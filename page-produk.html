@@ -1281,28 +1281,28 @@ html += '<button class="btn-icon btn-sm btn-hapus-kategori" data-id="' + cat.id 
       fileInput.click();
     });
 
-    dropzone.addEventListener("dragover", function(e){
-      e.preventDefault();
-      dropzone.style.borderColor = "var(--primary)";
-    });
-
-    dropzone.addEventListener("dragleave", function(){
-      dropzone.style.borderColor = "var(--border-color)";
-    });
-
-    dropzone.addEventListener("drop", function(e){
-      e.preventDefault();
-      dropzone.style.borderColor = "var(--border-color)";
-      if(e.dataTransfer.files.length){
-        processImportFile(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInput.addEventListener("change", function(e){
-      if(e.target.files.length){
-        processImportFile(e.target.files[0]);
-      }
-    });
+    document.addEventListener("dragover", function(e){ e.preventDefault(); });
+document.addEventListener("drop", function(e){ e.preventDefault(); });
+dropzone.addEventListener("dragover", function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  dropzone.style.borderColor = "var(--primary)";
+  dropzone.style.background = "rgba(99,102,241,0.05)";
+});
+dropzone.addEventListener("dragleave", function(e){
+  e.stopPropagation();
+  dropzone.style.borderColor = "var(--border-color)";
+  dropzone.style.background = "";
+});
+dropzone.addEventListener("drop", function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  dropzone.style.borderColor = "var(--border-color)";
+  dropzone.style.background = "";
+  if(e.dataTransfer.files.length){
+    processImportFile(e.dataTransfer.files[0]);
+  }
+});
 
     btnTemplate.addEventListener("click", function(){
       var csv = "No,Nama Produk,Kategori,Harga Beli,Harga Jual,Stok,Kode Barang\n";
