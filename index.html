@@ -106,6 +106,23 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
 .header-actions{display:flex;align-items:center;gap:.5rem}
 
+/* Header Stats */
+.header-stats{display:flex;align-items:center;gap:2rem}
+.header-stats .stat-item{display:flex;flex-direction:column;align-items:flex-start}
+.header-stats .stat-label{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted)}
+.header-stats .stat-value{font-size:1rem;font-weight:700;color:var(--text-primary)}
+.header-stats .stat-value.positive{color:var(--success)}
+.header-stats .stat-value.negative{color:var(--danger)}
+@media(max-width:768px){.header-stats{display:none}}
+
+/* Status Indicator */
+.status-indicator{display:flex;align-items:center;gap:.5rem;padding:.375rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600;background:var(--bg-secondary)}
+.status-indicator .status-dot{width:8px;height:8px;border-radius:50%}
+.status-indicator.open{background:rgba(16,185,129,.1);color:var(--success)}
+.status-indicator.open .status-dot{background:var(--success)}
+.status-indicator.closed{background:rgba(239,68,68,.1);color:var(--danger)}
+.status-indicator.closed .status-dot{background:var(--danger)}
+
 /* Page Content */
 .page-content{flex:1;padding:1.5rem;overflow-y:auto}
 @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
@@ -262,7 +279,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     /* Dashboard Specific Styles */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 1.5rem;
     }
@@ -271,7 +288,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       background: var(--bg-card);
       border-radius: var(--radius-xl);
       border: 1px solid var(--border-color);
-      padding: 1.5rem;
+      padding: 1.25rem;
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -284,39 +301,30 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }
 
     .stat-icon {
-      width: 56px;
-      height: 56px;
+      width: 48px;
+      height: 48px;
       border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       color: white;
       flex-shrink: 0;
     }
 
-    .stat-icon.purple {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    }
+    .stat-icon.purple { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
+    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+    .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .stat-icon.teal { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+    .stat-icon.indigo { background: linear-gradient(135deg, #4f46e5, #6366f1); }
 
-    .stat-icon.green {
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .stat-icon.orange {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-    }
-
-    .stat-icon.pink {
-      background: linear-gradient(135deg, #ec4899, #db2777);
-    }
-
-    .stat-content {
-      flex: 1;
-    }
+    .stat-content { flex: 1; }
 
     .stat-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -325,26 +333,117 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }
 
     .stat-value {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text-primary);
     }
 
-    .stat-value.success {
-      color: var(--success);
+    .stat-value.success { color: var(--success); }
+    .stat-value.danger { color: var(--danger); }
+    .stat-value.warning { color: var(--warning); }
+
+    /* Kas Calculation Section */
+    .kas-calculation {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    /* Content Grid */
-    .content-grid {
+    .kas-calculation-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .kas-calculation-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .kas-calculation-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
     }
 
-    @media (max-width: 1024px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
+    .kas-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+    }
+
+    .kas-item-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .kas-item-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+    }
+
+    .kas-item-icon.income { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .kas-item-icon.expense { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .kas-item-icon.neutral { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+    .kas-item-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+    .kas-item-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .kas-item-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .kas-item-value.income { color: var(--success); }
+    .kas-item-value.expense { color: var(--danger); }
+
+    /* Total Section */
+    .kas-total {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kas-total-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .kas-total-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
     }
 
     /* Quick Actions */
@@ -378,144 +477,33 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       transform: translateY(-2px);
     }
 
-    .quick-action-btn i {
-      font-size: 1.5rem;
+    .quick-action-btn i { font-size: 1.5rem; }
+
+    /* Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
     }
 
-    /* Transaction List */
-    .transaction-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+    @media (max-width: 1024px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .kas-calculation-grid { grid-template-columns: 1fr; }
     }
 
-    .transaction-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+    /* Formula Display */
+    .formula-display {
+      margin-top: 1rem;
       padding: 1rem;
-      background: var(--bg-secondary);
+      background: rgba(99, 102, 241, 0.05);
       border-radius: var(--radius-lg);
-      transition: all var(--transition-fast);
-    }
-
-    .transaction-item:hover {
-      background: var(--border-color);
-    }
-
-    .transaction-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-
-    .transaction-icon.sale {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--primary);
-    }
-
-    .transaction-icon.income {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-    }
-
-    .transaction-icon.expense {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-    }
-
-    .transaction-info {
-      flex: 1;
-    }
-
-    .transaction-title {
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-    }
-
-    .transaction-time {
       font-size: 0.75rem;
       color: var(--text-muted);
-    }
-
-    .transaction-amount {
-      font-weight: 700;
-      font-size: 0.9375rem;
-    }
-
-    .transaction-amount.positive {
-      color: var(--success);
-    }
-
-    .transaction-amount.negative {
-      color: var(--danger);
-    }
-
-    /* Low Stock Items */
-    .stock-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .stock-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.875rem;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-    }
-
-    .stock-info {
-      flex: 1;
-    }
-
-    .stock-name {
-      font-weight: 600;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-    }
-
-    .stock-code {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .stock-badge {
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .stock-badge.low {
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--warning);
-    }
-
-    .stock-badge.critical {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-    }
-
-    /* Chart Container */
-    .chart-container {
-      height: 300px;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-lg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
+      text-align: center;
+      font-family: monospace;
     }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="app-container">
@@ -773,78 +761,103 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           </div>
         </div>
 
-        <!-- Content Grid -->
-        <div class="content-grid">
-          <!-- Left Column -->
-          <div>
-            <!-- Recent Transactions -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <i class="fas fa-history"></i>
-                  Transaksi Terbaru
-                </h3>
-                <a href="page-riwayat.html" class="btn btn-sm btn-ghost">
-                  Lihat Semua <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
-                </a>
-              </div>
-              <div class="card-body">
-                <div class="transaction-list" id="recentTransactions">
-                  <div class="empty-state">
-                    <div class="empty-state-icon">
-                      <i class="fas fa-receipt"></i>
-                    </div>
-                    <p class="empty-state-text">Belum ada transaksi hari ini</p>
-                  </div>
+        <!-- Kas Calculation Section -->
+        <div class="kas-calculation">
+          <div class="kas-calculation-header">
+            <h3 class="kas-calculation-title">
+              <i class="fas fa-calculator"></i>
+              Perhitungan Kas
+            </h3>
+            <span class="badge badge-primary" id="kasDate">Hari Ini</span>
+          </div>
+          
+          <div class="kas-calculation-grid">
+            <!-- Modal Awal -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon neutral">
+                  <i class="fas fa-wallet"></i>
                 </div>
+                <span class="kas-item-label">Modal Awal</span>
               </div>
+              <span class="kas-item-value" id="kasModalAwal">Rp 0</span>
             </div>
-
-            <!-- Sales Chart -->
-            <div class="card" style="margin-top: 1.5rem;">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <i class="fas fa-chart-bar"></i>
-                  Grafik Penjualan
-                </h3>
-                <select class="form-select" style="width: auto; font-size: 0.875rem;" id="chartPeriod">
-                  <option value="today">Hari Ini</option>
-                  <option value="week">Minggu Ini</option>
-                  <option value="month">Bulan Ini</option>
-                </select>
-              </div>
-              <div class="card-body">
-                <div class="chart-container">
-                  <p>Grafik akan ditampilkan di sini</p>
+            
+            <!-- Uang Masuk -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon income">
+                  <i class="fas fa-arrow-down"></i>
                 </div>
+                <span class="kas-item-label">Uang Masuk</span>
               </div>
+              <span class="kas-item-value income" id="kasUangMasuk">+ Rp 0</span>
+            </div>
+            
+            <!-- Uang Keluar -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon expense">
+                  <i class="fas fa-arrow-up"></i>
+                </div>
+                <span class="kas-item-label">Uang Keluar</span>
+              </div>
+              <span class="kas-item-value expense" id="kasUangKeluar">- Rp 0</span>
+            </div>
+            
+            <!-- Penjualan Produk -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon income">
+                  <i class="fas fa-shopping-cart"></i>
+                </div>
+                <span class="kas-item-label">Penjualan Produk</span>
+              </div>
+              <span class="kas-item-value income" id="kasPenjualan">+ Rp 0</span>
+            </div>
+            
+            <!-- Top Up -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon income">
+                  <i class="fas fa-plus-circle"></i>
+                </div>
+                <span class="kas-item-label">Top Up</span>
+              </div>
+              <span class="kas-item-value income" id="kasTopUp">+ Rp 0</span>
+            </div>
+            
+            <!-- Tarik Tunai -->
+            <div class="kas-item">
+              <div class="kas-item-info">
+                <div class="kas-item-icon expense">
+                  <i class="fas fa-minus-circle"></i>
+                </div>
+                <span class="kas-item-label">Tarik Tunai</span>
+              </div>
+              <span class="kas-item-value expense" id="kasTarik">- Rp 0</span>
             </div>
           </div>
-
-          <!-- Right Column -->
-          <div>
-            <!-- Low Stock Alert -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
-                  Stok Menipis
-                </h3>
-              </div>
-              <div class="card-body">
-                <div class="stock-list" id="lowStockList">
-                  <div class="empty-state">
-                    <div class="empty-state-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                      <i class="fas fa-box"></i>
-                    </div>
-                    <p class="empty-state-text">Semua stok aman</p>
-                  </div>
-                </div>
-              </div>
+          
+          <!-- Total Uang Global -->
+          <div class="kas-total">
+            <div class="kas-total-label">
+              <i class="fas fa-money-bill-wave"></i>
+              Uang Global (Kas di Tangan)
             </div>
+            <div class="kas-total-value" id="kasGlobal">Rp 0</div>
+          </div>
+          
+          <div class="formula-display">
+            Modal Awal + Uang Masuk - Uang Keluar + Penjualan + Top Up - Tarik Tunai
+          </div>
+        </div>
 
-            <!-- Quick Actions -->
-            <div class="card" style="margin-top: 1.5rem;">
+        <!-- Content Grid -->
+        <div class="content-grid">
+          <!-- Left Column - Quick Actions -->
+          <div>
+            <div class="card">
               <div class="card-header">
                 <h3 class="card-title">
                   <i class="fas fa-bolt" style="color: var(--primary);"></i>
@@ -869,6 +882,43 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                     <i class="fas fa-store-slash"></i>
                     <span id="shiftBtnText">Tutup Shift</span>
                   </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column - Info -->
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i class="fas fa-info-circle" style="color: var(--info);"></i>
+                  Informasi
+                </h3>
+              </div>
+              <div class="card-body">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <i class="fas fa-arrow-down" style="color: var(--success);"></i>
+                    <div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">Uang Masuk</div>
+                      <div style="font-size: 0.8rem;">Uang yang tidak berasal dari modal</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <i class="fas fa-arrow-up" style="color: var(--danger);"></i>
+                    <div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">Uang Keluar</div>
+                      <div style="font-size: 0.8rem;">Uang yang berasal dari Kas ditangan (laci)</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-md);">
+                    <i class="fas fa-percentage" style="color: var(--warning);"></i>
+                    <div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted);">Admin Fee</div>
+                      <div style="font-size: 0.8rem;">Masuk ke laba (dari Top Up)</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -941,6 +991,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         tarik: 0,
         kasMasuk: 0,
         kasKeluar: 0,
+        topupAdminFee: 0,
+        tarikAdminFee: 0,
         laba: 0,
         transaksiCount: 0
       };
@@ -1033,19 +1085,23 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           
           // Calculate stats
           Object.values(transactions).forEach(trans => {
-            if (trans.status !== 'cancelled') {
+            if (trans.status !== 'cancelled' && trans.status !== 'voided') {
               switch (trans.type) {
                 case 'penjualan':
                   todayStats.penjualan += trans.total || 0;
                   todayStats.laba += trans.profit || 0;
                   break;
                 case 'topup':
-                  todayStats.topup += trans.total || 0;
+                  todayStats.topup += trans.amount || 0;
+                  todayStats.topupAdminFee += trans.adminFee || 0;
                   // Admin fee dari top up masuk ke laba
                   todayStats.laba += trans.adminFee || 0;
                   break;
                 case 'tarik':
-                  todayStats.tarik += trans.total || 0;
+                  todayStats.tarik += trans.amount || 0;
+                  todayStats.tarikAdminFee += trans.adminFee || 0;
+                  // Admin fee dari tarik masuk ke laba
+                  todayStats.laba += trans.adminFee || 0;
                   break;
                 case 'kas_masuk':
                   todayStats.kasMasuk += trans.amount || 0;
@@ -1063,25 +1119,36 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           const modalData = modalSnapshot.val();
           todayStats.modalAwal = modalData ? modalData.amount : 0;
 
-          // Calculate kas ditangan
-          const kasDitangan = todayStats.modalAwal + todayStats.penjualan + todayStats.topup + 
-                             todayStats.kasMasuk - todayStats.tarik - todayStats.kasKeluar;
+          // Calculate Uang Global
+          // Formula: Modal Awal + Uang Masuk - Uang Keluar + Penjualan + Top Up - Tarik Tunai
+          // Note: Top Up include admin fee, Tarik exclude admin fee (admin masuk ke laba)
+          const uangGlobal = todayStats.modalAwal + 
+                            todayStats.kasMasuk - 
+                            todayStats.kasKeluar + 
+                            todayStats.penjualan + 
+                            todayStats.topup - 
+                            todayStats.tarik;
 
-          // Update UI
-          document.getElementById('kasDitangan').textContent = Utils.formatRupiah(kasDitangan);
+          // Update UI - Header Stats
+          document.getElementById('kasDitangan').textContent = Utils.formatRupiah(uangGlobal);
           document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(todayStats.penjualan);
+          
+          // Update UI - Stats Cards
           document.getElementById('modalAwal').textContent = Utils.formatRupiah(todayStats.modalAwal);
           document.getElementById('totalTransaksi').textContent = Utils.formatNumber(todayStats.transaksiCount);
           document.getElementById('totalLaba').textContent = Utils.formatRupiah(todayStats.laba);
 
-          // Load recent transactions
-          loadRecentTransactions(transactions);
+          // Update UI - Kas Calculation
+          document.getElementById('kasModalAwal').textContent = Utils.formatRupiah(todayStats.modalAwal);
+          document.getElementById('kasUangMasuk').textContent = '+ ' + Utils.formatRupiah(todayStats.kasMasuk);
+          document.getElementById('kasUangKeluar').textContent = '- ' + Utils.formatRupiah(todayStats.kasKeluar);
+          document.getElementById('kasPenjualan').textContent = '+ ' + Utils.formatRupiah(todayStats.penjualan);
+          document.getElementById('kasTopUp').textContent = '+ ' + Utils.formatRupiah(todayStats.topup);
+          document.getElementById('kasTarik').textContent = '- ' + Utils.formatRupiah(todayStats.tarik);
+          document.getElementById('kasGlobal').textContent = Utils.formatRupiah(uangGlobal);
 
           // Check shift status
           checkShiftStatus();
-
-          // Load low stock
-          loadLowStock();
 
         } catch (error) {
           console.error('Error loading dashboard data:', error);
@@ -1089,56 +1156,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         }
         
         Utils.hideLoading();
-      }
-
-      // Load recent transactions
-      function loadRecentTransactions(transactions) {
-        const container = document.getElementById('recentTransactions');
-        const transArray = Object.entries(transactions)
-          .map(([id, data]) => ({ id, ...data }))
-          .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
-          .slice(0, 5);
-
-        if (transArray.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-state-icon">
-                <i class="fas fa-receipt"></i>
-              </div>
-              <p class="empty-state-text">Belum ada transaksi hari ini</p>
-            </div>
-          `;
-          return;
-        }
-
-        container.innerHTML = transArray.map(trans => {
-          const typeConfig = {
-            penjualan: { icon: 'fa-shopping-cart', class: 'sale', label: 'Penjualan' },
-            topup: { icon: 'fa-arrow-up', class: 'income', label: 'Top Up' },
-            tarik: { icon: 'fa-arrow-down', class: 'expense', label: 'Tarik Tunai' },
-            kas_masuk: { icon: 'fa-plus', class: 'income', label: 'Kas Masuk' },
-            kas_keluar: { icon: 'fa-minus', class: 'expense', label: 'Kas Keluar' }
-          };
-          
-          const config = typeConfig[trans.type] || { icon: 'fa-receipt', class: 'sale', label: trans.type };
-          const amount = trans.total || trans.amount || 0;
-          const isPositive = ['penjualan', 'topup', 'kas_masuk'].includes(trans.type);
-          
-          return `
-            <div class="transaction-item">
-              <div class="transaction-icon ${config.class}">
-                <i class="fas ${config.icon}"></i>
-              </div>
-              <div class="transaction-info">
-                <div class="transaction-title">${config.label}</div>
-                <div class="transaction-time">${Utils.formatDateTime(trans.timestamp)}</div>
-              </div>
-              <div class="transaction-amount ${isPositive ? 'positive' : 'negative'}">
-                ${isPositive ? '+' : '-'} ${Utils.formatRupiah(amount)}
-              </div>
-            </div>
-          `;
-        }).join('');
       }
 
       // Check shift status
@@ -1208,7 +1225,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             
             if (!modal || !modal.amount) {
               Utils.showToast('Silakan set modal awal terlebih dahulu', 'warning');
-              window.location.href = 'pages/modal.html';
+              window.location.href = 'page-modal.html';
               return;
             }
             
@@ -1229,48 +1246,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
 
       btnToggleShift.addEventListener('click', toggleShift);
-
-      // Load low stock items
-      async function loadLowStock() {
-        try {
-          const snapshot = await database.ref('products').once('value');
-          const products = snapshot.val() || {};
-          
-          const lowStockItems = Object.entries(products)
-            .map(([id, data]) => ({ id, ...data }))
-            .filter(p => p.stock <= (p.minStock || 5) && p.status !== 'inactive')
-            .slice(0, 5);
-
-          const container = document.getElementById('lowStockList');
-          
-          if (lowStockItems.length === 0) {
-            container.innerHTML = `
-              <div class="empty-state">
-                <div class="empty-state-icon" style="width: 60px; height: 60px; font-size: 1.5rem;">
-                  <i class="fas fa-box"></i>
-                </div>
-                <p class="empty-state-text">Semua stok aman</p>
-              </div>
-            `;
-            return;
-          }
-
-          container.innerHTML = lowStockItems.map(item => `
-            <div class="stock-item">
-              <div class="stock-info">
-                <div class="stock-name">${item.name}</div>
-                <div class="stock-code">${item.code || '-'}</div>
-              </div>
-              <span class="stock-badge ${item.stock === 0 ? 'critical' : 'low'}">
-                Stok: ${item.stock}
-              </span>
-            </div>
-          `).join('');
-
-        } catch (error) {
-          console.error('Error loading low stock:', error);
-        }
-      }
 
       // Initialize
       loadUserData();
