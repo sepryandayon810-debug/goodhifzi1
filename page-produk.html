@@ -1360,7 +1360,7 @@ html += '<button class="btn-icon btn-sm btn-hapus-kategori" data-id="' + cat.id 
           Utils.hideLoading();
         }catch(err){
           Utils.hideLoading();
-          showToast("Error membaca file: " + err.message, "error");
+          Utils.showToast("Error membaca file: " + err.message, "error");
         }
       };
 
@@ -1779,8 +1779,7 @@ html += '<button class="btn-icon btn-sm btn-hapus-kategori" data-id="' + cat.id 
       content += '</div></div>';
 
       Utils.showModal("Import Produk", content);
-
-      setupImportEvents();
+setTimeout(function(){ setupImportEvents(); }, 50);
     }
   }
 
@@ -1789,8 +1788,11 @@ html += '<button class="btn-icon btn-sm btn-hapus-kategori" data-id="' + cat.id 
     var fileInput = document.getElementById("importFile");
     var btnProcess = document.getElementById("btnProcessImport");
     var btnTemplate = document.getElementById("btnDownloadTemplate");
-    var importData = null;
-
+    
+    if(!dropzone || !fileInput){ 
+      console.error("Import elements not found"); 
+      return; 
+    }
     dropzone.addEventListener("click", function(){
       fileInput.click();
     });
