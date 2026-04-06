@@ -847,8 +847,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="produk-price">' + formatRupiah(product.sellingPrice || 0) + '</div>';
       html += '</div>';
       html += '<div class="produk-actions">';
-      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct(\'' + product.id + "')"><i class="fas fa-edit"></i> Edit</button>';
-      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct(\'' + product.id + "')"><i class="fas fa-trash"></i> Hapus</button>';
+      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct(\'' + product.id + '\')"><i class="fas fa-edit"></i> Edit</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct(\'' + product.id + '\')"><i class="fas fa-trash"></i> Hapus</button>';
       html += '</div>';
       html += '</div>';
     });
@@ -874,8 +874,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="kategori-count">' + productCount + ' produk</div>';
       html += '</div>';
       html += '<div class="kategori-actions">';
-      html += '<button class="btn-icon btn-sm" onclick="editCategory(\'' + cat.id + "')" title="Edit"><i class="fas fa-edit"></i></button>';
-      html += '<button class="btn-icon btn-sm" onclick="deleteCategory(\'' + cat.id + "')" title="Hapus"><i class="fas fa-trash"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="editCategory(\'' + cat.id + '\')" title="Edit"><i class="fas fa-edit"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="deleteCategory(\'' + cat.id + '\')" title="Hapus"><i class="fas fa-trash"></i></button>';
       html += '</div>';
       html += '</div>';
     });
