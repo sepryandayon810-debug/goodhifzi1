@@ -224,19 +224,49 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .w-full{width:100%!important}
 
   </style>
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  
+
   <style>
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all 0.15s;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
     /* Produk Specific Styles */
     .produk-toolbar {
       display: flex;
@@ -578,6 +608,121 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       color: var(--primary);
       background: rgba(99, 102, 241, 0.05);
     }
+
+    /* Kategori Styles */
+    .kategori-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .kategori-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+
+    .kategori-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .kategori-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .kategori-info {
+      flex: 1;
+    }
+
+    .kategori-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .kategori-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .kategori-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .kategori-actions .btn-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .add-kategori-card {
+      border-style: dashed;
+      background: var(--bg-secondary);
+      justify-content: center;
+      flex-direction: column;
+      min-height: 100px;
+    }
+
+    .add-kategori-card i {
+      font-size: 2rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .add-kategori-card span {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .add-kategori-card:hover {
+      background: rgba(99, 102, 241, 0.05);
+      border-color: var(--primary);
+    }
+
+    .add-kategori-card:hover i,
+    .add-kategori-card:hover span {
+      color: var(--primary);
+    }
+
+    .color-picker {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .color-option {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .color-option:hover {
+      transform: scale(1.1);
+    }
+
+    .color-option.selected {
+      border-color: var(--text-primary);
+    }
   </style>
 <base target="_blank">
 </head>
@@ -593,18 +738,18 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <span class="logo-text">WebPOS</span>
         </div>
       </div>
-      
+
       <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-chevron-left"></i>
       </button>
-      
+
       <div class="sidebar-search">
         <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
           <input type="text" class="search-input" id="menuSearch" placeholder="Cari menu...">
         </div>
       </div>
-      
+
       <nav class="sidebar-nav">
         <!-- Utama -->
         <div class="nav-section">
@@ -622,18 +767,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 <span>Kasir</span>
               </a>
             </li>
-            <li class="nav-item nav-dropdown" data-dropdown>
-              <div class="nav-link nav-dropdown-toggle" data-menu="produk">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <i class="fas fa-box"></i>
-                  <span>Produk</span>
-                </div>
-                <i class="fas fa-chevron-down dropdown-arrow"></i>
-              </div>
-              <ul class="nav-submenu">
-                <li><a href="page-produk.html" class="nav-link active"><span>Daftar Produk</span></a></li>
-                <li><a href="page-kategori.html" class="nav-link"><span>Kategori</span></a></li>
-              </ul>
+            <li class="nav-item">
+              <a href="page-produk.html" class="nav-link active" data-menu="produk">
+                <i class="fas fa-box"></i>
+                <span>Produk</span>
+              </a>
             </li>
           </ul>
         </div>
@@ -742,7 +880,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           </ul>
         </div>
       </nav>
-      
+
       <div class="sidebar-footer">
         <div class="user-profile" id="userProfile">
           <div class="user-avatar" id="userAvatar">
@@ -764,9 +902,9 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <button class="btn-icon d-md-none" id="mobileMenuToggle">
             <i class="fas fa-bars"></i>
           </button>
-          <h1 class="header-title">Daftar Produk</h1>
+          <h1 class="header-title">Manajemen Produk</h1>
         </div>
-        
+
         <div class="header-actions">
           <button class="btn btn-secondary" id="btnImport">
             <i class="fas fa-file-import"></i>
@@ -785,46 +923,67 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       <!-- Page Content -->
       <div class="page-content">
-        <!-- Toolbar -->
-        <div class="produk-toolbar">
-          <div class="produk-search">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchProduk" placeholder="Cari produk berdasarkan nama atau kode...">
-          </div>
-          
-          <div class="produk-filters">
-            <select class="filter-select" id="filterKategori">
-              <option value="">Semua Kategori</option>
-            </select>
-            
-            <select class="filter-select" id="filterStatus">
-              <option value="">Semua Status</option>
-              <option value="active">Aktif</option>
-              <option value="inactive">Nonaktif</option>
-            </select>
-            
-            <div class="view-toggle">
-              <button class="view-btn active" data-view="grid" title="Grid View">
-                <i class="fas fa-th-large"></i>
-              </button>
-              <button class="view-btn" data-view="list" title="List View">
-                <i class="fas fa-list"></i>
-              </button>
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="produk">
+            <i class="fas fa-box"></i> Produk
+          </button>
+          <button class="tab-btn" data-tab="kategori">
+            <i class="fas fa-tags"></i> Kategori
+          </button>
+        </div>
+
+        <!-- Tab Produk -->
+        <div id="tab-produk" class="tab-content">
+          <!-- Toolbar -->
+          <div class="produk-toolbar">
+            <div class="produk-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="searchProduk" placeholder="Cari produk berdasarkan nama atau kode...">
+            </div>
+
+            <div class="produk-filters">
+              <select class="filter-select" id="filterKategori">
+                <option value="">Semua Kategori</option>
+              </select>
+
+              <select class="filter-select" id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Nonaktif</option>
+              </select>
+
+              <div class="view-toggle">
+                <button class="view-btn active" data-view="grid" title="Grid View">
+                  <i class="fas fa-th-large"></i>
+                </button>
+                <button class="view-btn" data-view="list" title="List View">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- Products Grid -->
+          <div class="produk-grid" id="produkGrid">
+            <div class="produk-card skeleton" style="height: 280px;"></div>
+            <div class="produk-card skeleton" style="height: 280px;"></div>
+            <div class="produk-card skeleton" style="height: 280px;"></div>
+            <div class="produk-card skeleton" style="height: 280px;"></div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="pagination"></div>
         </div>
 
-        <!-- Products Grid -->
-        <div class="produk-grid" id="produkGrid">
-          <div class="produk-card skeleton" style="height: 280px;"></div>
-          <div class="produk-card skeleton" style="height: 280px;"></div>
-          <div class="produk-card skeleton" style="height: 280px;"></div>
-          <div class="produk-card skeleton" style="height: 280px;"></div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination" id="pagination">
-          <!-- Pagination buttons will be inserted here -->
+        <!-- Tab Kategori -->
+        <div id="tab-kategori" class="tab-content" style="display: none;">
+          <div class="kategori-grid" id="kategoriGrid">
+            <div class="kategori-card add-kategori-card" id="btnAddKategoriCard">
+              <i class="fas fa-plus-circle"></i>
+              <span>Tambah Kategori Baru</span>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -866,7 +1025,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       <div class="modal-body">
         <form id="produkForm">
           <input type="hidden" id="produkId">
-          
+
           <!-- Image Upload -->
           <div class="form-group">
             <label class="form-label">Gambar Produk</label>
@@ -969,24 +1128,36 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     </div>
   </div>
 
-  <!-- Add Category Modal -->
+  <!-- Add/Edit Category Modal -->
   <div class="modal-overlay" id="kategoriModal">
     <div class="modal" style="max-width: 400px;">
       <div class="modal-header">
-        <h3 class="modal-title">Tambah Kategori</h3>
+        <h3 class="modal-title" id="kategoriModalTitle">Tambah Kategori</h3>
         <button class="modal-close" id="closeKategoriModal">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Nama Kategori <span style="color: var(--danger);">*</span></label>
-          <input type="text" class="form-input" id="kategoriName" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Deskripsi</label>
-          <textarea class="form-textarea" id="kategoriDesc" rows="2"></textarea>
-        </div>
+        <form id="kategoriForm">
+          <input type="hidden" id="kategoriId">
+          <div class="form-group">
+            <label class="form-label">Nama Kategori <span style="color: var(--danger);">*</span></label>
+            <input type="text" class="form-input" id="kategoriName" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pilih Warna</label>
+            <div class="color-picker" id="colorPicker">
+              <div class="color-option selected" style="background: #6366f1;" data-color="#6366f1"></div>
+              <div class="color-option" style="background: #10b981;" data-color="#10b981"></div>
+              <div class="color-option" style="background: #f59e0b;" data-color="#f59e0b"></div>
+              <div class="color-option" style="background: #ef4444;" data-color="#ef4444"></div>
+              <div class="color-option" style="background: #ec4899;" data-color="#ec4899"></div>
+              <div class="color-option" style="background: #3b82f6;" data-color="#3b82f6"></div>
+              <div class="color-option" style="background: #8b5cf6;" data-color="#8b5cf6"></div>
+              <div class="color-option" style="background: #14b8a6;" data-color="#14b8a6"></div>
+            </div>
+          </div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btnCancelKategori">Batal</button>
@@ -1005,22 +1176,23 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
   <!-- SheetJS for Excel parsing -->
   <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  
+
   <!-- Scripts -->
   <script src="js/firebase-config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
 
   <script>
+
+
     // ============================================
-    // PRODUK IMPORT MODULE - UPDATED
+    // PRODUK IMPORT MODULE
     // ============================================
     const ProdukImport = {
-      // Parse CSV file
       parseCSV(content) {
-        const lines = content.split('\n').filter(line => line.trim());
+        const lines = content.split('
+').filter(line => line.trim());
         const headers = this.parseCSVLine(lines[0]);
-        
         const results = [];
         for (let i = 1; i < lines.length; i++) {
           const values = this.parseCSVLine(lines[i]);
@@ -1030,19 +1202,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           });
           results.push(row);
         }
-        
         return results;
       },
 
-      // Parse single CSV line
       parseCSVLine(line) {
         const result = [];
         let current = '';
         let inQuotes = false;
-        
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
-          
           if (char === '"') {
             if (inQuotes && line[i + 1] === '"') {
               current += '"';
@@ -1057,27 +1225,21 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             current += char;
           }
         }
-        
         result.push(current.trim());
         return result;
       },
 
-      // Parse Excel file
       async parseExcel(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
-          
           reader.onload = (e) => {
             try {
               const data = new Uint8Array(e.target.result);
               const workbook = XLSX.read(data, { type: 'array' });
               const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
               const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-              
-              // Convert array to object with headers
               const headers = jsonData[0].map(h => h.toString().toLowerCase().trim());
               const results = [];
-              
               for (let i = 1; i < jsonData.length; i++) {
                 const row = {};
                 jsonData[i].forEach((val, index) => {
@@ -1085,19 +1247,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 });
                 results.push(row);
               }
-              
               resolve(results);
             } catch (error) {
               reject(error);
             }
           };
-          
           reader.onerror = reject;
           reader.readAsArrayBuffer(file);
         });
       },
 
-      // Generate product code
       generateProductCode() {
         const prefix = 'BRG';
         const timestamp = Date.now().toString(36).toUpperCase();
@@ -1105,41 +1264,32 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         return `${prefix}${timestamp}${random}`;
       },
 
-      // Validate product data
       validateProduct(row, index, categories) {
         const errors = [];
-        
-        // Check required fields
         const nama = row['nama produk'] || row['nama'] || row['name'] || '';
         const hargaBeli = row['harga beli'] || row['harga modal'] || row['modal'] || '';
         const hargaJual = row['harga jual'] || row['jual'] || '';
         const kategori = row['kategori'] || row['category'] || '';
-        
+
         if (!nama || nama.trim() === '') {
           errors.push(`Baris ${index + 1}: Nama produk wajib diisi`);
         }
-        
         if (!hargaBeli || isNaN(parseFloat(hargaBeli))) {
           errors.push(`Baris ${index + 1}: Harga beli tidak valid`);
         }
-        
         if (!hargaJual || isNaN(parseFloat(hargaJual))) {
           errors.push(`Baris ${index + 1}: Harga jual tidak valid`);
         }
 
-        // Find category ID
         let categoryId = '';
         if (kategori) {
           const cat = categories.find(c => c.name.toLowerCase() === kategori.toLowerCase());
-          if (cat) {
-            categoryId = cat.id;
-          }
+          if (cat) categoryId = cat.id;
         }
-        
-        // Generate kode barang if not provided
+
         const kodeInput = row['kode barang'] || row['kode'] || row['code'] || '';
         const kodeBarang = kodeInput.trim() !== '' ? kodeInput : this.generateProductCode();
-        
+
         return {
           valid: errors.length === 0,
           errors,
@@ -1159,11 +1309,9 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         };
       },
 
-      // Process import file
       async processFile(file) {
         const extension = file.name.split('.').pop().toLowerCase();
         let data = [];
-        
         if (extension === 'csv') {
           const content = await file.text();
           data = this.parseCSV(content);
@@ -1175,44 +1323,29 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         } else {
           throw new Error('Format file tidak didukung. Gunakan CSV atau Excel (.xlsx)');
         }
-        
         return data;
       },
 
-      // Preview import data
       async preview(file, categories) {
-        try {
-          const data = await this.processFile(file);
-          const validated = data.map((row, index) => this.validateProduct(row, index, categories));
-          
-          const valid = validated.filter(v => v.valid);
-          const invalid = validated.filter(v => !v.valid);
-          
-          return {
-            total: data.length,
-            valid: valid.length,
-            invalid: invalid.length,
-            errors: invalid.flatMap(v => v.errors),
-            data: valid.map(v => v.data)
-          };
-        } catch (error) {
-          throw error;
-        }
+        const data = await this.processFile(file);
+        const validated = data.map((row, index) => this.validateProduct(row, index, categories));
+        const valid = validated.filter(v => v.valid);
+        const invalid = validated.filter(v => !v.valid);
+        return {
+          total: data.length,
+          valid: valid.length,
+          invalid: invalid.length,
+          errors: invalid.flatMap(v => v.errors),
+          data: valid.map(v => v.data)
+        };
       },
 
-      // Import products to Firebase
       async import(products, onProgress = null) {
-        const results = {
-          success: 0,
-          failed: 0,
-          errors: []
-        };
-        
+        const results = { success: 0, failed: 0, errors: [] };
         for (let i = 0; i < products.length; i++) {
           try {
             const product = products[i];
             const productId = Utils.generateId('PRD');
-            
             const productData = {
               id: productId,
               name: product.name,
@@ -1229,32 +1362,25 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               updatedAt: firebase.database.ServerValue.TIMESTAMP,
               soldCount: 0
             };
-            
             await database.ref(`products/${productId}`).set(productData);
             results.success++;
-            
-            if (onProgress) {
-              onProgress(i + 1, products.length);
-            }
+            if (onProgress) onProgress(i + 1, products.length);
           } catch (error) {
             results.failed++;
             results.errors.push(`Baris ${i + 1}: ${error.message}`);
           }
         }
-        
         return results;
       },
 
-      // Generate template CSV
       generateTemplate() {
         const headers = ['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Stok', 'Kode Barang'];
         const example1 = ['1', 'Laptop ASUS VivoBook', 'Elektronik', '5000000', '6500000', '10', ''];
         const example2 = ['2', 'Mouse Logitech', 'Aksesoris', '150000', '200000', '20', ''];
-        
-        return [headers.join(','), example1.join(','), example2.join(',')].join('\n');
+        return [headers.join(','), example1.join(','), example2.join(',')].join('
+');
       },
 
-      // Download template
       downloadTemplate() {
         const csv = this.generateTemplate();
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -1265,7 +1391,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         URL.revokeObjectURL(link.href);
       },
 
-      // Show import modal
       showImportModal(categories, callback) {
         const modalContent = `
           <div style="padding: 1rem;">
@@ -1282,14 +1407,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 <input type="file" id="importFileInput" accept=".csv,.xlsx,.xls" style="display: none;">
               </div>
             </div>
-            
             <div id="importPreview" style="display: none; margin-top: 1rem;">
               <h4 style="margin-bottom: 0.5rem;">Preview Import</h4>
               <div id="importStats" style="padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-lg); margin-bottom: 1rem;"></div>
               <div id="importPreviewTable" class="import-preview-table" style="display: none;"></div>
               <div id="importErrors" style="display: none; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: var(--radius-lg); color: var(--danger); margin-bottom: 1rem;"></div>
             </div>
-            
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
               <button class="btn btn-secondary" onclick="ProdukImport.downloadTemplate()">
                 <i class="fas fa-download"></i> Download Template
@@ -1300,46 +1423,35 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             </div>
           </div>
         `;
-        
+
         Utils.showModal('Import Produk', modalContent);
-        
+
         const fileUpload = document.getElementById('importFileUpload');
         const fileInput = document.getElementById('importFileInput');
         const btnProcess = document.getElementById('btnProcessImport');
-        
         let previewData = null;
-        
+
         fileUpload.addEventListener('click', () => fileInput.click());
-        
         fileUpload.addEventListener('dragover', (e) => {
           e.preventDefault();
           fileUpload.style.borderColor = 'var(--primary)';
         });
-        
         fileUpload.addEventListener('dragleave', () => {
           fileUpload.style.borderColor = 'var(--border-color)';
         });
-        
         fileUpload.addEventListener('drop', (e) => {
           e.preventDefault();
           fileUpload.style.borderColor = 'var(--border-color)';
-          if (e.dataTransfer.files.length) {
-            handleFile(e.dataTransfer.files[0]);
-          }
+          if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
-        
         fileInput.addEventListener('change', (e) => {
-          if (e.target.files.length) {
-            handleFile(e.target.files[0]);
-          }
+          if (e.target.files.length) handleFile(e.target.files[0]);
         });
-        
+
         const handleFile = async (file) => {
           try {
             Utils.showLoading('Membaca file...');
-            
             previewData = await this.preview(file, categories);
-            
             document.getElementById('importPreview').style.display = 'block';
             document.getElementById('importStats').innerHTML = `
               <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
@@ -1348,8 +1460,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 ${previewData.invalid > 0 ? `<div style="color: var(--danger);"><strong>Tidak Valid:</strong> ${previewData.invalid} produk</div>` : ''}
               </div>
             `;
-            
-            // Show preview table
             if (previewData.data.length > 0) {
               const tableDiv = document.getElementById('importPreviewTable');
               tableDiv.style.display = 'block';
@@ -1383,7 +1493,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 </table>
               `;
             }
-            
             if (previewData.errors.length > 0) {
               const errorsDiv = document.getElementById('importErrors');
               errorsDiv.style.display = 'block';
@@ -1395,7 +1504,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 </ul>
               `;
             }
-            
             btnProcess.disabled = previewData.valid === 0;
             Utils.hideLoading();
           } catch (error) {
@@ -1403,28 +1511,22 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             Utils.showToast(error.message, 'error');
           }
         };
-        
+
         btnProcess.addEventListener('click', async () => {
           if (!previewData || previewData.valid === 0) return;
-          
           try {
             Utils.showLoading('Mengimport produk...');
-            
             const results = await this.import(previewData.data, (current, total) => {
               Utils.showLoading(`Mengimport produk... ${current}/${total}`);
             });
-            
             Utils.closeModal();
             Utils.hideLoading();
-            
             if (results.failed > 0) {
               Utils.showToast(`${results.success} produk berhasil, ${results.failed} gagal`, 'warning');
             } else {
               Utils.showToast(`${results.success} produk berhasil diimport`, 'success');
             }
-            
             if (callback) callback();
-            
           } catch (error) {
             Utils.hideLoading();
             Utils.showToast('Gagal mengimport produk', 'error');
@@ -1442,15 +1544,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           window.location.href = 'login.html';
           return;
         }
-        
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        initProduk();
+        if (user) Auth.loadUserData(user.uid);
+        initPage();
       });
 
-      function initProduk() {
+      function initPage() {
         // State
         let products = [];
         let categories = [];
@@ -1458,6 +1556,9 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         let currentPage = 1;
         let perPage = 12;
         let currentProduct = null;
+        let currentCategory = null;
+        let selectedColor = '#6366f1';
+        let currentTab = 'produk';
 
         // DOM Elements
         const sidebar = document.getElementById('sidebar');
@@ -1466,14 +1567,47 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         const produkModal = document.getElementById('produkModal');
         const kategoriModal = document.getElementById('kategoriModal');
 
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            currentTab = tab;
+
+            // Update active tab button
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Show/hide tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+              content.style.display = 'none';
+            });
+            document.getElementById(`tab-${tab}`).style.display = 'block';
+
+            // Update header buttons
+            const btnImport = document.getElementById('btnImport');
+            const btnExport = document.getElementById('btnExport');
+            const btnAddProduk = document.getElementById('btnAddProduk');
+
+            if (tab === 'produk') {
+              btnImport.style.display = 'inline-flex';
+              btnExport.style.display = 'inline-flex';
+              btnAddProduk.innerHTML = '<i class="fas fa-plus"></i><span class="d-none d-md-inline">Tambah Produk</span>';
+              btnAddProduk.onclick = () => openAddProdukModal();
+            } else {
+              btnImport.style.display = 'none';
+              btnExport.style.display = 'none';
+              btnAddProduk.innerHTML = '<i class="fas fa-plus"></i><span class="d-none d-md-inline">Tambah Kategori</span>';
+              btnAddProduk.onclick = () => openAddKategoriModal();
+            }
+          });
+        });
+
         // Load user data
         function loadUserData() {
           const user = Auth.getCurrentUser();
           if (user) {
             document.getElementById('userName').textContent = user.name || user.email;
-            document.getElementById('userRole').textContent = 
-              user.role.charAt(0).toUpperCase() + user.role.slice(1);
-            
+            document.getElementById('userRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
             const avatar = document.getElementById('userAvatar');
             if (avatar && user.name) {
               const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -1487,40 +1621,31 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           sidebar.classList.toggle('collapsed');
         });
 
-        // Mobile menu toggle
         mobileMenuToggle.addEventListener('click', () => {
           sidebar.classList.toggle('mobile-open');
         });
 
-        // Dropdown menus - RESPONSIVE FIX
+        // Dropdown menus
         document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
           const toggle = dropdown.querySelector('.nav-dropdown-toggle');
           if (toggle) {
             toggle.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
-              
-              // Close other dropdowns
               document.querySelectorAll('[data-dropdown]').forEach(d => {
                 if (d !== dropdown) d.classList.remove('open');
               });
-              
-              // Toggle current dropdown
               dropdown.classList.toggle('open');
             });
           }
         });
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
           if (!e.target.closest('[data-dropdown]')) {
-            document.querySelectorAll('[data-dropdown]').forEach(d => {
-              d.classList.remove('open');
-            });
+            document.querySelectorAll('[data-dropdown]').forEach(d => d.classList.remove('open'));
           }
         });
 
-        // Close sidebar when clicking outside on mobile
         document.addEventListener('click', (e) => {
           if (window.innerWidth <= 1024) {
             if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
@@ -1534,17 +1659,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           try {
             const snapshot = await database.ref('categories').once('value');
             const cats = snapshot.val() || {};
-            
             categories = Object.entries(cats).map(([id, data]) => ({ id, ...data }));
-            
+
             const options = categories.map(cat => 
               `<option value="${cat.id}">${cat.name}</option>`
             ).join('');
-            
-            document.getElementById('filterKategori').innerHTML = 
-              '<option value="">Semua Kategori</option>' + options;
-            document.getElementById('produkKategori').innerHTML = 
-              '<option value="">Pilih Kategori</option>' + options;
+
+            document.getElementById('filterKategori').innerHTML = '<option value="">Semua Kategori</option>' + options;
+            document.getElementById('produkKategori').innerHTML = '<option value="">Pilih Kategori</option>' + options;
+
+            renderCategories();
           } catch (error) {
             console.error('Error loading categories:', error);
           }
@@ -1554,16 +1678,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         async function loadProducts() {
           try {
             Utils.showLoading();
-            
             const snapshot = await database.ref('products').once('value');
             const prods = snapshot.val() || {};
-            
             products = Object.entries(prods).map(([id, data]) => ({ id, ...data }));
             filteredProducts = [...products];
-            
             renderProducts();
             renderPagination();
-            
             Utils.hideLoading();
           } catch (error) {
             console.error('Error loading products:', error);
@@ -1575,11 +1695,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         // Render products
         function renderProducts() {
           const container = document.getElementById('produkGrid');
-          
           const start = (currentPage - 1) * perPage;
           const end = start + perPage;
           const pageProducts = filteredProducts.slice(start, end);
-          
+
           if (pageProducts.length === 0) {
             container.innerHTML = `
               <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
@@ -1592,19 +1711,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             `;
             return;
           }
-          
+
           container.innerHTML = pageProducts.map(product => {
             const category = categories.find(c => c.id === product.categoryId);
             const statusClass = product.status === 'active' ? 'active' : 'inactive';
             const statusText = product.status === 'active' ? 'Aktif' : 'Nonaktif';
-            
             return `
               <div class="produk-card" data-id="${product.id}">
                 <div class="produk-image">
-                  ${product.image ? 
-                    `<img src="${product.image}" alt="${product.name}">` : 
-                    '<i class="fas fa-box"></i>'
-                  }
+                  ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<i class="fas fa-box"></i>'}
                   <span class="produk-status ${statusClass}">${statusText}</span>
                   <span class="produk-stock-badge">Stok: ${product.stock || 0}</span>
                 </div>
@@ -1630,50 +1745,34 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         function renderPagination() {
           const totalPages = Math.ceil(filteredProducts.length / perPage);
           const container = document.getElementById('pagination');
-          
           if (totalPages <= 1) {
             container.innerHTML = '';
             return;
           }
-          
-          let html = '';
-          
-          // Previous
-          html += `
-            <button class="btn btn-sm btn-secondary" 
-              ${currentPage === 1 ? 'disabled' : ''}
-              onclick="goToPage(${currentPage - 1})">
+
+          let html = `
+            <button class="btn btn-sm btn-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
               <i class="fas fa-chevron-left"></i>
             </button>
           `;
-          
-          // Page numbers
+
           for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-              html += `
-                <button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-secondary'}"
-                  onclick="goToPage(${i})">
-                  ${i}
-                </button>
-              `;
+              html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-secondary'}" onclick="goToPage(${i})">${i}</button>`;
             } else if (i === currentPage - 2 || i === currentPage + 2) {
               html += `<span class="btn btn-sm" style="background: transparent; cursor: default;">...</span>`;
             }
           }
-          
-          // Next
+
           html += `
-            <button class="btn btn-sm btn-secondary"
-              ${currentPage === totalPages ? 'disabled' : ''}
-              onclick="goToPage(${currentPage + 1})">
+            <button class="btn btn-sm btn-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
               <i class="fas fa-chevron-right"></i>
             </button>
           `;
-          
+
           container.innerHTML = html;
         }
 
-        // Go to page (global function)
         window.goToPage = (page) => {
           currentPage = page;
           renderProducts();
@@ -1685,30 +1784,23 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           const search = document.getElementById('searchProduk').value.toLowerCase();
           const category = document.getElementById('filterKategori').value;
           const status = document.getElementById('filterStatus').value;
-          
+
           filteredProducts = products.filter(p => {
-            const matchSearch = !search || 
-              p.name.toLowerCase().includes(search) ||
-              (p.code && p.code.toLowerCase().includes(search));
+            const matchSearch = !search || p.name.toLowerCase().includes(search) || (p.code && p.code.toLowerCase().includes(search));
             const matchCategory = !category || p.categoryId === category;
             const matchStatus = !status || p.status === status;
-            
             return matchSearch && matchCategory && matchStatus;
           });
-          
+
           currentPage = 1;
           renderProducts();
           renderPagination();
         }
 
-        // Filter event listeners
-        document.getElementById('searchProduk').addEventListener('input', 
-          Utils.debounce(applyFilters, 300)
-        );
+        document.getElementById('searchProduk').addEventListener('input', Utils.debounce(applyFilters, 300));
         document.getElementById('filterKategori').addEventListener('change', applyFilters);
         document.getElementById('filterStatus').addEventListener('change', applyFilters);
 
-        // View toggle
         document.querySelectorAll('.view-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
@@ -1724,8 +1816,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           return `${prefix}${timestamp}${random}`;
         }
 
-        // Add product
-        document.getElementById('btnAddProduk').addEventListener('click', () => {
+        // Open add produk modal
+        function openAddProdukModal() {
           currentProduct = null;
           document.getElementById('modalTitle').textContent = 'Tambah Produk';
           document.getElementById('produkForm').reset();
@@ -1733,13 +1825,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           document.getElementById('imagePreview').style.display = 'none';
           document.getElementById('produkCode').value = generateProductCode();
           produkModal.classList.add('active');
-        });
+        }
 
-        // Edit product (global function)
         window.editProduct = (productId) => {
           const product = products.find(p => p.id === productId);
           if (!product) return;
-          
           currentProduct = product;
           document.getElementById('modalTitle').textContent = 'Edit Produk';
           document.getElementById('produkId').value = product.id;
@@ -1753,27 +1843,23 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           document.getElementById('produkMinStock').value = product.minStock || 5;
           document.getElementById('produkDesc').value = product.description || '';
           document.getElementById('produkStatus').checked = product.status !== 'inactive';
-          
+
           if (product.image) {
             document.getElementById('imagePreview').src = product.image;
             document.getElementById('imagePreview').style.display = 'block';
           } else {
             document.getElementById('imagePreview').style.display = 'none';
           }
-          
           produkModal.classList.add('active');
         };
 
-        // Delete product (global function)
         window.deleteProduct = async (productId) => {
           Utils.confirm('Yakin ingin menghapus produk ini?', async () => {
             try {
               Utils.showLoading('Menghapus produk...');
               await database.ref(`products/${productId}`).remove();
-              
               products = products.filter(p => p.id !== productId);
               applyFilters();
-              
               Utils.hideLoading();
               Utils.showToast('Produk berhasil dihapus', 'success');
             } catch (error) {
@@ -1783,92 +1869,178 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           });
         };
 
-        // Adjust stock (global function)
         window.adjustStock = (delta) => {
           const input = document.getElementById('produkStock');
           const current = parseInt(input.value) || 0;
           input.value = Math.max(0, current + delta);
         };
 
-        // Add category button
+        // Add category from produk modal
         document.getElementById('btnAddKategori').addEventListener('click', () => {
-          kategoriModal.classList.add('active');
+          produkModal.classList.remove('active');
+          openAddKategoriModal();
         });
 
-        // Close kategori modal
+        // Kategori functions
+        function openAddKategoriModal() {
+          currentCategory = null;
+          document.getElementById('kategoriModalTitle').textContent = 'Tambah Kategori';
+          document.getElementById('kategoriForm').reset();
+          document.getElementById('kategoriId').value = '';
+          selectedColor = '#6366f1';
+          updateColorPicker();
+          kategoriModal.classList.add('active');
+        }
+
+        function openEditKategoriModal(cat) {
+          currentCategory = cat;
+          document.getElementById('kategoriModalTitle').textContent = 'Edit Kategori';
+          document.getElementById('kategoriId').value = cat.id;
+          document.getElementById('kategoriName').value = cat.name;
+          selectedColor = cat.color || '#6366f1';
+          updateColorPicker();
+          kategoriModal.classList.add('active');
+        }
+
+        function updateColorPicker() {
+          document.querySelectorAll('.color-option').forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.color === selectedColor);
+          });
+        }
+
+        window.editCategory = (id) => {
+          const cat = categories.find(c => c.id === id);
+          if (cat) openEditKategoriModal(cat);
+        };
+
+        window.deleteCategory = async (id) => {
+          Utils.confirm('Yakin ingin menghapus kategori ini?', async () => {
+            try {
+              Utils.showLoading();
+              await database.ref(`categories/${id}`).remove();
+              categories = categories.filter(c => c.id !== id);
+              renderCategories();
+              loadCategories();
+              Utils.hideLoading();
+              Utils.showToast('Kategori berhasil dihapus', 'success');
+            } catch (error) {
+              Utils.hideLoading();
+              Utils.showToast('Gagal menghapus kategori', 'error');
+            }
+          });
+        };
+
+        // Render categories
+        function renderCategories() {
+          const grid = document.getElementById('kategoriGrid');
+          const cards = categories.map(cat => {
+            const productCount = products.filter(p => p.categoryId === cat.id).length;
+            return `
+              <div class="kategori-card" data-id="${cat.id}">
+                <div class="kategori-icon" style="background: ${cat.color || '#6366f1'};">
+                  <i class="fas fa-tag"></i>
+                </div>
+                <div class="kategori-info">
+                  <div class="kategori-name">${cat.name}</div>
+                  <div class="kategori-count">${productCount} produk</div>
+                </div>
+                <div class="kategori-actions">
+                  <button class="btn-icon btn-sm" onclick="editCategory('${cat.id}')">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn-icon btn-sm" onclick="deleteCategory('${cat.id}')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          grid.innerHTML = `
+            <div class="kategori-card add-kategori-card" id="btnAddKategoriCard">
+              <i class="fas fa-plus-circle"></i>
+              <span>Tambah Kategori Baru</span>
+            </div>
+            ${cards}
+          `;
+
+          document.getElementById('btnAddKategoriCard').addEventListener('click', openAddKategoriModal);
+        }
+
+        // Color picker
+        document.querySelectorAll('.color-option').forEach(opt => {
+          opt.addEventListener('click', () => {
+            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            selectedColor = opt.dataset.color;
+          });
+        });
+
+        // Close modals
+        document.getElementById('closeProdukModal').addEventListener('click', () => {
+          produkModal.classList.remove('active');
+        });
+        document.getElementById('btnCancelProduk').addEventListener('click', () => {
+          produkModal.classList.remove('active');
+        });
         document.getElementById('closeKategoriModal').addEventListener('click', () => {
           kategoriModal.classList.remove('active');
         });
-
         document.getElementById('btnCancelKategori').addEventListener('click', () => {
           kategoriModal.classList.remove('active');
         });
 
-        // Save category
+        // Save kategori
         document.getElementById('btnSaveKategori').addEventListener('click', async () => {
           const name = document.getElementById('kategoriName').value.trim();
-          const desc = document.getElementById('kategoriDesc').value.trim();
-          
           if (!name) {
-            Utils.showToast('Nama kategori wajib diisi', 'error');
+            Utils.showToast('Nama kategori wajib diisi', 'warning');
             return;
           }
-          
           try {
             Utils.showLoading('Menyimpan kategori...');
-            
-            const catId = Utils.generateId('CAT');
-            await database.ref(`categories/${catId}`).set({
-              id: catId,
-              name: name,
-              description: desc,
-              createdAt: firebase.database.ServerValue.TIMESTAMP
-            });
-            
-            Utils.hideLoading();
-            Utils.showToast('Kategori berhasil ditambahkan', 'success');
+            const data = {
+              name,
+              color: selectedColor,
+              updatedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            if (currentCategory) {
+              await database.ref(`categories/${currentCategory.id}`).update(data);
+              Utils.showToast('Kategori berhasil diupdate', 'success');
+            } else {
+              const id = Utils.generateId('CAT');
+              data.id = id;
+              data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+              data.productCount = 0;
+              await database.ref(`categories/${id}`).set(data);
+              Utils.showToast('Kategori berhasil ditambahkan', 'success');
+            }
             kategoriModal.classList.remove('active');
-            
-            // Reset form
-            document.getElementById('kategoriName').value = '';
-            document.getElementById('kategoriDesc').value = '';
-            
-            // Reload categories
             await loadCategories();
-            
           } catch (error) {
             Utils.hideLoading();
-            Utils.showToast('Gagal menambahkan kategori', 'error');
+            Utils.showToast('Gagal menyimpan kategori', 'error');
           }
         });
 
         // Image upload
         const imageUpload = document.getElementById('imageUpload');
         const produkImage = document.getElementById('produkImage');
-        
         imageUpload.addEventListener('click', () => produkImage.click());
-        
         imageUpload.addEventListener('dragover', (e) => {
           e.preventDefault();
           imageUpload.style.borderColor = 'var(--primary)';
         });
-        
         imageUpload.addEventListener('dragleave', () => {
           imageUpload.style.borderColor = 'var(--border-color)';
         });
-        
         imageUpload.addEventListener('drop', (e) => {
           e.preventDefault();
           imageUpload.style.borderColor = 'var(--border-color)';
-          if (e.dataTransfer.files.length) {
-            handleImageSelect(e.dataTransfer.files[0]);
-          }
+          if (e.dataTransfer.files.length) handleImageSelect(e.dataTransfer.files[0]);
         });
-        
         produkImage.addEventListener('change', (e) => {
-          if (e.target.files.length) {
-            handleImageSelect(e.target.files[0]);
-          }
+          if (e.target.files.length) handleImageSelect(e.target.files[0]);
         });
 
         function handleImageSelect(file) {
@@ -1876,7 +2048,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             Utils.showToast('File harus berupa gambar', 'error');
             return;
           }
-          
           const reader = new FileReader();
           reader.onload = (e) => {
             const preview = document.getElementById('imagePreview');
@@ -1886,45 +2057,32 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           reader.readAsDataURL(file);
         }
 
-        // Close modal
-        document.getElementById('closeProdukModal').addEventListener('click', () => {
-          produkModal.classList.remove('active');
-        });
-
-        document.getElementById('btnCancelProduk').addEventListener('click', () => {
-          produkModal.classList.remove('active');
-        });
-
-        // Save product
+        // Save produk
         document.getElementById('btnSaveProduk').addEventListener('click', async () => {
           const name = document.getElementById('produkName').value.trim();
           const categoryId = document.getElementById('produkKategori').value;
           const costPrice = document.getElementById('produkCost').value;
           const sellingPrice = document.getElementById('produkPrice').value;
-          
+
           if (!name) {
             Utils.showToast('Nama produk wajib diisi', 'error');
             return;
           }
-          
           if (!categoryId) {
             Utils.showToast('Kategori wajib dipilih', 'error');
             return;
           }
-          
           if (!costPrice || costPrice <= 0) {
             Utils.showToast('Harga beli wajib diisi', 'error');
             return;
           }
-          
           if (!sellingPrice || sellingPrice <= 0) {
             Utils.showToast('Harga jual wajib diisi', 'error');
             return;
           }
-          
+
           try {
             Utils.showLoading('Menyimpan produk...');
-            
             const productData = {
               name: name,
               code: document.getElementById('produkCode').value,
@@ -1938,8 +2096,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               status: document.getElementById('produkStatus').checked ? 'active' : 'inactive',
               updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
-            
-            // Handle image upload
+
             const imagePreview = document.getElementById('imagePreview');
             if (imagePreview.style.display !== 'none' && imagePreview.src.startsWith('data:')) {
               const imageFile = await fetch(imagePreview.src).then(r => r.blob());
@@ -1949,27 +2106,21 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             } else if (currentProduct?.image) {
               productData.image = currentProduct.image;
             }
-            
+
             const productId = document.getElementById('produkId').value;
-            
             if (productId) {
-              // Update existing
               await database.ref(`products/${productId}`).update(productData);
               Utils.showToast('Produk berhasil diupdate', 'success');
             } else {
-              // Create new
               const newId = Utils.generateId('PRD');
               productData.id = newId;
               productData.createdAt = firebase.database.ServerValue.TIMESTAMP;
               productData.soldCount = 0;
-              
               await database.ref(`products/${newId}`).set(productData);
               Utils.showToast('Produk berhasil ditambahkan', 'success');
             }
-            
             produkModal.classList.remove('active');
             loadProducts();
-            
           } catch (error) {
             console.error('Error saving product:', error);
             Utils.hideLoading();
@@ -1988,16 +2139,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             'Stok': p.stock,
             'Kode Barang': p.code
           }));
-          
-          // Add row numbers
           data.forEach((row, i) => row['No'] = i + 1);
-          
-          // Convert to CSV
           if (data.length === 0) {
             Utils.showToast('Tidak ada data untuk diexport', 'warning');
             return;
           }
-          
           const headers = Object.keys(data[0]);
           const csv = [
             headers.join(','),
@@ -2008,8 +2154,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               }
               return val;
             }).join(','))
-          ].join('\n');
-          
+          ].join('
+');
           const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -2017,7 +2163,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           a.download = `produk_${Utils.getTodayString()}.csv`;
           a.click();
           window.URL.revokeObjectURL(url);
-          
           Utils.showToast('Produk berhasil diexport', 'success');
         });
 
