@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366f1">
+  <title>WebPOS - Kas Management</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Inline CSS -->
+  <style>
+/* WebPOS Modern CSS - Simplified */
+
+/* Theme Colors */
+:root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+[data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
+[data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
+[data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
+[data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
+[data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
+[data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
+[data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+
+/* Base */
+:root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+
+[data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
+
+/* Layout */
+.app-container{display:flex;min-height:100vh}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
+.sidebar.collapsed{width:var(--sidebar-collapsed)}
+@media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
+
+.sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
+.logo-container{display:flex;align-items:center;gap:.5rem}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
+.logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar.collapsed .logo-text{opacity:0;width:0}
+
+.menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
+.menu-toggle:hover{background:var(--primary-dark)}
+.sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
+
+.sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
+.search-input-wrapper{position:relative;display:flex;align-items:center}
+.search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
+.search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
+.search-input:focus{outline:none;border-color:var(--primary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
+.nav-section{margin-bottom:1.5rem}
+.nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
+.sidebar.collapsed .nav-section-title{display:none}
+
+.nav-menu{list-style:none}
+.nav-item{margin-bottom:2px}
+.nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
+.nav-link::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--primary);transform:scaleY(0);transition:transform .15s;border-radius:0 .25rem .25rem 0}
+.nav-link:hover{background:rgba(99,102,241,.05);color:var(--primary)}
+.nav-link.active{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600}
+.nav-link.active::before{transform:scaleY(1)}
+.nav-link i{width:22px;text-align:center;font-size:1.05rem}
+.nav-link span{white-space:nowrap}
+.sidebar.collapsed .nav-link span{display:none}
+
+.nav-dropdown{position:relative}
+.nav-dropdown-toggle{justify-content:space-between}
+.nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto}
+.nav-dropdown.open .nav-dropdown-toggle .dropdown-arrow{transform:rotate(180deg)}
+.nav-submenu{list-style:none;padding-left:2.75rem;max-height:0;overflow:hidden;transition:max-height .25s}
+.sidebar.collapsed .nav-submenu{display:none}
+.nav-dropdown.open .nav-submenu{max-height:500px}
+.nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
+
+.sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
+.user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
+.user-profile:hover{opacity:.8}
+.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
+.user-info{flex:1;overflow:hidden}
+.sidebar.collapsed .user-info{display:none}
+.user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
+
+/* Main Content */
+.main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
+.sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
+@media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
+
+/* Header */
+.main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:1rem}
+.header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
+.header-actions{display:flex;align-items:center;gap:.5rem}
+
+/* Page Content */
+.page-content{flex:1;padding:1.5rem;overflow-y:auto}
+@media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover:not(:disabled){filter:brightness(0.9)}
+.btn-danger{background:var(--danger);color:white}
+.btn-danger:hover:not(:disabled){filter:brightness(0.9)}
+.btn-warning{background:var(--warning);color:white}
+.btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
+.btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:.4rem .875rem;font-size:.8rem}
+.btn-block{width:100%}
+
+.btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
+
+/* Cards */
+.card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
+.card:hover{box-shadow:var(--shadow-lg)}
+.card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
+.card-body{padding:1.5rem}
+.card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
+
+/* Forms */
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
+.form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-input::placeholder{color:var(--text-muted)}
+.form-textarea{min-height:100px;resize:vertical}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+
+/* Tables */
+.table-container{overflow-x:auto;border-radius:1rem;border:1px solid var(--border-color)}
+.table{width:100%;border-collapse:collapse;font-size:.9rem}
+.table th,.table td{padding:.875rem 1rem;text-align:left;border-bottom:1px solid var(--border-color)}
+.table th{font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+.table tbody tr:hover{background:rgba(99,102,241,.05)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.35rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+.badge-primary{background:rgba(99,102,241,.1);color:var(--primary)}
+.badge-success{background:rgba(16,185,129,.1);color:var(--success)}
+.badge-warning{background:rgba(245,158,11,.1);color:var(--warning)}
+.badge-danger{background:rgba(239,68,68,.1);color:var(--danger)}
+
+/* Toast */
+.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
+.toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.success{border-left-color:var(--success)}
+.toast.error{border-left-color:var(--danger)}
+.toast.warning{border-left-color:var(--warning)}
+.toast.info{border-left-color:var(--info)}
+
+/* Loading */
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
+.loading-overlay.active{opacity:1;visibility:visible}
+.spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile Nav */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
+.mobile-nav-item i{font-size:1.25rem}
+.mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
+@media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal-content{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
+.modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
+.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+.modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.modal-close:hover{background:var(--danger);color:white}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
+
+/* Empty State */
+.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
+.empty-state-title{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem}
+
+/* Toggle Switch */
+.toggle-switch{position:relative;width:50px;height:26px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;transition:.3s}
+.toggle-slider:before{content:"";position:absolute;height:20px;width:20px;left:2px;bottom:2px;background:white;border-radius:50%;transition:.3s;box-shadow:var(--shadow-sm)}
+input:checked+.toggle-slider{background:var(--primary);border-color:var(--primary)}
+input:checked+.toggle-slider:before{transform:translateX(24px)}
+
+/* Theme Grid */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}
+.theme-option{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem;border-radius:1rem;border:2px solid var(--border-color);cursor:pointer;transition:all .15s}
+.theme-option:hover{border-color:var(--text-muted);transform:translateY(-2px)}
+.theme-option.active{border-color:var(--primary);background:rgba(99,102,241,.05)}
+.theme-color{width:40px;height:40px;border-radius:50%;box-shadow:var(--shadow-md)}
+.theme-name{font-size:.75rem;font-weight:500;color:var(--text-secondary)}
+.theme-indigo{background:linear-gradient(135deg,#6366f1,#ec4899)}
+.theme-blue{background:linear-gradient(135deg,#3b82f6,#06b6d4)}
+.theme-green{background:linear-gradient(135deg,#10b981,#84cc16)}
+.theme-orange{background:linear-gradient(135deg,#f97316,#f59e0b)}
+.theme-purple{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
+.theme-red{background:linear-gradient(135deg,#ef4444,#f97316)}
+.theme-pink{background:linear-gradient(135deg,#ec4899,#8b5cf6)}
+.theme-teal{background:linear-gradient(135deg,#14b8a6,#06b6d4)}
+
+/* Utilities */
+.d-none{display:none!important}
+.d-block{display:block!important}
+.d-flex{display:flex!important}
+.d-md-none{display:none!important}
+@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
+.text-left{text-align:left!important}
+.text-center{text-align:center!important}
+.text-right{text-align:right!important}
+.text-primary{color:var(--primary)!important}
+.text-success{color:var(--success)!important}
+.text-danger{color:var(--danger)!important}
+.font-bold{font-weight:700!important}
+.text-sm{font-size:.875rem!important}
+.mb-0{margin-bottom:0!important}
+.mb-2{margin-bottom:1rem!important}
+.w-full{width:100%!important}
+
+  </style>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  
+  
+  <style>
+    .kas-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kas-stat {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .kas-stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .kas-stat-value.success { color: var(--success); }
+    .kas-stat-value.danger { color: var(--danger); }
+    .kas-stat-value.primary { color: var(--primary); }
+
+    .kas-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .kas-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kas-actions .btn {
+      flex: 1;
+    }
+
+    .transaction-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .transaction-type-badge.income {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .transaction-type-badge.expense {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon"><i class="fas fa-cash-register"></i></div>
+          <span class="logo-text">WebPOS</span>
+        </div>
+      </div>
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-chevron-left"></i></button>
+      <div class="sidebar-search">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" placeholder="Cari menu...">
+        </div>
+      </div>
+            <nav class="sidebar-nav">
+        <!-- Utama -->
+        <div class="nav-section">
+          <div class="nav-section-title">Utama</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="index.html" class="nav-link" data-menu="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-kasir.html" class="nav-link" data-menu="kasir">
+                <i class="fas fa-cash-register"></i>
+                <span>Kasir</span>
+              </a>
+            </li>
+            <li class="nav-item nav-dropdown" data-dropdown>
+              <div class="nav-link nav-dropdown-toggle" data-menu="produk">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <i class="fas fa-box"></i>
+                  <span>Produk</span>
+                </div>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+              </div>
+              <ul class="nav-submenu">
+                <li><a href="page-produk.html" class="nav-link"><span>Daftar Produk</span></a></li>
+                <li><a href="page-kategori.html" class="nav-link"><span>Kategori</span></a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Transaksi -->
+        <div class="nav-section">
+          <div class="nav-section-title">Transaksi</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-riwayat.html" class="nav-link" data-menu="riwayat">
+                <i class="fas fa-history"></i>
+                <span>Riwayat Transaksi</span>
+              </a>
+            </li>
+            <li class="nav-item nav-dropdown" data-dropdown>
+              <div class="nav-link nav-dropdown-toggle" data-menu="kas">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <i class="fas fa-wallet"></i>
+                  <span>Kas Management</span>
+                </div>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+              </div>
+              <ul class="nav-submenu">
+                <li><a href="page-kas.html" class="nav-link active"><span>Ringkasan Kas</span></a></li>
+                <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
+                <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
+                <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
+                <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="page-hutang.html" class="nav-link" data-menu="hutang">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Hutang & Piutang</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Laporan -->
+        <div class="nav-section">
+          <div class="nav-section-title">Laporan</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
+                <i class="fas fa-chart-bar"></i>
+                <span>Laporan Penjualan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Integrasi -->
+        <div class="nav-section">
+          <div class="nav-section-title">Integrasi</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram">
+                <i class="fab fa-telegram"></i>
+                <span>Saldo Telegram</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan">
+                <i class="fas fa-users"></i>
+                <span>Data Pelanggan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Sistem -->
+        <div class="nav-section">
+          <div class="nav-section-title">Sistem</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-pengguna.html" class="nav-link" data-menu="pengguna">
+                <i class="fas fa-user-cog"></i>
+                <span>Pengguna</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-setting.html" class="nav-link" data-menu="setting">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-backup.html" class="nav-link" data-menu="backup">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Backup & Sync</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-printer.html" class="nav-link" data-menu="printer">
+                <i class="fas fa-print"></i>
+                <span>Printer & Struk</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-reset.html" class="nav-link" data-menu="reset">
+                <i class="fas fa-trash-alt"></i>
+                <span>Reset Data</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-profile" id="userProfile">
+          <div class="user-avatar" id="userAvatar"><i class="fas fa-user"></i></div>
+          <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">-</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+          <h1 class="header-title">Kas Management</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon" id="btnLogout"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <!-- Kas Stats -->
+        <div class="kas-stats">
+          <div class="kas-stat">
+            <div class="kas-stat-value primary" id="kasDitangan">Rp 0</div>
+            <div class="kas-stat-label">Kas di Tangan</div>
+          </div>
+          <div class="kas-stat">
+            <div class="kas-stat-value success" id="kasMasuk">Rp 0</div>
+            <div class="kas-stat-label">Kas Masuk</div>
+          </div>
+          <div class="kas-stat">
+            <div class="kas-stat-value danger" id="kasKeluar">Rp 0</div>
+            <div class="kas-stat-label">Kas Keluar</div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="kas-actions">
+          <a href="page-kas-topup.html" class="btn btn-success">
+            <i class="fas fa-arrow-up"></i> Top Up
+          </a>
+          <a href="page-kas-tarik.html" class="btn btn-danger">
+            <i class="fas fa-arrow-down"></i> Tarik Tunai
+          </a>
+          <a href="page-modal.html" class="btn btn-primary">
+            <i class="fas fa-coins"></i> Set Modal
+          </a>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history"></i> Riwayat Kas</h3>
+          </div>
+          <div class="card-body" style="padding: 0; overflow-x: auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Tipe</th>
+                  <th>Keterangan</th>
+                  <th>Jumlah</th>
+                  <th>Kasir</th>
+                </tr>
+              </thead>
+              <tbody id="kasHistory">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 3rem;">
+                    <div class="empty-state">
+                      <div class="empty-state-icon"><i class="fas fa-wallet"></i></div>
+                      <p>Belum ada transaksi kas</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="mobile-nav">
+      <a href="index.html" class="mobile-nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+      <a href="page-kasir.html" class="mobile-nav-item"><i class="fas fa-cash-register"></i><span>Kasir</span></a>
+      <a href="page-produk.html" class="mobile-nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
+      <a href="page-riwayat.html" class="mobile-nav-item"><i class="fas fa-history"></i><span>Riwayat</span></a>
+      <a href="page-setting.html" class="mobile-nav-item"><i class="fas fa-cog"></i><span>Setting</span></a>
+    </nav>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
+  </div>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait for Firebase auth to be ready
+      auth.onAuthStateChanged((user) => {
+        if (!user && !Utils.getStorage('webpos_session')) {
+          window.location.href = '../login.html';
+          return;
+        }
+        
+        // Load user data if available
+        if (user) {
+          Auth.loadUserData(user.uid);
+        }
+        
+        // Initialize kas
+        initKas();
+      });
+
+      function initKas() {
+      const user = Auth.getCurrentUser();
+      document.getElementById('userName').textContent = user?.name || user?.email || 'User';
+      document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
+
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
+
+      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        Utils.confirm('Yakin ingin logout?', () => Auth.logout());
+      });
+
+      // Load kas data
+      async function loadKasData() {
+        try {
+          Utils.showLoading();
+          
+          const today = Utils.getTodayString();
+          const transSnapshot = await database.ref(`transactions/${today}`).once('value');
+          const transactions = transSnapshot.val() || {};
+          
+          let kasMasuk = 0;
+          let kasKeluar = 0;
+          let kasHistory = [];
+          
+          Object.entries(transactions).forEach(([id, data]) => {
+            if (data.status === 'cancelled') return;
+            
+            if (data.type === 'topup' || data.type === 'kas_masuk') {
+              kasMasuk += data.total || data.amount || 0;
+            } else if (data.type === 'tarik' || data.type === 'kas_keluar') {
+              kasKeluar += data.total || data.amount || 0;
+            }
+            
+            kasHistory.push({ id, ...data });
+          });
+          
+          // Get modal
+          const modalSnapshot = await database.ref(`modal/${today}/${user?.uid}`).once('value');
+          const modal = modalSnapshot.val();
+          const modalAmount = modal ? modal.amount : 0;
+          
+          // Calculate kas ditangan
+          let kasDitangan = modalAmount;
+          Object.entries(transactions).forEach(([id, data]) => {
+            if (data.status === 'cancelled') return;
+            
+            if (data.type === 'penjualan') {
+              kasDitangan += data.total || 0;
+            } else if (data.type === 'topup' || data.type === 'kas_masuk') {
+              kasDitangan += data.total || data.amount || 0;
+            } else if (data.type === 'tarik' || data.type === 'kas_keluar') {
+              kasDitangan -= data.total || data.amount || 0;
+            }
+          });
+          
+          // Update UI
+          document.getElementById('kasDitangan').textContent = Utils.formatRupiah(kasDitangan);
+          document.getElementById('kasMasuk').textContent = Utils.formatRupiah(kasMasuk);
+          document.getElementById('kasKeluar').textContent = Utils.formatRupiah(kasKeluar);
+          
+          // Render history
+          kasHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          const tbody = document.getElementById('kasHistory');
+          if (kasHistory.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem;">
+                  <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-wallet"></i></div>
+                    <p>Belum ada transaksi kas</p>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = kasHistory.slice(0, 20).map(t => {
+              const isIncome = ['topup', 'kas_masuk', 'penjualan'].includes(t.type);
+              const typeLabels = {
+                topup: 'Top Up',
+                tarik: 'Tarik Tunai',
+                kas_masuk: 'Kas Masuk',
+                kas_keluar: 'Kas Keluar',
+                penjualan: 'Penjualan'
+              };
+              
+              const adminFeeInfo = t.adminFee > 0 ? `<br><small style="color: var(--success);">+Admin: ${Utils.formatRupiah(t.adminFee)}</small>` : '';
+              
+              return `
+                <tr>
+                  <td>${Utils.formatDateTime(t.timestamp)}</td>
+                  <td>
+                    <span class="transaction-type-badge ${isIncome ? 'income' : 'expense'}">
+                      <i class="fas fa-${isIncome ? 'arrow-up' : 'arrow-down'}"></i>
+                      ${typeLabels[t.type] || t.type}
+                    </span>
+                  </td>
+                  <td>${t.note || '-'}${adminFeeInfo}</td>
+                  <td style="color: ${isIncome ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                    ${isIncome ? '+' : '-'} ${Utils.formatRupiah(t.total || t.amount || 0)}
+                  </td>
+                  <td>${t.cashierName || '-'}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+          
+          Utils.hideLoading();
+        } catch (error) {
+          console.error('Error loading kas data:', error);
+          Utils.hideLoading();
+        }
+      }
+
+      loadKasData();
+      }
+    });
+  </script>
+</body>
+</html>
