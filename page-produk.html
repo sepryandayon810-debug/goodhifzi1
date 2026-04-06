@@ -847,8 +847,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="produk-price">' + formatRupiah(product.sellingPrice || 0) + '</div>';
       html += '</div>';
       html += '<div class="produk-actions">';
-      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct('" + product.id + "')"><i class="fas fa-edit"></i> Edit</button>';
-      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct('" + product.id + "')"><i class="fas fa-trash"></i> Hapus</button>';
+      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct('\" + product.id + "')"><i class="fas fa-edit"></i> Edit</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct('\" + product.id + "')"><i class="fas fa-trash"></i> Hapus</button>';
       html += '</div>';
       html += '</div>';
     });
@@ -874,8 +874,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="kategori-count">' + productCount + ' produk</div>';
       html += '</div>';
       html += '<div class="kategori-actions">';
-      html += '<button class="btn-icon btn-sm" onclick="editCategory('" + cat.id + "')" title="Edit"><i class="fas fa-edit"></i></button>';
-      html += '<button class="btn-icon btn-sm" onclick="deleteCategory('" + cat.id + "')" title="Hapus"><i class="fas fa-trash"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="editCategory('\" + cat.id + "')" title="Edit"><i class="fas fa-edit"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="deleteCategory('\" + cat.id + "')" title="Hapus"><i class="fas fa-trash"></i></button>';
       html += '</div>';
       html += '</div>';
     });
@@ -899,13 +899,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     for(var i = 1; i <= totalPages; i++){
       if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)){
-        html += '<button class="btn btn-sm ' + (i === currentPage ? "btn-primary" : "btn-secondary") + '" onclick="goToPage('" + i + "')">' + i + '</button>';
+        html += '<button class="btn btn-sm ' + (i === currentPage ? "btn-primary" : "btn-secondary") + '" onclick="goToPage('\" + i + "')">' + i + '</button>';
       }else if(i === currentPage - 2 || i === currentPage + 2){
         html += '<span class="btn btn-sm" style="background:transparent;cursor:default">...</span>';
       }
     }
 
-    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === totalPages ? "disabled" : "") + ' onclick="goToPage('" + (currentPage + 1) + "')"><i class="fas fa-chevron-right"></i></button>';
+    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === totalPages ? "disabled" : "") + ' onclick="goToPage('\" + (currentPage + 1) + "')"><i class="fas fa-chevron-right"></i></button>';
 
     container.innerHTML = html;
   }
