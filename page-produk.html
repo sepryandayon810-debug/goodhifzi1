@@ -1495,4 +1495,488 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 })();
   </script>
 </body>
+</html> wajib diisi", "error");
+      return;
+    }
+    if(!categoryId){
+      showToast("Kategori wajib dipilih", "error");
+      return;
+    }
+    if(!costPrice || parseInt(costPrice) <= 0){
+      showToast("Harga beli wajib diisi", "error");
+      return;
+    }
+    if(!sellingPrice || parseInt(sellingPrice) <= 0){
+      showToast("Harga jual wajib diisi", "error");
+      return;
+    }
+
+    if(typeof Utils !== "undefined") Utils.showLoading("Menyimpan produk...");
+
+    var productData = {
+      name: name,
+      code: document.getElementById("produkCode").value,
+      categoryId: categoryId,
+      unit: document.getElementById("produkUnit").value,
+      costPrice: parseInt(costPrice) || 0,
+      sellingPrice: parseInt(sellingPrice) || 0,
+      stock: parseInt(document.getElementById("produkStock").value) || 0,
+      minStock: parseInt(document.getElementById("produkMinStock").value) || 5,
+      description: document.getElementById("produkDesc").value,
+      status: document.getElementById("produkStatus").checked ? "active" : "inactive",
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    var productId = document.getElementById("produkId").value;
+
+    function saveToDatabase(){
+      if(productId){
+        database.ref("products/" + productId).update(productData).then(function(){
+          showToast("Produk berhasil diupdate", "success");
+          closeProdukModal();
+          loadProducts();
+        }).catch(function(err){
+          showToast("Gagal mengupdate produk", "error");
+          if(typeof Utils !== "undefined") Utils.hideLoading();
+        });
+      }else{
+        var newId = database.ref("products").push().key;
+        productData.id = newId;
+        productData.createdAt = firebase.database.ServerValue.TIMESTAMP;
+        productData.soldCount = 0;
+        database.ref("products/" + newId).set(productData).then(function(){
+          showToast("Produk berhasil ditambahkan", "success");
+          closeProdukModal();
+          loadProducts();
+        }).catch(function(err){
+          showToast("Gagal menambahkan produk", "error");
+          if(typeof Utils !== "undefined") Utils.hideLoading();
+        });
+      }
+    }
+
+    var imagePreview = document.getElementById("imagePreview");
+    if(imagePreview.style.display !== "none" && imagePreview.src && imagePreview.src.startsWith("data:")){
+      fetch(imagePreview.src).then(function(r){ return r.blob(); }).then(function(blob){
+        var imageRef = storage.ref("products/" + Date.now() + "_" + name.replace(/\s+/g, "_"));
+        return imageRef.put(blob);
+      }).then(function(snapshot){
+        return snapshot.ref.getDownloadURL();
+      }).then(function(url){
+        productData.image = url;
+        saveToDatabase();
+      }).catch(function(err){
+        console.error("Error uploading image:", err);
+        saveToDatabase();
+      });
+    }else if(currentProduct && currentProduct.image){
+      productData.image = currentProduct.image;
+      saveToDatabase();
+    }else{
+      saveToDatabase();
+    }
+  }
+
+  function saveKategori(){
+    var name = document.getElementById("kategoriName").value.trim();
+    if(!name){
+      showToast("Nama kategori wajib diisi", "warning");
+      return;
+    }
+
+    if(typeof Utils !== "undefined") Utils.showLoading("Menyimpan kategori...");
+
+    var data = {
+      name: name,
+      color: selectedColor,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    if(currentCategory){
+      database.ref("categories/" + currentCategory.id).update(data).then(function(){
+        showToast("Kategori berhasil diupdate", "success");
+        closeKategoriModal();
+        loadCategories().then(function(){
+          loadProducts();
+        });
+      }).catch(function(err){
+        showToast("Gagal mengupdate kategori", "error");
+        if(typeof Utils !== "undefined") Utils.hideLoading();
+      });
+    }else{
+      var newId = database.ref("categories").push().key;
+      data.id = newId;
+      data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+      data.productCount = 0;
+      database.ref("categories/" + newId).set(data).then(function(){
+        showToast("Kategori berhasil ditambahkan", "success");
+        closeKategoriModal();
+        loadCategories().then(function(){
+          loadProducts();
+        });
+      }).catch(function(err){
+        showToast("Gagal menambahkan kategori", "error");
+        if(typeof Utils !== "undefined") Utils.hideLoading();
+      });
+    }
+  }
+
+  function handleImageSelect(file){
+    if(!file.type.startsWith("image/")){
+      showToast("File harus berupa gambar", "error");
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var preview = document.getElementById("imagePreview");
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showImportModal(){
+    if(typeof Utils !== "undefined"){
+      var content = '<div style="padding:1rem">';
+      content += '<div class="form-group">';
+      content += '<label class="form-label">Pilih File (CSV atau Excel)</label>';
+      content += '<div class="image-upload" id="importDropzone" style="padding:2rem">';
+      content += '<i class="fas fa-file-upload" style="font-size:2rem;color:var(--text-muted)"></i>';
+      content += '<p>Klik atau drag file ke sini</p>';
+      content += '<p style="font-size:0.75rem;color:var(--text-muted)">Format: CSV, XLSX (Max 5MB)</p>';
+      content += '<input type="file" id="importFile" accept=".csv,.xlsx,.xls" style="display:none">';
+      content += '</div></div>';
+      content += '<div id="importResult" style="display:none;margin-top:1rem"></div>';
+      content += '<div style="display:flex;gap:0.5rem;margin-top:1rem">';
+      content += '<button class="btn btn-secondary" id="btnDownloadTemplate"><i class="fas fa-download"></i> Template</button>';
+      content += '<button class="btn btn-primary" id="btnProcessImport" disabled><i class="fas fa-upload"></i> Import</button>';
+      content += '</div></div>';
+
+      Utils.showModal("Import Produk", content);
+
+      setupImportEvents();
+    }
+  }
+
+  function setupImportEvents(){
+    var dropzone = document.getElementById("importDropzone");
+    var fileInput = document.getElementById("importFile");
+    var btnProcess = document.getElementById("btnProcessImport");
+    var btnTemplate = document.getElementById("btnDownloadTemplate");
+    var importData = null;
+
+    dropzone.addEventListener("click", function(){
+      fileInput.click();
+    });
+
+    dropzone.addEventListener("dragover", function(e){
+      e.preventDefault();
+      dropzone.style.borderColor = "var(--primary)";
+    });
+
+    dropzone.addEventListener("dragleave", function(){
+      dropzone.style.borderColor = "var(--border-color)";
+    });
+
+    dropzone.addEventListener("drop", function(e){
+      e.preventDefault();
+      dropzone.style.borderColor = "var(--border-color)";
+      if(e.dataTransfer.files.length){
+        processImportFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener("change", function(e){
+      if(e.target.files.length){
+        processImportFile(e.target.files[0]);
+      }
+    });
+
+    btnTemplate.addEventListener("click", function(){
+      var csv = "No,Nama Produk,Kategori,Harga Beli,Harga Jual,Stok,Kode Barang\n";
+      csv += "1,Laptop ASUS,Elektronik,5000000,6500000,10,\n";
+      csv += "2,Mouse Logitech,Aksesoris,150000,200000,20,\n";
+      var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "template_import_produk.csv";
+      link.click();
+    });
+
+    btnProcess.addEventListener("click", function(){
+      if(importData && importData.length > 0){
+        processImport(importData);
+      }
+    });
+
+    function processImportFile(file){
+      Utils.showLoading("Membaca file...");
+      var reader = new FileReader();
+
+      reader.onload = function(e){
+        try{
+          var data = [];
+          var ext = file.name.split(".").pop().toLowerCase();
+
+          if(ext === "csv"){
+            var lines = e.target.result.split("\n").filter(function(l){ return l.trim(); });
+            var headers = lines[0].split(",").map(function(h){ return h.trim().toLowerCase(); });
+            for(var i = 1; i < lines.length; i++){
+              var values = lines[i].split(",");
+              var row = {};
+              headers.forEach(function(h, idx){
+                row[h] = values[idx] ? values[idx].trim() : "";
+              });
+              data.push(row);
+            }
+          }else{
+            var workbook = XLSX.read(e.target.result, {type: "array"});
+            var sheet = workbook.Sheets[workbook.SheetNames[0]];
+            var jsonData = XLSX.utils.sheet_to_json(sheet, {header: 1});
+            var headers = jsonData[0].map(function(h){ return h.toString().toLowerCase().trim(); });
+            for(var i = 1; i < jsonData.length; i++){
+              var row = {};
+              jsonData[i].forEach(function(val, idx){
+                row[headers[idx]] = val !== undefined ? val.toString().trim() : "";
+              });
+              data.push(row);
+            }
+          }
+
+          importData = validateImportData(data);
+          showImportPreview(importData);
+          Utils.hideLoading();
+        }catch(err){
+          Utils.hideLoading();
+          showToast("Error membaca file: " + err.message, "error");
+        }
+      };
+
+      if(file.name.endsWith(".csv")){
+        reader.readAsText(file);
+      }else{
+        reader.readAsArrayBuffer(file);
+      }
+    }
+
+    function validateImportData(data){
+      var valid = [];
+      data.forEach(function(row, idx){
+        var nama = row["nama produk"] || row["nama"] || "";
+        var hargaBeli = row["harga beli"] || row["modal"] || "";
+        var hargaJual = row["harga jual"] || "";
+        var kategori = row["kategori"] || "";
+
+        if(nama && hargaBeli && hargaJual){
+          var cat = categories.find(function(c){ return c.name.toLowerCase() === kategori.toLowerCase(); });
+          valid.push({
+            name: nama.trim(),
+            code: row["kode barang"] || row["kode"] || generateProductCode(),
+            categoryId: cat ? cat.id : "",
+            costPrice: parseInt(hargaBeli) || 0,
+            sellingPrice: parseInt(hargaJual) || 0,
+            stock: parseInt(row["stok"] || row["stock"]) || 0,
+            unit: row["satuan"] || "pcs",
+            description: row["deskripsi"] || ""
+          });
+        }
+      });
+      return valid;
+    }
+
+    function showImportPreview(data){
+      var resultDiv = document.getElementById("importResult");
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = '<div style="padding:1rem;background:var(--bg-secondary);border-radius:var(--radius-lg)"><strong>' + data.length + '</strong> produk valid siap diimport</div>';
+      btnProcess.disabled = data.length === 0;
+    }
+
+    function processImport(data){
+      Utils.showLoading("Mengimport produk...");
+      var promises = data.map(function(product){
+        var id = database.ref("products").push().key;
+        product.id = id;
+        product.createdAt = firebase.database.ServerValue.TIMESTAMP;
+        product.updatedAt = firebase.database.ServerValue.TIMESTAMP;
+        product.status = "active";
+        product.soldCount = 0;
+        product.minStock = 5;
+        return database.ref("products/" + id).set(product);
+      });
+
+      Promise.all(promises).then(function(){
+        Utils.closeModal();
+        Utils.hideLoading();
+        showToast(data.length + " produk berhasil diimport", "success");
+        loadProducts();
+      }).catch(function(err){
+        Utils.hideLoading();
+        showToast("Gagal mengimport produk", "error");
+      });
+    }
+  }
+
+  function exportProducts(){
+    if(products.length === 0){
+      showToast("Tidak ada data untuk diexport", "warning");
+      return;
+    }
+
+    var csv = "No,Nama Produk,Kategori,Harga Beli,Harga Jual,Stok,Kode Barang\n";
+    products.forEach(function(p, i){
+      var cat = categories.find(function(c){ return c.id === p.categoryId; });
+      csv += (i + 1) + ",";
+      csv += "\"" + (p.name || "") + "\",";
+      csv += (cat ? cat.name : "") + ",";
+      csv += (p.costPrice || 0) + ",";
+      csv += (p.sellingPrice || 0) + ",";
+      csv += (p.stock || 0) + ",";
+      csv += (p.code || "") + "\n";
+    });
+
+    var blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "produk_" + new Date().toISOString().split("T")[0] + ".csv";
+    link.click();
+    showToast("Produk berhasil diexport", "success");
+  }
+
+  // Global functions
+  window.goToPage = function(page){
+    currentPage = page;
+    renderProducts();
+    renderPagination();
+  };
+
+  window.editProduct = function(productId){
+    var product = products.find(function(p){ return p.id === productId; });
+    if(!product) return;
+
+    currentProduct = product;
+    document.getElementById("modalTitle").textContent = "Edit Produk";
+    document.getElementById("produkId").value = product.id;
+    document.getElementById("produkName").value = product.name || "";
+    document.getElementById("produkCode").value = product.code || "";
+    document.getElementById("produkKategori").value = product.categoryId || "";
+    document.getElementById("produkUnit").value = product.unit || "pcs";
+    document.getElementById("produkCost").value = product.costPrice || 0;
+    document.getElementById("produkPrice").value = product.sellingPrice || 0;
+    document.getElementById("produkStock").value = product.stock || 0;
+    document.getElementById("produkMinStock").value = product.minStock || 5;
+    document.getElementById("produkDesc").value = product.description || "";
+    document.getElementById("produkStatus").checked = product.status !== "inactive";
+
+    var preview = document.getElementById("imagePreview");
+    if(product.image){
+      preview.src = product.image;
+      preview.style.display = "block";
+    }else{
+      preview.style.display = "none";
+    }
+
+    document.getElementById("produkModal").classList.add("active");
+  };
+
+  window.deleteProduct = function(productId){
+    if(typeof Utils !== "undefined"){
+      Utils.confirm("Yakin ingin menghapus produk ini?", function(){
+        Utils.showLoading("Menghapus produk...");
+        database.ref("products/" + productId).remove().then(function(){
+          products = products.filter(function(p){ return p.id !== productId; });
+          applyFilters();
+          Utils.hideLoading();
+          showToast("Produk berhasil dihapus", "success");
+        }).catch(function(err){
+          Utils.hideLoading();
+          showToast("Gagal menghapus produk", "error");
+        });
+      });
+    }
+  };
+
+  window.editCategory = function(catId){
+    var cat = categories.find(function(c){ return c.id === catId; });
+    if(!cat) return;
+
+    currentCategory = cat;
+    document.getElementById("kategoriModalTitle").textContent = "Edit Kategori";
+    document.getElementById("kategoriId").value = cat.id;
+    document.getElementById("kategoriName").value = cat.name || "";
+    selectedColor = cat.color || "#6366f1";
+    updateColorPicker();
+    document.getElementById("kategoriModal").classList.add("active");
+  };
+
+  window.deleteCategory = function(catId){
+    if(typeof Utils !== "undefined"){
+      Utils.confirm("Yakin ingin menghapus kategori ini?", function(){
+        Utils.showLoading();
+        database.ref("categories/" + catId).remove().then(function(){
+          categories = categories.filter(function(c){ return c.id !== catId; });
+          renderCategories();
+          loadCategories().then(function(){
+            loadProducts();
+          });
+          Utils.hideLoading();
+          showToast("Kategori berhasil dihapus", "success");
+        }).catch(function(err){
+          Utils.hideLoading();
+          showToast("Gagal menghapus kategori", "error");
+        });
+      });
+    }
+  };
+
+  window.adjustStock = function(delta){
+    var input = document.getElementById("produkStock");
+    var current = parseInt(input.value) || 0;
+    input.value = Math.max(0, current + delta);
+  };
+
+  // Utility functions
+  function generateProductCode(){
+    return "BRG" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+  }
+
+  function formatRupiah(num){
+    if(typeof Utils !== "undefined" && Utils.formatRupiah){
+      return Utils.formatRupiah(num);
+    }
+    return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+
+  function escapeHtml(text){
+    if(!text) return "";
+    var div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function debounce(func, wait){
+    var timeout;
+    return function(){
+      var context = this, args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(function(){ func.apply(context, args); }, wait);
+    };
+  }
+
+  function showToast(message, type){
+    if(typeof Utils !== "undefined" && Utils.showToast){
+      Utils.showToast(message, type);
+    }else{
+      alert(message);
+    }
+  }
+
+  // Start
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  }else{
+    init();
+  }
+})();
+  </script>
+</body>
 </html>
