@@ -1247,14 +1247,40 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
       btnToggleShift.addEventListener('click', toggleShift);
 
-      // Prevent links from opening in new tab
-      document.querySelectorAll('a').forEach(link => {
-        link.removeAttribute('target');
-        link.addEventListener('click', function(e) {
-          // Allow normal navigation
-          e.stopPropagation();
+      // Prevent links from opening in new tab - ULTRA FIX
+      function fixLinks() {
+        document.querySelectorAll('a').forEach(link => {
+          // Remove target attribute completely
+          link.removeAttribute('target');
+          link.removeAttribute('rel');
+          
+          // Override ALL click behaviors
+          link.onclick = function(e) {
+            // Remove target just in case it was added dynamically
+            this.removeAttribute('target');
+            this.removeAttribute('rel');
+            
+            // Navigate in same tab
+            const href = this.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+              window.location.href = href;
+              return false; // Prevent default
+            }
+          };
         });
+      }
+      
+      // Run multiple times to catch dynamically added links
+      fixLinks();
+      setTimeout(fixLinks, 100);
+      setTimeout(fixLinks, 500);
+      setTimeout(fixLinks, 1000);
+      
+      // Also use MutationObserver to catch new links
+      const observer = new MutationObserver(function(mutations) {
+        fixLinks();
       });
+      observer.observe(document.body, { childList: true, subtree: true });
 
       // Initialize
       loadUserData();
