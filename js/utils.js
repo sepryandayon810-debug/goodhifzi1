@@ -515,6 +515,18 @@ document.addEventListener('DOMContentLoaded', () => {
   Utils.Theme.init();
 });
 
+showModal: function(title, content){
+  var modal = document.createElement("div");
+  modal.className = "modal-overlay active";
+  modal.id = "dynamicModal";
+  modal.innerHTML = '<div class="modal" style="max-width:600px"><div class="modal-header"><h3 class="modal-title">' + title + '</h3><button class="modal-close" onclick="Utils.closeModal()"><i class="fas fa-times"></i></button></div><div class="modal-body">' + content + '</div></div>';
+  document.body.appendChild(modal);
+},
+closeModal: function(){
+  var modal = document.getElementById("dynamicModal");
+  if(modal) modal.remove();
+},
+
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Utils;
