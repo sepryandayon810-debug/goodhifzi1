@@ -1190,15 +1190,14 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     // ============================================
     const ProdukImport = {
       parseCSV(content) {
-        const lines = content.split('
-').filter(line => line.trim());
+        const lines = content.split("\n").filter(line => line.trim());
         const headers = this.parseCSVLine(lines[0]);
         const results = [];
         for (let i = 1; i < lines.length; i++) {
           const values = this.parseCSVLine(lines[i]);
           const row = {};
           headers.forEach((header, index) => {
-            row[header.trim().toLowerCase()] = values[index] ? values[index].trim() : '';
+            row[header.trim().toLowerCase()] = values[index] ? values[index].trim() : "";
           });
           results.push(row);
         }
@@ -1207,7 +1206,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       parseCSVLine(line) {
         const result = [];
-        let current = '';
+        let current = "";
         let inQuotes = false;
         for (let i = 0; i < line.length; i++) {
           const char = line[i];
@@ -1218,9 +1217,9 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             } else {
               inQuotes = !inQuotes;
             }
-          } else if (char === ',' && !inQuotes) {
+          } else if (char === "," && !inQuotes) {
             result.push(current.trim());
-            current = '';
+            current = "";
           } else {
             current += char;
           }
@@ -1235,7 +1234,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           reader.onload = (e) => {
             try {
               const data = new Uint8Array(e.target.result);
-              const workbook = XLSX.read(data, { type: 'array' });
+              const workbook = XLSX.read(data, { type: "array" });
               const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
               const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
               const headers = jsonData[0].map(h => h.toString().toLowerCase().trim());
@@ -1243,7 +1242,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               for (let i = 1; i < jsonData.length; i++) {
                 const row = {};
                 jsonData[i].forEach((val, index) => {
-                  row[headers[index]] = val !== undefined ? val.toString().trim() : '';
+                  row[headers[index]] = val !== undefined ? val.toString().trim() : "";
                 });
                 results.push(row);
               }
@@ -1258,70 +1257,70 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       },
 
       generateProductCode() {
-        const prefix = 'BRG';
+        const prefix = "BRG";
         const timestamp = Date.now().toString(36).toUpperCase();
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        return `${prefix}${timestamp}${random}`;
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+        return prefix + timestamp + random;
       },
 
       validateProduct(row, index, categories) {
         const errors = [];
-        const nama = row['nama produk'] || row['nama'] || row['name'] || '';
-        const hargaBeli = row['harga beli'] || row['harga modal'] || row['modal'] || '';
-        const hargaJual = row['harga jual'] || row['jual'] || '';
-        const kategori = row['kategori'] || row['category'] || '';
+        const nama = row["nama produk"] || row["nama"] || row["name"] || "";
+        const hargaBeli = row["harga beli"] || row["harga modal"] || row["modal"] || "";
+        const hargaJual = row["harga jual"] || row["jual"] || "";
+        const kategori = row["kategori"] || row["category"] || "";
 
-        if (!nama || nama.trim() === '') {
-          errors.push(`Baris ${index + 1}: Nama produk wajib diisi`);
+        if (!nama || nama.trim() === "") {
+          errors.push("Baris " + (index + 1) + ": Nama produk wajib diisi");
         }
         if (!hargaBeli || isNaN(parseFloat(hargaBeli))) {
-          errors.push(`Baris ${index + 1}: Harga beli tidak valid`);
+          errors.push("Baris " + (index + 1) + ": Harga beli tidak valid");
         }
         if (!hargaJual || isNaN(parseFloat(hargaJual))) {
-          errors.push(`Baris ${index + 1}: Harga jual tidak valid`);
+          errors.push("Baris " + (index + 1) + ": Harga jual tidak valid");
         }
 
-        let categoryId = '';
+        let categoryId = "";
         if (kategori) {
           const cat = categories.find(c => c.name.toLowerCase() === kategori.toLowerCase());
           if (cat) categoryId = cat.id;
         }
 
-        const kodeInput = row['kode barang'] || row['kode'] || row['code'] || '';
-        const kodeBarang = kodeInput.trim() !== '' ? kodeInput : this.generateProductCode();
+        const kodeInput = row["kode barang"] || row["kode"] || row["code"] || "";
+        const kodeBarang = kodeInput.trim() !== "" ? kodeInput : this.generateProductCode();
 
         return {
           valid: errors.length === 0,
-          errors,
+          errors: errors,
           data: {
-            name: nama ? nama.trim() : '',
+            name: nama ? nama.trim() : "",
             code: kodeBarang,
             categoryId: categoryId,
             categoryName: kategori,
             costPrice: parseInt(hargaBeli) || 0,
             sellingPrice: parseInt(hargaJual) || 0,
-            stock: parseInt(row['stok'] || row['stock']) || 0,
-            unit: row['satuan'] || row['unit'] || 'pcs',
-            description: row['deskripsi'] || row['description'] || '',
-            minStock: parseInt(row['stok minimum'] || row['min stock']) || 5,
-            status: 'active'
+            stock: parseInt(row["stok"] || row["stock"]) || 0,
+            unit: row["satuan"] || row["unit"] || "pcs",
+            description: row["deskripsi"] || row["description"] || "",
+            minStock: parseInt(row["stok minimum"] || row["min stock"]) || 5,
+            status: "active"
           }
         };
       },
 
       async processFile(file) {
-        const extension = file.name.split('.').pop().toLowerCase();
+        const extension = file.name.split(".").pop().toLowerCase();
         let data = [];
-        if (extension === 'csv') {
+        if (extension === "csv") {
           const content = await file.text();
           data = this.parseCSV(content);
-        } else if (extension === 'xlsx' || extension === 'xls') {
-          if (typeof XLSX === 'undefined') {
-            throw new Error('Library XLSX tidak tersedia.');
+        } else if (extension === "xlsx" || extension === "xls") {
+          if (typeof XLSX === "undefined") {
+            throw new Error("Library XLSX tidak tersedia.");
           }
           data = await this.parseExcel(file);
         } else {
-          throw new Error('Format file tidak didukung. Gunakan CSV atau Excel (.xlsx)');
+          throw new Error("Format file tidak didukung. Gunakan CSV atau Excel (.xlsx)");
         }
         return data;
       },
@@ -1340,53 +1339,52 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         };
       },
 
-      async import(products, onProgress = null) {
+      async import(products, onProgress) {
         const results = { success: 0, failed: 0, errors: [] };
         for (let i = 0; i < products.length; i++) {
           try {
             const product = products[i];
-            const productId = Utils.generateId('PRD');
+            const productId = Utils.generateId("PRD");
             const productData = {
               id: productId,
               name: product.name,
               code: product.code,
-              categoryId: product.categoryId || '',
-              unit: product.unit || 'pcs',
+              categoryId: product.categoryId || "",
+              unit: product.unit || "pcs",
               costPrice: product.costPrice,
               sellingPrice: product.sellingPrice,
               stock: product.stock || 0,
               minStock: product.minStock || 5,
-              description: product.description || '',
-              status: product.status || 'active',
+              description: product.description || "",
+              status: product.status || "active",
               createdAt: firebase.database.ServerValue.TIMESTAMP,
               updatedAt: firebase.database.ServerValue.TIMESTAMP,
               soldCount: 0
             };
-            await database.ref(`products/${productId}`).set(productData);
+            await database.ref("products/" + productId).set(productData);
             results.success++;
             if (onProgress) onProgress(i + 1, products.length);
           } catch (error) {
             results.failed++;
-            results.errors.push(`Baris ${i + 1}: ${error.message}`);
+            results.errors.push("Baris " + (i + 1) + ": " + error.message);
           }
         }
         return results;
       },
 
       generateTemplate() {
-        const headers = ['No', 'Nama Produk', 'Kategori', 'Harga Beli', 'Harga Jual', 'Stok', 'Kode Barang'];
-        const example1 = ['1', 'Laptop ASUS VivoBook', 'Elektronik', '5000000', '6500000', '10', ''];
-        const example2 = ['2', 'Mouse Logitech', 'Aksesoris', '150000', '200000', '20', ''];
-        return [headers.join(','), example1.join(','), example2.join(',')].join('
-');
+        const headers = ["No", "Nama Produk", "Kategori", "Harga Beli", "Harga Jual", "Stok", "Kode Barang"];
+        const example1 = ["1", "Laptop ASUS VivoBook", "Elektronik", "5000000", "6500000", "10", ""];
+        const example2 = ["2", "Mouse Logitech", "Aksesoris", "150000", "200000", "20", ""];
+        return [headers.join(","), example1.join(","), example2.join(",")].join("\n");
       },
 
       downloadTemplate() {
         const csv = this.generateTemplate();
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = 'template_import_produk.csv';
+        link.download = "template_import_produk.csv";
         link.click();
         URL.revokeObjectURL(link.href);
       },
@@ -1424,45 +1422,46 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           </div>
         `;
 
-        Utils.showModal('Import Produk', modalContent);
+        Utils.showModal("Import Produk", modalContent);
 
-        const fileUpload = document.getElementById('importFileUpload');
-        const fileInput = document.getElementById('importFileInput');
-        const btnProcess = document.getElementById('btnProcessImport');
+        const fileUpload = document.getElementById("importFileUpload");
+        const fileInput = document.getElementById("importFileInput");
+        const btnProcess = document.getElementById("btnProcessImport");
         let previewData = null;
 
-        fileUpload.addEventListener('click', () => fileInput.click());
-        fileUpload.addEventListener('dragover', (e) => {
+        fileUpload.addEventListener("click", () => fileInput.click());
+        fileUpload.addEventListener("dragover", (e) => {
           e.preventDefault();
-          fileUpload.style.borderColor = 'var(--primary)';
+          fileUpload.style.borderColor = "var(--primary)";
         });
-        fileUpload.addEventListener('dragleave', () => {
-          fileUpload.style.borderColor = 'var(--border-color)';
+        fileUpload.addEventListener("dragleave", () => {
+          fileUpload.style.borderColor = "var(--border-color)";
         });
-        fileUpload.addEventListener('drop', (e) => {
+        fileUpload.addEventListener("drop", (e) => {
           e.preventDefault();
-          fileUpload.style.borderColor = 'var(--border-color)';
+          fileUpload.style.borderColor = "var(--border-color)";
           if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
-        fileInput.addEventListener('change', (e) => {
+        fileInput.addEventListener("change", (e) => {
           if (e.target.files.length) handleFile(e.target.files[0]);
         });
 
+        const self = this;
         const handleFile = async (file) => {
           try {
-            Utils.showLoading('Membaca file...');
-            previewData = await this.preview(file, categories);
-            document.getElementById('importPreview').style.display = 'block';
-            document.getElementById('importStats').innerHTML = `
+            Utils.showLoading("Membaca file...");
+            previewData = await self.preview(file, categories);
+            document.getElementById("importPreview").style.display = "block";
+            document.getElementById("importStats").innerHTML = `
               <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <div><strong>Total:</strong> ${previewData.total} produk</div>
                 <div style="color: var(--success);"><strong>Valid:</strong> ${previewData.valid} produk</div>
-                ${previewData.invalid > 0 ? `<div style="color: var(--danger);"><strong>Tidak Valid:</strong> ${previewData.invalid} produk</div>` : ''}
+                ${previewData.invalid > 0 ? `<div style="color: var(--danger);"><strong>Tidak Valid:</strong> ${previewData.invalid} produk</div>` : ""}
               </div>
             `;
             if (previewData.data.length > 0) {
-              const tableDiv = document.getElementById('importPreviewTable');
-              tableDiv.style.display = 'block';
+              const tableDiv = document.getElementById("importPreviewTable");
+              tableDiv.style.display = "block";
               tableDiv.innerHTML = `
                 <table>
                   <thead>
@@ -1481,26 +1480,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                       <tr>
                         <td>${i + 1}</td>
                         <td>${p.name}</td>
-                        <td>${p.categoryName || '-'}</td>
+                        <td>${p.categoryName || "-"}</td>
                         <td>${Utils.formatRupiah(p.costPrice)}</td>
                         <td>${Utils.formatRupiah(p.sellingPrice)}</td>
                         <td>${p.stock}</td>
                         <td>${p.code}</td>
                       </tr>
-                    `).join('')}
-                    ${previewData.data.length > 5 ? `<tr><td colspan="7" style="text-align: center;">... dan ${previewData.data.length - 5} produk lainnya</td></tr>` : ''}
+                    `).join("")}
+                    ${previewData.data.length > 5 ? `<tr><td colspan="7" style="text-align: center;">... dan ${previewData.data.length - 5} produk lainnya</td></tr>` : ""}
                   </tbody>
                 </table>
               `;
             }
             if (previewData.errors.length > 0) {
-              const errorsDiv = document.getElementById('importErrors');
-              errorsDiv.style.display = 'block';
+              const errorsDiv = document.getElementById("importErrors");
+              errorsDiv.style.display = "block";
               errorsDiv.innerHTML = `
                 <strong>Error:</strong>
                 <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
-                  ${previewData.errors.slice(0, 5).map(e => `<li>${e}</li>`).join('')}
-                  ${previewData.errors.length > 5 ? `<li>... dan ${previewData.errors.length - 5} error lainnya</li>` : ''}
+                  ${previewData.errors.slice(0, 5).map(e => `<li>${e}</li>`).join("")}
+                  ${previewData.errors.length > 5 ? `<li>... dan ${previewData.errors.length - 5} error lainnya</li>` : ""}
                 </ul>
               `;
             }
@@ -1508,28 +1507,28 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             Utils.hideLoading();
           } catch (error) {
             Utils.hideLoading();
-            Utils.showToast(error.message, 'error');
+            Utils.showToast(error.message, "error");
           }
         };
 
-        btnProcess.addEventListener('click', async () => {
+        btnProcess.addEventListener("click", async () => {
           if (!previewData || previewData.valid === 0) return;
           try {
-            Utils.showLoading('Mengimport produk...');
-            const results = await this.import(previewData.data, (current, total) => {
+            Utils.showLoading("Mengimport produk...");
+            const results = await self.import(previewData.data, (current, total) => {
               Utils.showLoading(`Mengimport produk... ${current}/${total}`);
             });
             Utils.closeModal();
             Utils.hideLoading();
             if (results.failed > 0) {
-              Utils.showToast(`${results.success} produk berhasil, ${results.failed} gagal`, 'warning');
+              Utils.showToast(results.success + " produk berhasil, " + results.failed + " gagal", "warning");
             } else {
-              Utils.showToast(`${results.success} produk berhasil diimport`, 'success');
+              Utils.showToast(results.success + " produk berhasil diimport", "success");
             }
             if (callback) callback();
           } catch (error) {
             Utils.hideLoading();
-            Utils.showToast('Gagal mengimport produk', 'error');
+            Utils.showToast("Gagal mengimport produk", "error");
           }
         });
       }
@@ -1538,10 +1537,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     // ============================================
     // MAIN SCRIPT
     // ============================================
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
+      // Fix for links - prevent new tab
+      document.querySelectorAll("a").forEach(link => {
+        link.removeAttribute("target");
+      });
+
       auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
+        if (!user && !Utils.getStorage("webpos_session")) {
+          window.location.href = "login.html";
           return;
         }
         if (user) Auth.loadUserData(user.uid);
@@ -1549,7 +1553,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
 
       function initPage() {
-        // State
         let products = [];
         let categories = [];
         let filteredProducts = [];
@@ -1557,144 +1560,132 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         let perPage = 12;
         let currentProduct = null;
         let currentCategory = null;
-        let selectedColor = '#6366f1';
-        let currentTab = 'produk';
+        let selectedColor = "#6366f1";
+        let currentTab = "produk";
 
-        // DOM Elements
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-        const produkModal = document.getElementById('produkModal');
-        const kategoriModal = document.getElementById('kategoriModal');
+        const sidebar = document.getElementById("sidebar");
+        const menuToggle = document.getElementById("menuToggle");
+        const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+        const produkModal = document.getElementById("produkModal");
+        const kategoriModal = document.getElementById("kategoriModal");
 
         // Tab Navigation
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
             const tab = btn.dataset.tab;
             currentTab = tab;
-
-            // Update active tab button
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Show/hide tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-              content.style.display = 'none';
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.querySelectorAll(".tab-content").forEach(content => {
+              content.style.display = "none";
             });
-            document.getElementById(`tab-${tab}`).style.display = 'block';
+            document.getElementById("tab-" + tab).style.display = "block";
 
-            // Update header buttons
-            const btnImport = document.getElementById('btnImport');
-            const btnExport = document.getElementById('btnExport');
-            const btnAddProduk = document.getElementById('btnAddProduk');
+            const btnImport = document.getElementById("btnImport");
+            const btnExport = document.getElementById("btnExport");
+            const btnAddProduk = document.getElementById("btnAddProduk");
 
-            if (tab === 'produk') {
-              btnImport.style.display = 'inline-flex';
-              btnExport.style.display = 'inline-flex';
+            if (tab === "produk") {
+              btnImport.style.display = "inline-flex";
+              btnExport.style.display = "inline-flex";
               btnAddProduk.innerHTML = '<i class="fas fa-plus"></i><span class="d-none d-md-inline">Tambah Produk</span>';
               btnAddProduk.onclick = () => openAddProdukModal();
             } else {
-              btnImport.style.display = 'none';
-              btnExport.style.display = 'none';
+              btnImport.style.display = "none";
+              btnExport.style.display = "none";
               btnAddProduk.innerHTML = '<i class="fas fa-plus"></i><span class="d-none d-md-inline">Tambah Kategori</span>';
               btnAddProduk.onclick = () => openAddKategoriModal();
             }
           });
         });
 
-        // Load user data
         function loadUserData() {
           const user = Auth.getCurrentUser();
           if (user) {
-            document.getElementById('userName').textContent = user.name || user.email;
-            document.getElementById('userRole').textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
-            const avatar = document.getElementById('userAvatar');
+            document.getElementById("userName").textContent = user.name || user.email;
+            document.getElementById("userRole").textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+            const avatar = document.getElementById("userAvatar");
             if (avatar && user.name) {
-              const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+              const initials = user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
               avatar.textContent = initials;
             }
           }
         }
 
-        // Toggle sidebar
-        menuToggle.addEventListener('click', () => {
-          sidebar.classList.toggle('collapsed');
+        menuToggle.addEventListener("click", () => {
+          sidebar.classList.toggle("collapsed");
         });
 
-        mobileMenuToggle.addEventListener('click', () => {
-          sidebar.classList.toggle('mobile-open');
+        mobileMenuToggle.addEventListener("click", () => {
+          sidebar.classList.toggle("mobile-open");
         });
 
-        // Dropdown menus
-        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
-          const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+        document.querySelectorAll("[data-dropdown]").forEach(dropdown => {
+          const toggle = dropdown.querySelector(".nav-dropdown-toggle");
           if (toggle) {
-            toggle.addEventListener('click', (e) => {
+            toggle.addEventListener("click", (e) => {
               e.preventDefault();
               e.stopPropagation();
-              document.querySelectorAll('[data-dropdown]').forEach(d => {
-                if (d !== dropdown) d.classList.remove('open');
+              document.querySelectorAll("[data-dropdown]").forEach(d => {
+                if (d !== dropdown) d.classList.remove("open");
               });
-              dropdown.classList.toggle('open');
+              dropdown.classList.toggle("open");
             });
           }
         });
 
-        document.addEventListener('click', (e) => {
-          if (!e.target.closest('[data-dropdown]')) {
-            document.querySelectorAll('[data-dropdown]').forEach(d => d.classList.remove('open'));
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest("[data-dropdown]")) {
+            document.querySelectorAll("[data-dropdown]").forEach(d => d.classList.remove("open"));
           }
         });
 
-        document.addEventListener('click', (e) => {
+        document.addEventListener("click", (e) => {
           if (window.innerWidth <= 1024) {
             if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-              sidebar.classList.remove('mobile-open');
+              sidebar.classList.remove("mobile-open");
             }
           }
         });
 
-        // Load categories
         async function loadCategories() {
           try {
-            const snapshot = await database.ref('categories').once('value');
+            const snapshot = await database.ref("categories").once("value");
             const cats = snapshot.val() || {};
-            categories = Object.entries(cats).map(([id, data]) => ({ id, ...data }));
+            categories = Object.entries(cats).map(([id, data]) => ({ id: id, ...data }));
 
             const options = categories.map(cat => 
-              `<option value="${cat.id}">${cat.name}</option>`
-            ).join('');
+              '<option value="' + cat.id + '">' + cat.name + "</option>"
+            ).join("");
 
-            document.getElementById('filterKategori').innerHTML = '<option value="">Semua Kategori</option>' + options;
-            document.getElementById('produkKategori').innerHTML = '<option value="">Pilih Kategori</option>' + options;
+            document.getElementById("filterKategori").innerHTML = '<option value="">Semua Kategori</option>' + options;
+            document.getElementById("produkKategori").innerHTML = '<option value="">Pilih Kategori</option>' + options;
 
             renderCategories();
           } catch (error) {
-            console.error('Error loading categories:', error);
+            console.error("Error loading categories:", error);
           }
         }
 
-        // Load products
         async function loadProducts() {
           try {
             Utils.showLoading();
-            const snapshot = await database.ref('products').once('value');
+            const snapshot = await database.ref("products").once("value");
             const prods = snapshot.val() || {};
-            products = Object.entries(prods).map(([id, data]) => ({ id, ...data }));
+            products = Object.entries(prods).map(([id, data]) => ({ id: id, ...data }));
             filteredProducts = [...products];
             renderProducts();
             renderPagination();
             Utils.hideLoading();
           } catch (error) {
-            console.error('Error loading products:', error);
+            console.error("Error loading products:", error);
             Utils.hideLoading();
-            Utils.showToast('Gagal memuat produk', 'error');
+            Utils.showToast("Gagal memuat produk", "error");
           }
         }
 
-        // Render products
         function renderProducts() {
-          const container = document.getElementById('produkGrid');
+          const container = document.getElementById("produkGrid");
           const start = (currentPage - 1) * perPage;
           const end = start + perPage;
           const pageProducts = filteredProducts.slice(start, end);
@@ -1714,58 +1705,57 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
           container.innerHTML = pageProducts.map(product => {
             const category = categories.find(c => c.id === product.categoryId);
-            const statusClass = product.status === 'active' ? 'active' : 'inactive';
-            const statusText = product.status === 'active' ? 'Aktif' : 'Nonaktif';
+            const statusClass = product.status === "active" ? "active" : "inactive";
+            const statusText = product.status === "active" ? "Aktif" : "Nonaktif";
             return `
               <div class="produk-card" data-id="${product.id}">
                 <div class="produk-image">
-                  ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<i class="fas fa-box"></i>'}
+                  ${product.image ? '<img src="' + product.image + '" alt="' + product.name + '">' : '<i class="fas fa-box"></i>'}
                   <span class="produk-status ${statusClass}">${statusText}</span>
                   <span class="produk-stock-badge">Stok: ${product.stock || 0}</span>
                 </div>
                 <div class="produk-info">
                   <div class="produk-name">${product.name}</div>
-                  <div class="produk-code">${product.code || '-'} • ${category?.name || 'Uncategorized'}</div>
+                  <div class="produk-code">${product.code || "-"} • ${category ? category.name : "Uncategorized"}</div>
                   <div class="produk-price">${Utils.formatRupiah(product.sellingPrice)}</div>
                 </div>
                 <div class="produk-actions">
-                  <button class="btn btn-secondary btn-sm" onclick="editProduct('${product.id}')">
+                  <button class="btn btn-secondary btn-sm" onclick="window.editProduct('${product.id}')">
                     <i class="fas fa-edit"></i> Edit
                   </button>
-                  <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product.id}')">
+                  <button class="btn btn-danger btn-sm" onclick="window.deleteProduct('${product.id}')">
                     <i class="fas fa-trash"></i> Hapus
                   </button>
                 </div>
               </div>
             `;
-          }).join('');
+          }).join("");
         }
 
-        // Render pagination
         function renderPagination() {
           const totalPages = Math.ceil(filteredProducts.length / perPage);
-          const container = document.getElementById('pagination');
+          const container = document.getElementById("pagination");
           if (totalPages <= 1) {
-            container.innerHTML = '';
+            container.innerHTML = "";
             return;
           }
 
           let html = `
-            <button class="btn btn-sm btn-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">
+            <button class="btn btn-sm btn-secondary" ${currentPage === 1 ? "disabled" : ""} onclick="window.goToPage(${currentPage - 1})">
               <i class="fas fa-chevron-left"></i>
             </button>
           `;
 
           for (let i = 1; i <= totalPages; i++) {
             if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-              html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-secondary'}" onclick="goToPage(${i})">${i}</button>`;
+              html += '<button class="btn btn-sm ' + (i === currentPage ? "btn-primary" : "btn-secondary") + '" onclick="window.goToPage(' + i + ')">' + i + "</button>";
             } else if (i === currentPage - 2 || i === currentPage + 2) {
-              html += `<span class="btn btn-sm" style="background: transparent; cursor: default;">...</span>`;
+              html += '<span class="btn btn-sm" style="background: transparent; cursor: default;">...</span>';
             }
           }
 
           html += `
-            <button class="btn btn-sm btn-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">
+            <button class="btn btn-sm btn-secondary" ${currentPage === totalPages ? "disabled" : ""} onclick="window.goToPage(${currentPage + 1})">
               <i class="fas fa-chevron-right"></i>
             </button>
           `;
@@ -1779,11 +1769,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           renderPagination();
         };
 
-        // Apply filters
         function applyFilters() {
-          const search = document.getElementById('searchProduk').value.toLowerCase();
-          const category = document.getElementById('filterKategori').value;
-          const status = document.getElementById('filterStatus').value;
+          const search = document.getElementById("searchProduk").value.toLowerCase();
+          const category = document.getElementById("filterKategori").value;
+          const status = document.getElementById("filterStatus").value;
 
           filteredProducts = products.filter(p => {
             const matchSearch = !search || p.name.toLowerCase().includes(search) || (p.code && p.code.toLowerCase().includes(search));
@@ -1797,114 +1786,110 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           renderPagination();
         }
 
-        document.getElementById('searchProduk').addEventListener('input', Utils.debounce(applyFilters, 300));
-        document.getElementById('filterKategori').addEventListener('change', applyFilters);
-        document.getElementById('filterStatus').addEventListener('change', applyFilters);
+        document.getElementById("searchProduk").addEventListener("input", Utils.debounce(applyFilters, 300));
+        document.getElementById("filterKategori").addEventListener("change", applyFilters);
+        document.getElementById("filterStatus").addEventListener("change", applyFilters);
 
-        document.querySelectorAll('.view-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+        document.querySelectorAll(".view-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
           });
         });
 
-        // Generate product code
         function generateProductCode() {
-          const prefix = 'BRG';
+          const prefix = "BRG";
           const timestamp = Date.now().toString(36).toUpperCase();
-          const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-          return `${prefix}${timestamp}${random}`;
+          const random = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
+          return prefix + timestamp + random;
         }
 
-        // Open add produk modal
         function openAddProdukModal() {
           currentProduct = null;
-          document.getElementById('modalTitle').textContent = 'Tambah Produk';
-          document.getElementById('produkForm').reset();
-          document.getElementById('produkId').value = '';
-          document.getElementById('imagePreview').style.display = 'none';
-          document.getElementById('produkCode').value = generateProductCode();
-          produkModal.classList.add('active');
+          document.getElementById("modalTitle").textContent = "Tambah Produk";
+          document.getElementById("produkForm").reset();
+          document.getElementById("produkId").value = "";
+          document.getElementById("imagePreview").style.display = "none";
+          document.getElementById("produkCode").value = generateProductCode();
+          produkModal.classList.add("active");
         }
 
         window.editProduct = (productId) => {
           const product = products.find(p => p.id === productId);
           if (!product) return;
           currentProduct = product;
-          document.getElementById('modalTitle').textContent = 'Edit Produk';
-          document.getElementById('produkId').value = product.id;
-          document.getElementById('produkName').value = product.name;
-          document.getElementById('produkCode').value = product.code || '';
-          document.getElementById('produkKategori').value = product.categoryId || '';
-          document.getElementById('produkUnit').value = product.unit || 'pcs';
-          document.getElementById('produkCost').value = product.costPrice || 0;
-          document.getElementById('produkPrice').value = product.sellingPrice || 0;
-          document.getElementById('produkStock').value = product.stock || 0;
-          document.getElementById('produkMinStock').value = product.minStock || 5;
-          document.getElementById('produkDesc').value = product.description || '';
-          document.getElementById('produkStatus').checked = product.status !== 'inactive';
+          document.getElementById("modalTitle").textContent = "Edit Produk";
+          document.getElementById("produkId").value = product.id;
+          document.getElementById("produkName").value = product.name;
+          document.getElementById("produkCode").value = product.code || "";
+          document.getElementById("produkKategori").value = product.categoryId || "";
+          document.getElementById("produkUnit").value = product.unit || "pcs";
+          document.getElementById("produkCost").value = product.costPrice || 0;
+          document.getElementById("produkPrice").value = product.sellingPrice || 0;
+          document.getElementById("produkStock").value = product.stock || 0;
+          document.getElementById("produkMinStock").value = product.minStock || 5;
+          document.getElementById("produkDesc").value = product.description || "";
+          document.getElementById("produkStatus").checked = product.status !== "inactive";
 
           if (product.image) {
-            document.getElementById('imagePreview').src = product.image;
-            document.getElementById('imagePreview').style.display = 'block';
+            document.getElementById("imagePreview").src = product.image;
+            document.getElementById("imagePreview").style.display = "block";
           } else {
-            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById("imagePreview").style.display = "none";
           }
-          produkModal.classList.add('active');
+          produkModal.classList.add("active");
         };
 
         window.deleteProduct = async (productId) => {
-          Utils.confirm('Yakin ingin menghapus produk ini?', async () => {
+          Utils.confirm("Yakin ingin menghapus produk ini?", async () => {
             try {
-              Utils.showLoading('Menghapus produk...');
-              await database.ref(`products/${productId}`).remove();
+              Utils.showLoading("Menghapus produk...");
+              await database.ref("products/" + productId).remove();
               products = products.filter(p => p.id !== productId);
               applyFilters();
               Utils.hideLoading();
-              Utils.showToast('Produk berhasil dihapus', 'success');
+              Utils.showToast("Produk berhasil dihapus", "success");
             } catch (error) {
               Utils.hideLoading();
-              Utils.showToast('Gagal menghapus produk', 'error');
+              Utils.showToast("Gagal menghapus produk", "error");
             }
           });
         };
 
         window.adjustStock = (delta) => {
-          const input = document.getElementById('produkStock');
+          const input = document.getElementById("produkStock");
           const current = parseInt(input.value) || 0;
           input.value = Math.max(0, current + delta);
         };
 
-        // Add category from produk modal
-        document.getElementById('btnAddKategori').addEventListener('click', () => {
-          produkModal.classList.remove('active');
+        document.getElementById("btnAddKategori").addEventListener("click", () => {
+          produkModal.classList.remove("active");
           openAddKategoriModal();
         });
 
-        // Kategori functions
         function openAddKategoriModal() {
           currentCategory = null;
-          document.getElementById('kategoriModalTitle').textContent = 'Tambah Kategori';
-          document.getElementById('kategoriForm').reset();
-          document.getElementById('kategoriId').value = '';
-          selectedColor = '#6366f1';
+          document.getElementById("kategoriModalTitle").textContent = "Tambah Kategori";
+          document.getElementById("kategoriForm").reset();
+          document.getElementById("kategoriId").value = "";
+          selectedColor = "#6366f1";
           updateColorPicker();
-          kategoriModal.classList.add('active');
+          kategoriModal.classList.add("active");
         }
 
         function openEditKategoriModal(cat) {
           currentCategory = cat;
-          document.getElementById('kategoriModalTitle').textContent = 'Edit Kategori';
-          document.getElementById('kategoriId').value = cat.id;
-          document.getElementById('kategoriName').value = cat.name;
-          selectedColor = cat.color || '#6366f1';
+          document.getElementById("kategoriModalTitle").textContent = "Edit Kategori";
+          document.getElementById("kategoriId").value = cat.id;
+          document.getElementById("kategoriName").value = cat.name;
+          selectedColor = cat.color || "#6366f1";
           updateColorPicker();
-          kategoriModal.classList.add('active');
+          kategoriModal.classList.add("active");
         }
 
         function updateColorPicker() {
-          document.querySelectorAll('.color-option').forEach(opt => {
-            opt.classList.toggle('selected', opt.dataset.color === selectedColor);
+          document.querySelectorAll(".color-option").forEach(opt => {
+            opt.classList.toggle("selected", opt.dataset.color === selectedColor);
           });
         }
 
@@ -1914,30 +1899,29 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         };
 
         window.deleteCategory = async (id) => {
-          Utils.confirm('Yakin ingin menghapus kategori ini?', async () => {
+          Utils.confirm("Yakin ingin menghapus kategori ini?", async () => {
             try {
               Utils.showLoading();
-              await database.ref(`categories/${id}`).remove();
+              await database.ref("categories/" + id).remove();
               categories = categories.filter(c => c.id !== id);
               renderCategories();
               loadCategories();
               Utils.hideLoading();
-              Utils.showToast('Kategori berhasil dihapus', 'success');
+              Utils.showToast("Kategori berhasil dihapus", "success");
             } catch (error) {
               Utils.hideLoading();
-              Utils.showToast('Gagal menghapus kategori', 'error');
+              Utils.showToast("Gagal menghapus kategori", "error");
             }
           });
         };
 
-        // Render categories
         function renderCategories() {
-          const grid = document.getElementById('kategoriGrid');
+          const grid = document.getElementById("kategoriGrid");
           const cards = categories.map(cat => {
             const productCount = products.filter(p => p.categoryId === cat.id).length;
             return `
               <div class="kategori-card" data-id="${cat.id}">
-                <div class="kategori-icon" style="background: ${cat.color || '#6366f1'};">
+                <div class="kategori-icon" style="background: ${cat.color || "#6366f1"};">
                   <i class="fas fa-tag"></i>
                 </div>
                 <div class="kategori-info">
@@ -1945,16 +1929,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                   <div class="kategori-count">${productCount} produk</div>
                 </div>
                 <div class="kategori-actions">
-                  <button class="btn-icon btn-sm" onclick="editCategory('${cat.id}')">
+                  <button class="btn-icon btn-sm" onclick="window.editCategory('${cat.id}')">
                     <i class="fas fa-edit"></i>
                   </button>
-                  <button class="btn-icon btn-sm" onclick="deleteCategory('${cat.id}')">
+                  <button class="btn-icon btn-sm" onclick="window.deleteCategory('${cat.id}')">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
               </div>
             `;
-          }).join('');
+          }).join("");
 
           grid.innerHTML = `
             <div class="kategori-card add-kategori-card" id="btnAddKategoriCard">
@@ -1964,216 +1948,207 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             ${cards}
           `;
 
-          document.getElementById('btnAddKategoriCard').addEventListener('click', openAddKategoriModal);
+          document.getElementById("btnAddKategoriCard").addEventListener("click", openAddKategoriModal);
         }
 
-        // Color picker
-        document.querySelectorAll('.color-option').forEach(opt => {
-          opt.addEventListener('click', () => {
-            document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
+        document.querySelectorAll(".color-option").forEach(opt => {
+          opt.addEventListener("click", () => {
+            document.querySelectorAll(".color-option").forEach(o => o.classList.remove("selected"));
+            opt.classList.add("selected");
             selectedColor = opt.dataset.color;
           });
         });
 
-        // Close modals
-        document.getElementById('closeProdukModal').addEventListener('click', () => {
-          produkModal.classList.remove('active');
+        document.getElementById("closeProdukModal").addEventListener("click", () => {
+          produkModal.classList.remove("active");
         });
-        document.getElementById('btnCancelProduk').addEventListener('click', () => {
-          produkModal.classList.remove('active');
+        document.getElementById("btnCancelProduk").addEventListener("click", () => {
+          produkModal.classList.remove("active");
         });
-        document.getElementById('closeKategoriModal').addEventListener('click', () => {
-          kategoriModal.classList.remove('active');
+        document.getElementById("closeKategoriModal").addEventListener("click", () => {
+          kategoriModal.classList.remove("active");
         });
-        document.getElementById('btnCancelKategori').addEventListener('click', () => {
-          kategoriModal.classList.remove('active');
+        document.getElementById("btnCancelKategori").addEventListener("click", () => {
+          kategoriModal.classList.remove("active");
         });
 
-        // Save kategori
-        document.getElementById('btnSaveKategori').addEventListener('click', async () => {
-          const name = document.getElementById('kategoriName').value.trim();
+        document.getElementById("btnSaveKategori").addEventListener("click", async () => {
+          const name = document.getElementById("kategoriName").value.trim();
           if (!name) {
-            Utils.showToast('Nama kategori wajib diisi', 'warning');
+            Utils.showToast("Nama kategori wajib diisi", "warning");
             return;
           }
           try {
-            Utils.showLoading('Menyimpan kategori...');
+            Utils.showLoading("Menyimpan kategori...");
             const data = {
-              name,
+              name: name,
               color: selectedColor,
               updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
             if (currentCategory) {
-              await database.ref(`categories/${currentCategory.id}`).update(data);
-              Utils.showToast('Kategori berhasil diupdate', 'success');
+              await database.ref("categories/" + currentCategory.id).update(data);
+              Utils.showToast("Kategori berhasil diupdate", "success");
             } else {
-              const id = Utils.generateId('CAT');
+              const id = Utils.generateId("CAT");
               data.id = id;
               data.createdAt = firebase.database.ServerValue.TIMESTAMP;
               data.productCount = 0;
-              await database.ref(`categories/${id}`).set(data);
-              Utils.showToast('Kategori berhasil ditambahkan', 'success');
+              await database.ref("categories/" + id).set(data);
+              Utils.showToast("Kategori berhasil ditambahkan", "success");
             }
-            kategoriModal.classList.remove('active');
+            kategoriModal.classList.remove("active");
             await loadCategories();
           } catch (error) {
             Utils.hideLoading();
-            Utils.showToast('Gagal menyimpan kategori', 'error');
+            Utils.showToast("Gagal menyimpan kategori", "error");
           }
         });
 
-        // Image upload
-        const imageUpload = document.getElementById('imageUpload');
-        const produkImage = document.getElementById('produkImage');
-        imageUpload.addEventListener('click', () => produkImage.click());
-        imageUpload.addEventListener('dragover', (e) => {
+        const imageUpload = document.getElementById("imageUpload");
+        const produkImage = document.getElementById("produkImage");
+        imageUpload.addEventListener("click", () => produkImage.click());
+        imageUpload.addEventListener("dragover", (e) => {
           e.preventDefault();
-          imageUpload.style.borderColor = 'var(--primary)';
+          imageUpload.style.borderColor = "var(--primary)";
         });
-        imageUpload.addEventListener('dragleave', () => {
-          imageUpload.style.borderColor = 'var(--border-color)';
+        imageUpload.addEventListener("dragleave", () => {
+          imageUpload.style.borderColor = "var(--border-color)";
         });
-        imageUpload.addEventListener('drop', (e) => {
+        imageUpload.addEventListener("drop", (e) => {
           e.preventDefault();
-          imageUpload.style.borderColor = 'var(--border-color)';
+          imageUpload.style.borderColor = "var(--border-color)";
           if (e.dataTransfer.files.length) handleImageSelect(e.dataTransfer.files[0]);
         });
-        produkImage.addEventListener('change', (e) => {
+        produkImage.addEventListener("change", (e) => {
           if (e.target.files.length) handleImageSelect(e.target.files[0]);
         });
 
         function handleImageSelect(file) {
-          if (!file.type.startsWith('image/')) {
-            Utils.showToast('File harus berupa gambar', 'error');
+          if (!file.type.startsWith("image/")) {
+            Utils.showToast("File harus berupa gambar", "error");
             return;
           }
           const reader = new FileReader();
           reader.onload = (e) => {
-            const preview = document.getElementById('imagePreview');
+            const preview = document.getElementById("imagePreview");
             preview.src = e.target.result;
-            preview.style.display = 'block';
+            preview.style.display = "block";
           };
           reader.readAsDataURL(file);
         }
 
-        // Save produk
-        document.getElementById('btnSaveProduk').addEventListener('click', async () => {
-          const name = document.getElementById('produkName').value.trim();
-          const categoryId = document.getElementById('produkKategori').value;
-          const costPrice = document.getElementById('produkCost').value;
-          const sellingPrice = document.getElementById('produkPrice').value;
+        document.getElementById("btnSaveProduk").addEventListener("click", async () => {
+          const name = document.getElementById("produkName").value.trim();
+          const categoryId = document.getElementById("produkKategori").value;
+          const costPrice = document.getElementById("produkCost").value;
+          const sellingPrice = document.getElementById("produkPrice").value;
 
           if (!name) {
-            Utils.showToast('Nama produk wajib diisi', 'error');
+            Utils.showToast("Nama produk wajib diisi", "error");
             return;
           }
           if (!categoryId) {
-            Utils.showToast('Kategori wajib dipilih', 'error');
+            Utils.showToast("Kategori wajib dipilih", "error");
             return;
           }
           if (!costPrice || costPrice <= 0) {
-            Utils.showToast('Harga beli wajib diisi', 'error');
+            Utils.showToast("Harga beli wajib diisi", "error");
             return;
           }
           if (!sellingPrice || sellingPrice <= 0) {
-            Utils.showToast('Harga jual wajib diisi', 'error');
+            Utils.showToast("Harga jual wajib diisi", "error");
             return;
           }
 
           try {
-            Utils.showLoading('Menyimpan produk...');
+            Utils.showLoading("Menyimpan produk...");
             const productData = {
               name: name,
-              code: document.getElementById('produkCode').value,
+              code: document.getElementById("produkCode").value,
               categoryId: categoryId,
-              unit: document.getElementById('produkUnit').value,
+              unit: document.getElementById("produkUnit").value,
               costPrice: parseInt(costPrice) || 0,
               sellingPrice: parseInt(sellingPrice) || 0,
-              stock: parseInt(document.getElementById('produkStock').value) || 0,
-              minStock: parseInt(document.getElementById('produkMinStock').value) || 5,
-              description: document.getElementById('produkDesc').value,
-              status: document.getElementById('produkStatus').checked ? 'active' : 'inactive',
+              stock: parseInt(document.getElementById("produkStock").value) || 0,
+              minStock: parseInt(document.getElementById("produkMinStock").value) || 5,
+              description: document.getElementById("produkDesc").value,
+              status: document.getElementById("produkStatus").checked ? "active" : "inactive",
               updatedAt: firebase.database.ServerValue.TIMESTAMP
             };
 
-            const imagePreview = document.getElementById('imagePreview');
-            if (imagePreview.style.display !== 'none' && imagePreview.src.startsWith('data:')) {
+            const imagePreview = document.getElementById("imagePreview");
+            if (imagePreview.style.display !== "none" && imagePreview.src.startsWith("data:")) {
               const imageFile = await fetch(imagePreview.src).then(r => r.blob());
-              const imageRef = storage.ref(`products/${Date.now()}_${productData.name}`);
+              const imageRef = storage.ref("products/" + Date.now() + "_" + productData.name);
               await imageRef.put(imageFile);
               productData.image = await imageRef.getDownloadURL();
-            } else if (currentProduct?.image) {
+            } else if (currentProduct && currentProduct.image) {
               productData.image = currentProduct.image;
             }
 
-            const productId = document.getElementById('produkId').value;
+            const productId = document.getElementById("produkId").value;
             if (productId) {
-              await database.ref(`products/${productId}`).update(productData);
-              Utils.showToast('Produk berhasil diupdate', 'success');
+              await database.ref("products/" + productId).update(productData);
+              Utils.showToast("Produk berhasil diupdate", "success");
             } else {
-              const newId = Utils.generateId('PRD');
+              const newId = Utils.generateId("PRD");
               productData.id = newId;
               productData.createdAt = firebase.database.ServerValue.TIMESTAMP;
               productData.soldCount = 0;
-              await database.ref(`products/${newId}`).set(productData);
-              Utils.showToast('Produk berhasil ditambahkan', 'success');
+              await database.ref("products/" + newId).set(productData);
+              Utils.showToast("Produk berhasil ditambahkan", "success");
             }
-            produkModal.classList.remove('active');
+            produkModal.classList.remove("active");
             loadProducts();
           } catch (error) {
-            console.error('Error saving product:', error);
+            console.error("Error saving product:", error);
             Utils.hideLoading();
-            Utils.showToast('Gagal menyimpan produk', 'error');
+            Utils.showToast("Gagal menyimpan produk", "error");
           }
         });
 
-        // Export products
-        document.getElementById('btnExport').addEventListener('click', () => {
+        document.getElementById("btnExport").addEventListener("click", () => {
           const data = products.map(p => ({
-            'No': '',
-            'Nama Produk': p.name,
-            'Kategori': categories.find(c => c.id === p.categoryId)?.name || '',
-            'Harga Beli': p.costPrice,
-            'Harga Jual': p.sellingPrice,
-            'Stok': p.stock,
-            'Kode Barang': p.code
+            "No": "",
+            "Nama Produk": p.name,
+            "Kategori": categories.find(c => c.id === p.categoryId) ? categories.find(c => c.id === p.categoryId).name : "",
+            "Harga Beli": p.costPrice,
+            "Harga Jual": p.sellingPrice,
+            "Stok": p.stock,
+            "Kode Barang": p.code
           }));
-          data.forEach((row, i) => row['No'] = i + 1);
+          data.forEach((row, i) => row["No"] = i + 1);
           if (data.length === 0) {
-            Utils.showToast('Tidak ada data untuk diexport', 'warning');
+            Utils.showToast("Tidak ada data untuk diexport", "warning");
             return;
           }
           const headers = Object.keys(data[0]);
           const csv = [
-            headers.join(','),
+            headers.join(","),
             ...data.map(row => headers.map(h => {
               const val = row[h];
-              if (typeof val === 'string' && (val.includes(',') || val.includes('"'))) {
-                return `"${val.replace(/"/g, '""')}"`;
+              if (typeof val === "string" && (val.includes(",") || val.includes('"'))) {
+                return '"' + val.replace(/"/g, '""') + '"';
               }
               return val;
-            }).join(','))
-          ].join('
-');
-          const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            }).join(","))
+          ].join("\n");
+          const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
+          const a = document.createElement("a");
           a.href = url;
-          a.download = `produk_${Utils.getTodayString()}.csv`;
+          a.download = "produk_" + Utils.getTodayString() + ".csv";
           a.click();
           window.URL.revokeObjectURL(url);
-          Utils.showToast('Produk berhasil diexport', 'success');
+          Utils.showToast("Produk berhasil diexport", "success");
         });
 
-        // Import products
-        document.getElementById('btnImport').addEventListener('click', () => {
+        document.getElementById("btnImport").addEventListener("click", () => {
           ProdukImport.showImportModal(categories, () => {
             loadProducts();
           });
         });
 
-        // Initialize
         loadUserData();
         loadCategories();
         loadProducts();
