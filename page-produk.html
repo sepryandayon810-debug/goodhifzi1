@@ -896,17 +896,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     var html = "";
-    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === 1 ? "disabled" : "") + ' onclick="goToPage(' + (currentPage - 1) + ')"><i class="fas fa-chevron-left"></i></button>';
+    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === 1 ? "disabled" : "") + ' onclick="goToPage(\'" + (currentPage - 1) + "\')"><i class="fas fa-chevron-left"></i></button>';
 
     for(var i = 1; i <= totalPages; i++){
       if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)){
-        html += '<button class="btn btn-sm ' + (i === currentPage ? "btn-primary" : "btn-secondary") + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+        html += '<button class="btn btn-sm ' + (i === currentPage ? "btn-primary" : "btn-secondary") + '" onclick="goToPage(\'" + i + "\')">' + i + '</button>';
       }else if(i === currentPage - 2 || i === currentPage + 2){
         html += '<span class="btn btn-sm" style="background:transparent;cursor:default">...</span>';
       }
     }
 
-    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === totalPages ? "disabled" : "") + ' onclick="goToPage(' + (currentPage + 1) + ')"><i class="fas fa-chevron-right"></i></button>';
+    html += '<button class="btn btn-sm btn-secondary" ' + (currentPage === totalPages ? "disabled" : "") + ' onclick="goToPage(\'" + (currentPage + 1) + "\')"><i class="fas fa-chevron-right"></i></button>';
 
     container.innerHTML = html;
   }
