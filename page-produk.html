@@ -585,6 +585,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       showToast: function(msg, type){
         var toast = document.createElement("div");
         toast.className = "toast " + (type || "info");
+        toast.style.cssText = "position:fixed;bottom:20px;right:20px;background:var(--bg-card);color:var(--text-primary);padding:15px 20px;border-radius:12px;box-shadow:0 10px 15px rgba(0,0,0,0.1);border-left:4px solid " + (type === "success" ? "var(--success)" : type === "error" ? "var(--danger)" : "var(--info)") + ";z-index:9999;display:flex;align-items:center;gap:10px;animation:slideIn 0.3s ease;";
         toast.innerHTML = '<i class="fas fa-' + (type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle") + '"></i><span>' + msg + '</span>';
         document.body.appendChild(toast);
         setTimeout(function(){ toast.remove(); }, 3000);
@@ -847,8 +848,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="produk-price">' + formatRupiah(product.sellingPrice || 0) + '</div>';
       html += '</div>';
       html += '<div class="produk-actions">';
-      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct('"' + product.id + '"')"><i class="fas fa-edit"></i> Edit</button>';
-      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct('"' + product.id + '"')"><i class="fas fa-trash"></i> Hapus</button>';
+      html += '<button class="btn btn-secondary btn-sm" onclick="editProduct('' + product.id + '')"><i class="fas fa-edit"></i> Edit</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="deleteProduct('' + product.id + '')"><i class="fas fa-trash"></i> Hapus</button>';
       html += '</div>';
       html += '</div>';
     });
@@ -874,8 +875,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       html += '<div class="kategori-count">' + productCount + ' produk</div>';
       html += '</div>';
       html += '<div class="kategori-actions">';
-      html += '<button class="btn-icon btn-sm" onclick="editCategory('"' + cat.id + '"')" title="Edit"><i class="fas fa-edit"></i></button>';
-      html += '<button class="btn-icon btn-sm" onclick="deleteCategory('"' + cat.id + '"')" title="Hapus"><i class="fas fa-trash"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="editCategory('' + cat.id + '')" title="Edit"><i class="fas fa-edit"></i></button>';
+      html += '<button class="btn-icon btn-sm" onclick="deleteCategory('' + cat.id + '')" title="Hapus"><i class="fas fa-trash"></i></button>';
       html += '</div>';
       html += '</div>';
     });
@@ -911,6 +912,38 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   }
 
   function setupEventListeners(){
+    // Event delegation for produk grid
+    document.getElementById("produkGrid").addEventListener("click", function(e){
+      var btn = e.target.closest(".btn-edit-produk");
+      if(btn){
+        e.stopPropagation();
+        editProduct(btn.dataset.id);
+        return;
+      }
+      btn = e.target.closest(".btn-hapus-produk");
+      if(btn){
+        e.stopPropagation();
+        deleteProduct(btn.dataset.id);
+        return;
+      }
+    });
+
+    // Event delegation for kategori grid
+    document.getElementById("kategoriGrid").addEventListener("click", function(e){
+      var btn = e.target.closest(".btn-edit-kategori");
+      if(btn){
+        e.stopPropagation();
+        editCategory(btn.dataset.id);
+        return;
+      }
+      btn = e.target.closest(".btn-hapus-kategori");
+      if(btn){
+        e.stopPropagation();
+        deleteCategory(btn.dataset.id);
+        return;
+      }
+    });
+
     // Search and filters
     var searchInput = document.getElementById("searchProduk");
     if(searchInput){
@@ -1112,7 +1145,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     var imagePreview = document.getElementById("imagePreview");
     if(imagePreview && imagePreview.style.display !== "none" && imagePreview.src && imagePreview.src.indexOf("data:") === 0){
-      // Convert dataURL to blob
       var byteString = atob(imagePreview.src.split(",")[1]);
       var mimeString = imagePreview.src.split(",")[0].split(":")[1].split(";")[0];
       var ab = new ArrayBuffer(byteString.length);
@@ -1627,7 +1659,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     var imagePreview = document.getElementById("imagePreview");
     if(imagePreview && imagePreview.style.display !== "none" && imagePreview.src && imagePreview.src.indexOf("data:") === 0){
-      // Convert dataURL to blob
       var byteString = atob(imagePreview.src.split(",")[1]);
       var mimeString = imagePreview.src.split(",")[0].split(":")[1].split(";")[0];
       var ab = new ArrayBuffer(byteString.length);
