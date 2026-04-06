@@ -1247,6 +1247,15 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
       btnToggleShift.addEventListener('click', toggleShift);
 
+      // Prevent links from opening in new tab
+      document.querySelectorAll('a').forEach(link => {
+        link.removeAttribute('target');
+        link.addEventListener('click', function(e) {
+          // Allow normal navigation
+          e.stopPropagation();
+        });
+      });
+
       // Initialize
       loadUserData();
       loadDashboardData();
