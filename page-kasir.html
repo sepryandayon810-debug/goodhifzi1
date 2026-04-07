@@ -1134,19 +1134,25 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     // ===== UPDATE SUMMARY =====
     function updateSummary() {
       const subtotal = cart.reduce((s, i) => s + i.total, 0);
-      const taxAmount = subtotal * TAX_RATE;
+      const ppnAktif = document.getElementById('ppnToggle').checked;
+      const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
       const total = subtotal + taxAmount - discount;
 
       document.getElementById('subtotal').textContent = formatRupiah(subtotal);
       document.getElementById('discount').textContent = formatRupiah(discount);
       document.getElementById('tax').textContent = formatRupiah(taxAmount);
+      document.getElementById('taxRow').style.display = ppnAktif ? 'flex' : 'none';
       document.getElementById('total').textContent = formatRupiah(total);
     }
 
     function calculateTotal() {
       const subtotal = cart.reduce((s, i) => s + i.total, 0);
-      return subtotal + (subtotal * TAX_RATE) - discount;
+      const ppnAktif = document.getElementById('ppnToggle').checked;
+      const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
+      return subtotal + taxAmount - discount;
     }
+    // PPN Toggle event
+    document.getElementById('ppnToggle').addEventListener('change', updateSummary);
 
     // ===== SAVE / LOAD CART =====
     function saveCart() {
@@ -1286,13 +1292,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
         const subtotal = cart.reduce((s, i) => s + i.total, 0);
         const profit = cart.reduce((s, i) => s + ((i.price - i.cost) * i.quantity), 0);
+        const ppnAktif = document.getElementById('ppnToggle').checked;
+        const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
 
         const transaction = {
           id: transactionId,
           type: 'penjualan',
           items: cart,
           subtotal,
-          tax: subtotal * TAX_RATE,
+          tax: taxAmount,
           discount,
           total,
           profit,
