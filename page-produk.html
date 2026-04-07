@@ -1342,56 +1342,228 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       else reader.readAsArrayBuffer(file);
     }
 
-    function validateImportData(data){
-      var valid = [];
-      data.forEach(function(row){
-        var nama = row["nama produk"] || row["nama"] || "";
-        var hargaBeli = row["harga beli"] || row["modal"] || "";
-        var hargaJual = row["harga jual"] || "";
-        var kategori = row["kategori"] || "";
-        if(nama && hargaBeli && hargaJual){
-          var cat = categories.find(function(c){ return c.name.toLowerCase() === kategori.toLowerCase(); });
-          valid.push({
-            name: nama.trim(),
-            code: row["kode barang"] || row["kode"] || generateProductCode(),
-            categoryId: cat ? cat.id : "",
-            costPrice: parseInt(hargaBeli) || 0,
-            sellingPrice: parseInt(hargaJual) || 0,
-            stock: parseInt(row["stok"] || row["stock"]) || 0,
-            unit: row["satuan"] || "pcs",
-            description: row["deskripsi"] || ""
+    function validateImportData(data) {
+  var valid = [];
+  var newCategories = []; // ➡️ Menyimpan kategori baru yang perlu dibuat
+  var unmatchedCategories = []; // ➡️ Untuk tracking
+  
+  data.forEach(function(row) {
+    var nama = row["nama produk"] || row["nama"] || "";
+    var hargaBeli = row["harga beli"] || row["modal"] || "";
+    var hargaJual = row["harga jual"] || "";
+    var kategoriRaw = row["kategori"] || "";
+    var kategori = kategoriRaw.toString().trim(); // ➡️ Trim spasi
+    
+    if (nama && hargaBeli && hargaJual) {
+      var catId = "";
+      var catName = "";
+      var isNewCat = false;
+      
+      // ➡️ Cari kategori yang sudah ada (case insensitive & trim)
+      if (kategori) {
+        var existingCat = categories.find(function(c) { 
+          return c.name.toLowerCase().trim() === kategori.toLowerCase(); 
+        });
+        
+        if (existingCat) {
+          catId = existingCat.id;
+          catName = existingCat.name;
+        } else {
+          // ➡️ Kategori belum ada, cek apakah sudah ditandai untuk dibuat
+          var pendingCat = newCategories.find(function(c) { 
+            return c.name.toLowerCase() === kategori.toLowerCase(); 
           });
+          
+          if (pendingCat) {
+            catId = pendingCat.id;
+            catName = pendingCat.name;
+          } else {
+            // ➡️ Buat kategori baru dengan ID sementara
+            var newId = "CAT_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+            catId = newId;
+            catName = kategori;
+            isNewCat = true;
+            newCategories.push({
+              id: newId,
+              name: kategori,
+              color: getRandomColor(), // ➡️ Warna random
+              createdAt: firebase.database.ServerValue.TIMESTAMP,
+              updatedAt: firebase.database.ServerValue.TIMESTAMP,
+              productCount: 0
+            });
+          }
+          unmatchedCategories.push(kategori);
         }
+      }
+      
+      valid.push({
+        name: nama.trim(),
+        code: row["kode barang"] || row["kode"] || generateProductCode(),
+        categoryId: catId,
+        categoryName: catName, // ➡️ Simpan nama untuk referensi
+        costPrice: parseInt(hargaBeli) || 0,
+        sellingPrice: parseInt(hargaJual) || 0,
+        stock: parseInt(row["stok"] || row["stock"]) || 0,
+        unit: row["satuan"] || "pcs",
+        description: row["deskripsi"] || "",
+        isNewCategory: isNewCat // ➡️ Flag untuk UI
       });
-      return valid;
     }
+  });
+  
+  // ➡️ Simpan ke global variable untuk diproses nanti
+  window._newCategoriesToCreate = newCategories;
+  window._unmatchedCategories = [...new Set(unmatchedCategories)];
+  
+  return valid;
+}
 
-    function showImportPreview(data){
-      var resultDiv = document.getElementById("importResult");
-      resultDiv.style.display = "block";
-      resultDiv.innerHTML = '<div style="padding:1rem;background:var(--bg-secondary);border-radius:var(--radius-lg);font-weight:500"><i class="fas fa-check-circle" style="color:var(--success)"></i> <strong>' + data.length + '</strong> produk valid siap diimport</div>';
-      document.getElementById("btnProcessImport").disabled = data.length === 0;
+// ➡️ FUNGSI BARU: Helper warna random
+function getRandomColor() {
+  var colors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6", "#8b5cf6", "#14b8a6", "#f97316", "#84cc16"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+    
+    function showImportPreview(data) {
+  var resultDiv = document.getElementById("importResult");
+  var newCategories = window._newCategoriesToCreate || [];
+  
+  resultDiv.style.display = "block";
+  
+  // ➡️ Info jumlah dan kategori baru
+  var html = '<div style="padding:1rem;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:1rem;">';
+  html += '<div style="font-weight:600;margin-bottom:0.5rem;"><i class="fas fa-check-circle" style="color:var(--success)"></i> ';
+  html += '<strong>' + data.length + '</strong> produk valid siap diimport</div>';
+  
+  // ➡️ Tampilkan badge kategori baru yang akan dibuat
+  if (newCategories.length > 0) {
+    html += '<div style="font-size:0.875rem;color:var(--warning);margin-top:0.5rem;">';
+    html += '<i class="fas fa-info-circle"></i> <strong>' + newCategories.length + ' kategori baru</strong> akan otomatis dibuat:<br>';
+    html += newCategories.map(function(c) { 
+      return '<span style="display:inline-block;margin:0.25rem;padding:0.25rem 0.5rem;background:' + c.color + ';color:white;border-radius:4px;font-size:0.75rem;">' + escapeHtml(c.name) + '</span>'; 
+    }).join("");
+    html += '</div>';
+  }
+  
+  // ➡️ BREAKDOWN: Hitung distribusi per kategori
+  var categoryBreakdown = {};
+  data.forEach(function(p) {
+    var catName = p.categoryName || "Tanpa Kategori";
+    if (!categoryBreakdown[catName]) categoryBreakdown[catName] = 0;
+    categoryBreakdown[catName]++;
+  });
+  
+  html += '<div style="margin-top:0.75rem;font-size:0.8rem;color:var(--text-secondary);border-top:1px solid var(--border-color);padding-top:0.5rem;">';
+  html += '<strong>Distribusi per Kategori:</strong><br>';
+  for (var cat in categoryBreakdown) {
+    html += '• ' + escapeHtml(cat) + ': ' + categoryBreakdown[cat] + ' produk<br>';
+  }
+  html += '</div></div>';
+  
+  // ➡️ Preview tabel (max 5 baris)
+  html += '<div style="max-height:200px;overflow-y:auto;font-size:0.8rem;">';
+  html += '<table style="width:100%;border-collapse:collapse;">';
+  html += '<thead style="position:sticky;top:0;background:var(--bg-card);"><tr>';
+  html += '<th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--border-color);">Nama</th>';
+  html += '<th style="text-align:left;padding:0.5rem;border-bottom:1px solid var(--border-color);">Kategori</th>';
+  html += '<th style="text-align:right;padding:0.5rem;border-bottom:1px solid var(--border-color);">Harga Jual</th>';
+  html += '</tr></thead><tbody>';
+  
+  data.slice(0, 5).forEach(function(p) {
+    var catLabel = p.categoryName || '<span style="color:var(--danger)">Tanpa Kategori</span>';
+    if (p.isNewCategory) {
+      catLabel += ' <span style="font-size:0.7rem;color:var(--success);">(baru)</span>';
     }
+    html += '<tr>';
+    html += '<td style="padding:0.5rem;border-bottom:1px solid var(--border-color);">' + escapeHtml(p.name.substring(0, 30)) + (p.name.length > 30 ? '...' : '') + '</td>';
+    html += '<td style="padding:0.5rem;border-bottom:1px solid var(--border-color);">' + catLabel + '</td>';
+    html += '<td style="text-align:right;padding:0.5rem;border-bottom:1px solid var(--border-color);">' + formatRupiah(p.sellingPrice) + '</td>';
+    html += '</tr>';
+  });
+  
+  if (data.length > 5) {
+    html += '<tr><td colspan="3" style="text-align:center;padding:0.5rem;color:var(--text-muted);">... dan ' + (data.length - 5) + ' produk lainnya</td></tr>';
+  }
+  
+  html += '</tbody></table></div>';
+  
+  resultDiv.innerHTML = html;
+  document.getElementById("btnProcessImport").disabled = data.length === 0;
+}
 
-    function processImport(data){
-      Utils.showLoading("Mengimport produk...");
-      var promises = data.map(function(product){
-        var id = database.ref("products").push().key;
-        product.id = id;
-        product.createdAt = firebase.database.ServerValue.TIMESTAMP;
-        product.updatedAt = firebase.database.ServerValue.TIMESTAMP;
-        product.status = "active";
-        product.soldCount = 0;
-        product.minStock = 5;
-        return database.ref("products/" + id).set(product);
-      });
-      Promise.all(promises).then(function(){
-        closeImportModal();
-        Utils.hideLoading();
-        Utils.showToast(data.length + " produk berhasil diimport", "success");
-        loadProducts();
-      }).catch(function(){ Utils.hideLoading(); Utils.showToast("Gagal mengimport produk", "error"); });
+    function processImport(data) {
+  Utils.showLoading("Mengimport produk...");
+  
+  var newCategories = window._newCategoriesToCreate || [];
+  
+  // ➡️ STEP 1: Buat kategori baru di database terlebih dahulu
+  var catPromises = newCategories.map(function(cat) {
+    // Generate key Firebase yang proper untuk kategori baru
+    var realId = database.ref("categories").push().key;
+    
+    // ➡️ Update ID di semua produk yang menggunakan kategori ini (ganti dari ID sementara ke ID real)
+    data.forEach(function(prod) {
+      if (prod.categoryId === cat.id) {
+        prod.categoryId = realId;
+      }
+    });
+    
+    var catData = {
+      name: cat.name,
+      color: cat.color,
+      createdAt: firebase.database.ServerValue.TIMESTAMP,
+      updatedAt: firebase.database.ServerValue.TIMESTAMP,
+      productCount: 0
+    };
+    
+    return database.ref("categories/" + realId).set(catData);
+  });
+  
+  // ➡️ STEP 2: Setelah kategori dibuat, baru simpan produk
+  Promise.all(catPromises).then(function() {
+    var productPromises = data.map(function(product) {
+      var id = database.ref("products").push().key;
+      
+      var productData = {
+        name: product.name,
+        code: product.code,
+        categoryId: product.categoryId, // ➡️ Sekarang sudah ID yang valid
+        costPrice: product.costPrice,
+        sellingPrice: product.sellingPrice,
+        stock: product.stock,
+        unit: product.unit,
+        description: product.description,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+        status: "active",
+        soldCount: 0,
+        minStock: 5
+      };
+      
+      return database.ref("products/" + id).set(productData);
+    });
+    
+    return Promise.all(productPromises);
+  }).then(function() {
+    closeImportModal();
+    Utils.hideLoading();
+    
+    // ➡️ Notifikasi detail dengan nama kategori baru
+    var msg = data.length + " produk berhasil diimport";
+    if (newCategories.length > 0) {
+      msg += " (" + newCategories.length + " kategori baru: " + 
+             newCategories.map(function(c) { return c.name; }).join(", ") + ")";
     }
+    Utils.showToast(msg, "success");
+    
+    // ➡️ Refresh data termasuk kategori baru
+    loadCategories().then(function() { loadProducts(); });
+  }).catch(function(err) {
+    Utils.hideLoading();
+    console.error("Import error:", err);
+    Utils.showToast("Gagal mengimport: " + err.message, "error");
+  });
+}
 
     // ============================================================
     // EXPORT
