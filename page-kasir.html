@@ -636,10 +636,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                   <span>Diskon</span>
                   <span id="discount">Rp 0</span>
                 </div>
-                <div class="summary-row">
+                <div class="summary-row" id="taxRow" style="display:none;">
                   <span>PPN (11%)</span>
                   <span id="tax">Rp 0</span>
                 </div>
+                <div class="summary-row" style="font-size:.8rem;align-items:center;margin-bottom:.25rem;">
+                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text-secondary);font-weight:500;">
+                    <input type="checkbox" id="ppnToggle" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
+                    Kenakan PPN 11%
+                  </label>
                 <div class="summary-row total">
                   <span>Total</span>
                   <span id="total">Rp 0</span>
@@ -848,42 +853,52 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           String(today.getMonth() + 1).padStart(2, '0') + '-' +
           String(today.getDate()).padStart(2, '0');
 
-        // Ambil transaksi hari ini
+        // Ambil transaksi hari ini (semua status completed)
         const txSnapshot = await db.ref('transactions/' + todayStr).once('value');
         const txData = txSnapshot.val() || {};
 
         let totalPenjualan = 0;
+        let kasDariPenjualanTunai = 0;
         Object.values(txData).forEach(tx => {
-          if (tx.status === 'completed' && tx.type === 'penjualan') {
+          if (tx.status === 'completed') {
             totalPenjualan += tx.total || 0;
+            if (!tx.paymentMethod || tx.paymentMethod === 'cash') {
+              kasDariPenjualanTunai += tx.total || 0;
+            }
           }
         });
 
-        // Ambil kas modal (jika ada)
+        // Ambil kas saldo — coba beberapa path yang mungkin dipakai
         let kasDitangan = 0;
-        try {
-          const kasSnapshot = await db.ref('kas/saldo').once('value');
-          kasDitangan = kasSnapshot.val() || 0;
-        } catch (e) {
-          // Jika tidak ada node kas, coba hitung dari kas masuk - kas keluar hari ini
-          const kasHarian = await db.ref('kas_harian/' + todayStr).once('value');
-          const kasData = kasHarian.val() || {};
-          Object.values(kasData).forEach(k => {
-            if (k.type === 'masuk') kasDitangan += k.amount || 0;
-            if (k.type === 'keluar') kasDitangan -= k.amount || 0;
+        const paths = ['kas/saldo', 'kas/currentBalance', 'settings/kas/saldo'];
+        for (const path of paths) {
+          const snap = await db.ref(path).once('value');
+          const val = snap.val();
+          if (val !== null && typeof val === 'number') {
+            kasDitangan = val;
+            break;
+          }
+        }
+        // Jika semua path kosong, hitung dari modal harian + transaksi kas + penjualan tunai
+        if (kasDitangan === 0) {
+          // Coba modal harian
+          const modalSnap = await db.ref('kas_harian/' + todayStr).once('value');
+          const modalData = modalSnap.val() || {};
+          Object.values(modalData).forEach(k => {
+            if (k.type === 'masuk' || k.type === 'topup' || k.type === 'modal') kasDitangan += k.amount || 0;
+            if (k.type === 'keluar' || k.type === 'tarik') kasDitangan -= k.amount || 0;
           });
           // Tambah dari penjualan tunai hari ini
-          Object.values(txData).forEach(tx => {
-            if (tx.status === 'completed' && tx.paymentMethod === 'cash') {
-              kasDitangan += tx.total || 0;
-            }
-          });
+          kasDitangan += kasDariPenjualanTunai;
         }
 
         document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
         document.getElementById('kasDitangan').textContent = formatRupiah(kasDitangan);
       } catch (err) {
         console.error('Error loading header stats:', err);
+        // Tetap tampilkan nilai 0 daripada tidak update sama sekali
+        document.getElementById('totalPenjualan').textContent = 'Rp 0';
+        document.getElementById('kasDitangan').textContent = 'Rp 0';
       }
     }
 
