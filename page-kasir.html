@@ -852,24 +852,22 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     // ===== LOAD HEADER STATS DARI FIREBASE =====
     async function loadHeaderStats() {
+      const today = new Date();
+      const todayStr = today.getFullYear() + '-' +
+        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+        String(today.getDate()).padStart(2, '0');
+      // --- Total Penjualan dari transaksi hari ini ---
       try {
-        const db = firebase.database();
-        const today = new Date();
-        const todayStr = today.getFullYear() + '-' +
-          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-          String(today.getDate()).padStart(2, '0');
-
-        // Ambil transaksi hari ini (semua status completed)
-        const txSnapshot = await db.ref('transactions/' + todayStr).once('value');
+        const txSnapshot = await firebase.database().ref('transactions/' + todayStr).once('value');
         const txData = txSnapshot.val() || {};
 
         let totalPenjualan = 0;
-        let kasDariPenjualanTunai = 0;
+        let kasTunai = 0;
         Object.values(txData).forEach(tx => {
           if (tx.status === 'completed') {
             totalPenjualan += tx.total || 0;
             if (!tx.paymentMethod || tx.paymentMethod === 'cash') {
-              kasDariPenjualanTunai += tx.total || 0;
+              kasTunai += tx.total || 0;
             }
           }
         });
