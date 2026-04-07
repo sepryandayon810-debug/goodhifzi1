@@ -18,6 +18,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
 /* ===== THEME COLORS ===== */
@@ -549,11 +550,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       <div class="page-content">
         <!-- Quick Actions -->
         <div class="quick-actions-bar">
-          <button class="quick-action-btn" id="btnTopup">
+           <button class="quick-action-btn" id="btnTopup" onclick="window.location.href='page-kas-topup.html'">
             <i class="fas fa-arrow-up"></i>
             <span>Top Up</span>
           </button>
-          <button class="quick-action-btn" id="btnTarik">
+          <button class="quick-action-btn" id="btnTarik" onclick="window.location.href='page-kas-tarik.html'">
             <i class="fas fa-arrow-down"></i>
             <span>Tarik Tunai</span>
           </button>
@@ -732,6 +733,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <div class="amount-value" id="paymentTotal">Rp 0</div>
         </div>
 
+        <div class="amount-display" style="background:rgba(99,102,241,.08);border:2px solid var(--primary);">
+          <div class="amount-label">Jumlah Diterima</div>
+          <div class="amount-value" id="paymentInput" style="color:var(--primary);font-size:2.25rem;">Rp 0</div>
+        </div>
+
         <div class="amount-display" style="background:rgba(16,185,129,.1);">
           <div class="amount-label">Kembalian</div>
           <div class="amount-value" id="paymentChange" style="color:var(--success);">Rp 0</div>
@@ -868,26 +874,33 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           }
         });
 
-        // Ambil kas saldo — coba beberapa path yang mungkin dipakai
+        // Ambil kas saldo — coba beberapa path, masing-masing di-try sendiri agar
+        // permission_denied pada satu path tidak membatalkan path lainnya
+
         let kasDitangan = 0;
-        const paths = ['kas/saldo', 'kas/currentBalance', 'settings/kas/saldo'];
-        for (const path of paths) {
-          const snap = await db.ref(path).once('value');
-          const val = snap.val();
-          if (val !== null && typeof val === 'number') {
-            kasDitangan = val;
-            break;
+        const kasPaths = ['kas/saldo', 'kas/currentBalance', 'settings/kas/saldo'];
+        for (const path of kasPaths) {
+          try {
+            const snap = await db.ref(path).once('value');
+            const val = snap.val();
+            if (val !== null && typeof val === 'number') {
+              kasDitangan = val;
+              break;
+            }
+          } catch (e) {
+            // Path ini tidak bisa diakses (permission denied), lanjut ke path berikutnya
           }
         }
-        // Jika semua path kosong, hitung dari modal harian + transaksi kas + penjualan tunai
+        // Jika semua path saldo kosong, hitung dari modal harian + penjualan tunai hari ini
         if (kasDitangan === 0) {
-          // Coba modal harian
-          const modalSnap = await db.ref('kas_harian/' + todayStr).once('value');
-          const modalData = modalSnap.val() || {};
-          Object.values(modalData).forEach(k => {
-            if (k.type === 'masuk' || k.type === 'topup' || k.type === 'modal') kasDitangan += k.amount || 0;
-            if (k.type === 'keluar' || k.type === 'tarik') kasDitangan -= k.amount || 0;
-          });
+          try {
+            const modalSnap = await db.ref('kas_harian/' + todayStr).once('value');
+            const modalData = modalSnap.val() || {};
+            Object.values(modalData).forEach(k => {
+              if (k.type === 'masuk' || k.type === 'topup' || k.type === 'modal') kasDitangan += k.amount || 0;
+              if (k.type === 'keluar' || k.type === 'tarik') kasDitangan -= k.amount || 0;
+            });
+          } catch (e) { }
           // Tambah dari penjualan tunai hari ini
           kasDitangan += kasDariPenjualanTunai;
         }
@@ -896,9 +909,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         document.getElementById('kasDitangan').textContent = formatRupiah(kasDitangan);
       } catch (err) {
         console.error('Error loading header stats:', err);
-        // Tetap tampilkan nilai 0 daripada tidak update sama sekali
-        document.getElementById('totalPenjualan').textContent = 'Rp 0';
-        document.getElementById('kasDitangan').textContent = 'Rp 0';
       }
     }
 
@@ -1216,6 +1226,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       const total = calculateTotal();
       document.getElementById('paymentTotal').textContent = formatRupiah(total);
       paymentAmount = 0;
+      document.getElementById('paymentInput').textContent = 'Rp 0';
       document.getElementById('paymentChange').textContent = 'Rp 0';
       paymentModal.classList.add('active');
     });
@@ -1268,6 +1279,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     function updatePaymentDisplay() {
       const total = calculateTotal();
       const change = paymentAmount - total;
+      document.getElementById('paymentInput').textContent = formatRupiah(paymentAmount);
       document.getElementById('paymentChange').textContent = formatRupiah(change > 0 ? change : 0);
     }
 
@@ -1352,14 +1364,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     });
 
     // ===== QUICK ACTIONS =====
-    document.getElementById('btnTopup').addEventListener('click', () => {
-      window.location.href = 'page-kas-topup.html';
-    });
-
-    document.getElementById('btnTarik').addEventListener('click', () => {
-      window.location.href = 'page-kas-tarik.html';
-    });
-
+    // btnTopup & btnTarik sudah pakai onclick di HTML
     document.getElementById('btnManual').addEventListener('click', () => {
       const name = prompt('Nama produk:');
       if (!name) return;
