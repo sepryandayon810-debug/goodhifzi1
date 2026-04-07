@@ -441,14 +441,41 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         </div>
 
         <div id="tab-kategori" class="tab-content" style="display:none">
-          <div class="kategori-grid" id="kategoriGrid">
-            <div class="kategori-card add-kategori-card" id="btnAddKategoriCard">
-              <i class="fas fa-plus-circle"></i>
-              <span>Tambah Kategori Baru</span>
-            </div>
-          </div>
+  <!-- LIST KATEGORI -->
+  <div id="kategoriList">
+    <div class="kategori-grid" id="kategoriGrid">
+      <div class="kategori-card add-kategori-card" id="btnAddKategoriCard">
+        <i class="fas fa-plus-circle"></i>
+        <span>Tambah Kategori Baru</span>
+      </div>
+    </div>
+  </div>
+  <!-- DETAIL KATEGORI -->
+  <div id="kategoriDetail" style="display:none">
+    <div class="produk-toolbar" style="margin-bottom:1rem">
+      <button class="btn btn-secondary btn-sm" id="btnBackKategori">
+        <i class="fas fa-arrow-left"></i> Kembali
+      </button>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:0">
+        <div id="detailKatIcon" style="width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:white;background:#6366f1;flex-shrink:0;font-size:1.1rem">
+          <i class="fas fa-tag"></i>
+        </div>
+        <div style="min-width:0">
+          <div style="font-weight:700;color:var(--text-primary);font-size:1.05rem" id="detailKatName">-</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)" id="detailKatCount">0 produk</div>
         </div>
       </div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-kat-view="grid" title="Grid"><i class="fas fa-th-large"></i></button>
+        <button class="view-btn" data-kat-view="list" title="List"><i class="fas fa-list"></i></button>
+      </div>
+      <button class="btn btn-primary btn-sm" id="btnAddProdukKat">
+        <i class="fas fa-plus"></i> Tambah Produk
+      </button>
+    </div>
+    <div id="kategoriProdukGrid" class="produk-grid"></div>
+  </div>
+</div>
     </main>
 
     <nav class="mobile-nav">
@@ -673,6 +700,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     var currentTab = "produk";
     var currentView = "grid";
     var importData = null;
+    var currentKatView = "grid";
+    var currentKatId = null;
 
     // ============================================================
     // INIT — tunggu Firebase siap
@@ -781,27 +810,21 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       setupEventListeners();
     }
 
-        // Dark Mode Toggle untuk Page Produk
+        // ── Dark Mode (sinkron dengan halaman lain via webpos_dark_mode) ──
+    function applyTheme(){
+      var isDark = localStorage.getItem('webpos_dark_mode') === 'true';
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      var btn = document.getElementById('btnTheme');
+      if(btn) btn.innerHTML = isDark ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' : '<i class="fas fa-moon"></i>';
+    }
+    applyTheme();
+    window.addEventListener('storage', function(e){ if(e.key === 'webpos_dark_mode') applyTheme(); });
     var btnTheme = document.getElementById("btnTheme");
     if(btnTheme){
-      // Set icon sesuai tema saat load
-      var currentTheme = document.documentElement.getAttribute('data-theme');
-      if(currentTheme === 'dark'){
-        btnTheme.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
-      }
-      
-      // Click handler
       btnTheme.addEventListener("click", function(){
         var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if(isDark){
-          document.documentElement.setAttribute('data-theme', 'light');
-          localStorage.setItem('theme', 'light');
-          this.innerHTML = '<i class="fas fa-moon"></i>';
-        } else {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          localStorage.setItem('theme', 'dark');
-          this.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
-        }
+        localStorage.setItem('webpos_dark_mode', (!isDark).toString());
+        applyTheme();
       });
     }
 
@@ -916,14 +939,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       }
     }
 
-    function renderCategories(){
+        function renderCategories(){
       var grid = document.getElementById("kategoriGrid");
       var html = '<div class="kategori-card add-kategori-card" id="btnAddKategoriCard"><i class="fas fa-plus-circle"></i><span>Tambah Kategori Baru</span></div>';
       categories.forEach(function(cat){
         var productCount = products.filter(function(p){ return p.categoryId === cat.id; }).length;
-        html += '<div class="kategori-card" data-id="' + cat.id + '">';
+        html += '<div class="kategori-card" data-id="' + cat.id + '" data-action="detail">';
         html += '<div class="kategori-icon" style="background:' + (cat.color || "#6366f1") + '"><i class="fas fa-tag"></i></div>';
-        html += '<div class="kategori-info"><div class="kategori-name">' + escapeHtml(cat.name) + '</div><div class="kategori-count">' + productCount + ' produk</div></div>';
+        html += '<div class="kategori-info"><div class="kategori-name">' + escapeHtml(cat.name) + '</div>';
+        html += '<div class="kategori-count">' + productCount + ' produk</div></div>';
         html += '<div class="kategori-actions">';
         html += '<button class="btn-icon btn-sm btn-edit-kategori" data-id="' + cat.id + '" title="Edit"><i class="fas fa-edit"></i></button>';
         html += '<button class="btn-icon btn-sm btn-hapus-kategori" data-id="' + cat.id + '" title="Hapus"><i class="fas fa-trash"></i></button>';
@@ -931,8 +955,100 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
       grid.innerHTML = html;
       document.getElementById("btnAddKategoriCard").addEventListener("click", openAddKategoriModal);
+      // Klik card buka detail
+      grid.querySelectorAll(".kategori-card[data-action='detail']").forEach(function(card){
+        card.addEventListener("click", function(e){
+          if(e.target.closest(".btn-edit-kategori") || e.target.closest(".btn-hapus-kategori")) return;
+          openKategoriDetail(card.dataset.id);
+        });
+      });
     }
-
+    function openKategoriDetail(catId){
+      currentKatId = catId;
+      var cat = categories.find(function(c){ return c.id === catId; });
+      if(!cat) return;
+      document.getElementById("kategoriList").style.display = "none";
+      document.getElementById("kategoriDetail").style.display = "block";
+      document.getElementById("detailKatName").textContent = cat.name;
+      document.getElementById("detailKatIcon").style.background = cat.color || "#6366f1";
+      // View toggle
+      document.querySelectorAll("[data-kat-view]").forEach(function(btn){
+        btn.classList.toggle("active", btn.dataset.katView === currentKatView);
+        btn.addEventListener("click", function(){
+          currentKatView = btn.dataset.katView;
+          document.querySelectorAll("[data-kat-view]").forEach(function(b){ b.classList.remove("active"); });
+          btn.classList.add("active");
+          renderKategoriDetail();
+        });
+      });
+      // Tambah produk ke kategori ini
+      document.getElementById("btnAddProdukKat").onclick = function(){
+        openAddProdukModal();
+        setTimeout(function(){
+          var sel = document.getElementById("produkKategori");
+          if(sel) sel.value = catId;
+        }, 100);
+      };
+      // Tombol kembali
+      document.getElementById("btnBackKategori").onclick = function(){
+        document.getElementById("kategoriDetail").style.display = "none";
+        document.getElementById("kategoriList").style.display = "block";
+        currentKatId = null;
+      };
+      renderKategoriDetail();
+    }
+    function renderKategoriDetail(){
+      var cat = categories.find(function(c){ return c.id === currentKatId; });
+      var katProducts = products.filter(function(p){ return p.categoryId === currentKatId; });
+      var container = document.getElementById("kategoriProdukGrid");
+      document.getElementById("detailKatCount").textContent = katProducts.length + " produk";
+      if(katProducts.length === 0){
+        container.className = "produk-grid";
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem"><div class="empty-state"><i class="fas fa-box-open"></i><div class="empty-state-title">Belum ada produk</div><p>Klik "Tambah Produk" untuk menambahkan produk ke kategori ini</p></div></div>';
+        return;
+      }
+      if(currentKatView === "list"){
+        container.className = "produk-list";
+        var html = "";
+        katProducts.forEach(function(product){
+          html += '<div class="produk-list-item">';
+          html += '<div class="produk-list-img">';
+          if(product.image) html += '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">';
+          else html += '<i class="fas fa-box" style="color:var(--text-muted)"></i>';
+          html += '</div><div class="produk-list-info">';
+          html += '<div style="font-weight:600;color:var(--text-primary)">' + escapeHtml(product.name) + '</div>';
+          html += '<div style="font-size:0.75rem;color:var(--text-muted)">' + (product.code || "-") + ' • Stok: ' + (product.stock || 0) + '</div>';
+          html += '<div style="font-weight:700;color:var(--primary)">' + formatRupiah(product.sellingPrice || 0) + '</div>';
+          html += '</div>';
+          html += '<span style="font-size:0.75rem;padding:0.25rem 0.75rem;border-radius:50px;font-weight:700;background:' + (product.status === "active" ? "var(--success)" : "var(--text-muted)") + ';color:white;flex-shrink:0">' + (product.status === "active" ? "Aktif" : "Nonaktif") + '</span>';
+          html += '<div class="produk-list-actions">';
+          html += '<button class="btn btn-secondary btn-sm btn-edit-produk" data-id="' + product.id + '"><i class="fas fa-edit"></i></button>';
+          html += '<button class="btn btn-danger btn-sm btn-hapus-produk" data-id="' + product.id + '"><i class="fas fa-trash"></i></button>';
+          html += '</div></div>';
+        });
+        container.innerHTML = html;
+      } else {
+        container.className = "produk-grid";
+        var html = "";
+        katProducts.forEach(function(product){
+          html += '<div class="produk-card" data-id="' + product.id + '">';
+          html += '<div class="produk-image">';
+          if(product.image) html += '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">';
+          else html += '<i class="fas fa-box"></i>';
+          html += '<span class="produk-status ' + (product.status === "active" ? "active" : "inactive") + '">' + (product.status === "active" ? "Aktif" : "Nonaktif") + '</span>';
+          html += '<span class="produk-stock-badge">Stok: ' + (product.stock || 0) + '</span>';
+          html += '</div><div class="produk-info">';
+          html += '<div class="produk-name">' + escapeHtml(product.name) + '</div>';
+          html += '<div class="produk-code">' + (product.code || "-") + '</div>';
+          html += '<div class="produk-price">' + formatRupiah(product.sellingPrice || 0) + '</div>';
+          html += '</div><div class="produk-actions">';
+          html += '<button class="btn btn-secondary btn-sm btn-edit-produk" data-id="' + product.id + '"><i class="fas fa-edit"></i> Edit</button>';
+          html += '<button class="btn btn-danger btn-sm btn-hapus-produk" data-id="' + product.id + '"><i class="fas fa-trash"></i> Hapus</button>';
+          html += '</div></div>';
+        });
+        container.innerHTML = html;
+      }
+    }
     function renderPagination(){
       var container = document.getElementById("pagination");
       var totalPages = Math.ceil(filteredProducts.length / perPage);
@@ -963,6 +1079,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       // Kategori grid — event delegation
       document.getElementById("kategoriGrid").addEventListener("click", function(e){
+         if(e.target.closest(".btn-edit-kategori") || e.target.closest(".btn-hapus-kategori")) return;
+        var card = e.target.closest(".kategori-card[data-id]");
+      if(card && !card.classList.contains("add-kategori-card")){
+        var catId = card.dataset.id;
+        var cat = categories.find(function(c){ return c.id === catId; });
         var btn = e.target.closest(".btn-edit-kategori");
         if(btn){ e.stopPropagation(); editCategory(btn.dataset.id); return; }
         btn = e.target.closest(".btn-hapus-kategori");
