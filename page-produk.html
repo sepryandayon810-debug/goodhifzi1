@@ -845,6 +845,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         filteredProducts = products.slice();
         renderProducts();
         renderPagination();
+        renderCategories();
         Utils.hideLoading();
       }).catch(function(err){
         console.error("Error load products:", err);
