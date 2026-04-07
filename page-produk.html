@@ -1300,12 +1300,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     function processImportFile(file){
-      Utils.showLoading("Membaca file...");
-      var reader = new FileReader();
-      reader.onload = function(e){
-        try{
-          var data = [];
-          var ext = file.name.split(".").pop().toLowerCase();
+  Utils.showLoading("Membaca file...");
+  var ext = file.name.split(".").pop().toLowerCase();
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = [];
           if(ext === "csv"){
             var lines = e.target.result.split("\n").filter(function(l){ return l.trim(); });
             var headers = lines[0].split(",").map(function(h){ return h.trim().toLowerCase(); });
