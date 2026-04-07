@@ -507,28 +507,14 @@ const Utils = {
   formatUsername: (username) => {
     if (!username) return '';
     return username.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9_]/g, '');
-  },   // ← tambah koma di sini!
-  // Show modal
-  showModal: (title, content) => {
-    const existing = document.getElementById('dynamicModal');
-    if (existing) existing.remove();
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay active';
-    modal.id = 'dynamicModal';
-    modal.innerHTML = `<div class="modal" style="max-width:600px"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close" onclick="Utils.closeModal()"><i class="fas fa-times"></i></button></div><div class="modal-body">${content}</div></div>`;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) Utils.closeModal(); });
-  },
-  // Close modal
-  closeModal: () => {
-    const modal = document.getElementById('dynamicModal');
-    if (modal) modal.remove();
-  }   // ← tidak ada koma di sini karena ini fungsi terakhir
-};  // ← penutup Utils
+  }
+};
+
 // Initialize theme on load
 document.addEventListener('DOMContentLoaded', () => {
   Utils.Theme.init();
 });
+
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Utils;
