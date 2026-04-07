@@ -395,6 +395,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <h1 class="header-title">Manajemen Produk</h1>
         </div>
         <div class="header-actions">
+          <!-- TAMBAHKAN INI -->
+          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          
           <button class="btn btn-secondary" id="btnImport"><i class="fas fa-file-import"></i><span class="d-md-inline" style="margin-left:0.35rem">Import</span></button>
           <button class="btn btn-secondary" id="btnExport"><i class="fas fa-file-export"></i><span class="d-md-inline" style="margin-left:0.35rem">Export</span></button>
           <button class="btn btn-primary" id="btnAddProduk"><i class="fas fa-plus"></i><span class="d-md-inline" style="margin-left:0.35rem">Tambah Produk</span></button>
@@ -774,6 +779,30 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       // Load data
       loadCategories().then(function(){ loadProducts(); });
       setupEventListeners();
+    }
+
+        // Dark Mode Toggle untuk Page Produk
+    var btnTheme = document.getElementById("btnTheme");
+    if(btnTheme){
+      // Set icon sesuai tema saat load
+      var currentTheme = document.documentElement.getAttribute('data-theme');
+      if(currentTheme === 'dark'){
+        btnTheme.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
+      }
+      
+      // Click handler
+      btnTheme.addEventListener("click", function(){
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if(isDark){
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+          this.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+          this.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
+        }
+      });
     }
 
     // ============================================================
