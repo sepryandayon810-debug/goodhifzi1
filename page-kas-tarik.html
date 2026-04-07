@@ -558,8 +558,16 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </div>
 
               <div class="form-group">
-                <label class="form-label">Keterangan (Wajib)</label>
+                <label class="form-label">Keterangan <span style="color: var(--text-muted); font-size: 0.75rem;">(Opsional)</span></label>
                 <input type="text" class="form-input" id="tarikNote" placeholder="Contoh: Setoran ke bank">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Biaya Admin <span style="color: var(--text-muted); font-size: 0.75rem;">(Opsional)</span></label>
+                <input type="number" class="form-input" id="adminFee" placeholder="0" min="0">
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                  Biaya admin akan masuk ke laba, tidak mengurangi kas
+                </p>
               </div>
 
               <button class="btn btn-danger btn-block btn-lg" id="btnSimpanTarik">
@@ -706,8 +714,11 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         }
 
         const note = document.getElementById('tarikNote').value.trim();
-        if (!note) {
-          Utils.showToast('Keterangan wajib diisi', 'warning');
+        const adminFee = parseInt(document.getElementById('adminFee').value) || 0;
+        
+        // Validasi: jika ada admin fee, minimal ada keterangan
+        if (adminFee > 0 && !note) {
+          Utils.showToast('Keterangan wajib diisi jika ada biaya admin', 'warning');
           document.getElementById('tarikNote').focus();
           return;
         }
@@ -721,8 +732,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           await database.ref(`transactions/${today}/${transactionId}`).set({
             id: transactionId,
             type: 'tarik',
-            amount: amount,
-            note: note,
+            amount: amount,              // Jumlah yang customer tarik
+            adminFee: adminFee,          // Biaya admin (pendapatan)
+            note: note || 'Tarik Tunai', // Default jika kosong
             cashierId: user.uid,
             cashierName: user.name,
             timestamp: Date.now(),
