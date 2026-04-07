@@ -872,10 +872,18 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           }
         });
 
-        // Ambil kas saldo — coba beberapa path, masing-masing di-try sendiri agar
-        // permission_denied pada satu path tidak membatalkan path lainnya
-
+                // Hitung kas ditangan dari transaksi hari ini (tunai)
+        let kasDariPenjualanTunai = 0;
         let kasDitangan = 0;
+        
+        // Hitung penjualan tunai dari transaksi
+        Object.values(txData).forEach(tx => {
+          if (tx.status === 'completed' && (!tx.paymentMethod || tx.paymentMethod === 'cash')) {
+            kasDariPenjualanTunai += tx.total || 0;
+          }
+        });
+
+        // Coba ambil dari path kas/saldo dulu
         const kasPaths = ['kas/saldo', 'kas/currentBalance', 'settings/kas/saldo'];
         for (const path of kasPaths) {
           try {
@@ -886,23 +894,27 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               break;
             }
           } catch (e) {
-            // Path ini tidak bisa diakses (permission denied), lanjut ke path berikutnya
+            // Path tidak bisa diakses, lanjut ke path berikutnya
           }
         }
-        // Jika semua path saldo kosong, hitung dari modal harian + penjualan tunai hari ini
+
+        // Jika tidak ada saldo di database, hitung dari modal + penjualan tunai
         if (kasDitangan === 0) {
           try {
             const modalSnap = await db.ref('kas_harian/' + todayStr).once('value');
             const modalData = modalSnap.val() || {};
+            let modalAwal = 0;
             Object.values(modalData).forEach(k => {
-              if (k.type === 'masuk' || k.type === 'topup' || k.type === 'modal') kasDitangan += k.amount || 0;
-              if (k.type === 'keluar' || k.type === 'tarik') kasDitangan -= k.amount || 0;
+              if (k.type === 'modal' || k.type === 'masuk') modalAwal += k.amount || 0;
+              if (k.type === 'keluar' || k.type === 'tarik') modalAwal -= k.amount || 0;
             });
-          } catch (e) { }
-          // Tambah dari penjualan tunai hari ini
-          kasDitangan += kasDariPenjualanTunai;
+            kasDitangan = modalAwal + kasDariPenjualanTunai;
+          } catch (e) {
+            // Fallback: hanya pakai penjualan tunai kalau modal error
+            kasDitangan = kasDariPenjualanTunai;
+          }
         }
-
+        
         document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
         document.getElementById('kasDitangan').textContent = formatRupiah(kasDitangan);
       } catch (err) {
