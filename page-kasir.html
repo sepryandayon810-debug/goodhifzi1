@@ -383,18 +383,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 <span>Kasir</span>
               </a>
             </li>
-            <li class="nav-item nav-dropdown" id="dropdownProduk">
-              <div class="nav-link nav-dropdown-toggle" onclick="toggleDropdown('dropdownProduk')">
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                  <i class="fas fa-box"></i>
-                  <span>Produk</span>
-                </div>
-                <i class="fas fa-chevron-down dropdown-arrow"></i>
-              </div>
-              <ul class="nav-submenu">
-                <li><a href="page-produk.html" class="nav-link"><span>Daftar Produk</span></a></li>
-                <li><a href="page-kategori.html" class="nav-link"><span>Kategori</span></a></li>
-              </ul>
+            <li class="nav-item">
+              <a href="page-produk.html" class="nav-link" data-menu="produk">
+                <i class="fas fa-box"></i>
+                <span>Produk</span>
+              </a>
             </li>
           </ul>
         </div>
