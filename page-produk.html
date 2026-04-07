@@ -231,7 +231,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .image-upload{border:2px dashed var(--border-color);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;transition:all 0.15s}
 .image-upload:hover{border-color:var(--primary);background:rgba(99,102,241,0.05)}
 .image-upload i{font-size:2rem;color:var(--text-muted);margin-bottom:0.5rem;display:block}
-.image-preview{max-width:100%;max-height:200px;border-radius:var(--radius-md);margin-top:1rem}
+.image-preview{max-width:100%;max-height:200px;border-radius:var(--radius-md);margin-top:1rem;pointer-events:none}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:640px){.form-row{grid-template-columns:1fr}}
 .stock-input-group{display:flex;align-items:center;gap:0.5rem}
@@ -473,6 +473,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               <p style="font-size:0.75rem;color:var(--text-muted)">atau drag &amp; drop</p>
               <input type="file" id="produkImage" accept="image/*" style="display:none">
               <img id="imagePreview" class="image-preview" style="display:none">
+              <button type="button" id="btnHapusGambar" class="btn btn-danger btn-sm" style="margin-top:0.5rem;display:none"><i class="fas fa-trash"></i> Hapus Gambar</button>
             </div>
           </div>
           <div class="form-row">
@@ -977,6 +978,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       imageUpload.addEventListener("dragleave", function(){ imageUpload.style.borderColor = "var(--border-color)"; });
       imageUpload.addEventListener("drop", function(e){ e.preventDefault(); imageUpload.style.borderColor = "var(--border-color)"; if(e.dataTransfer.files.length) handleImageSelect(e.dataTransfer.files[0]); });
       produkImage.addEventListener("change", function(e){ if(e.target.files.length) handleImageSelect(e.target.files[0]); });
+      document.getElementById("btnHapusGambar").addEventListener("click", function(){
+  document.getElementById("imagePreview").style.display = "none";
+  document.getElementById("imagePreview").src = "";
+  document.getElementById("produkImage").value = "";
+  if(currentProduct) currentProduct.image = null;
+  this.style.display = "none";
+});
 
       // Color picker
       document.querySelectorAll(".color-option").forEach(function(opt){
@@ -1106,6 +1114,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       currentProduct = product;
       document.getElementById("modalTitle").textContent = "Edit Produk";
       document.getElementById("produkId").value = product.id;
+      document.getElementById("produkImage").value = "";
       document.getElementById("produkName").value = product.name || "";
       document.getElementById("produkCode").value = product.code || "";
       document.getElementById("produkKategori").value = product.categoryId || "";
@@ -1117,8 +1126,15 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       document.getElementById("produkDesc").value = product.description || "";
       document.getElementById("produkStatus").checked = product.status !== "inactive";
       var preview = document.getElementById("imagePreview");
-      if(product.image){ preview.src = product.image; preview.style.display = "block"; }
-      else{ preview.style.display = "none"; }
+var btnHapus = document.getElementById("btnHapusGambar");
+if(product.image){ 
+  preview.src = product.image; 
+  preview.style.display = "block";
+  if(btnHapus) btnHapus.style.display = "inline-flex";
+} else { 
+  preview.style.display = "none";
+  if(btnHapus) btnHapus.style.display = "none";
+}
       document.getElementById("produkModal").classList.add("active");
     }
 
