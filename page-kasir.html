@@ -1,27 +1,16 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="light" data-theme-color="indigo">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366f1">
-  <title>WebPOS - Kasir</title>
+  <title>WebPOS - Riwayat Transaksi</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-
   <style>
-/* ===== THEME COLORS ===== */
+/* ===== THEME COLORS - SAMA SEPERTI SETTING & KASIR ===== */
 :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
 [data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
 [data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
@@ -68,7 +57,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .logo-container{display:flex;align-items:center;gap:.5rem}
 .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
 .logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar.collapsed .logo-text{opacity:0;width:0;overflow:hidden}
+.sidebar.collapsed .logo-text{opacity:0;width:0}
 
 .menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
 .menu-toggle:hover{background:var(--primary-dark)}
@@ -126,14 +115,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
 .header-actions{display:flex;align-items:center;gap:.5rem}
 
-/* Header Stats */
-.header-stats{display:flex;align-items:center;gap:1.5rem}
-.stat-item{text-align:center}
-.stat-label{display:block;font-size:0.7rem;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
-.stat-value{display:block;font-size:1rem;font-weight:700;color:var(--text-primary)}
-.stat-value.positive{color:var(--success)}
-@media(max-width:640px){.header-stats{display:none}}
-
 /* ===== PAGE CONTENT ===== */
 .page-content{flex:1;padding:1.5rem;overflow-y:auto}
 @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
@@ -146,14 +127,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .btn-secondary{background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border-color)}
 .btn-secondary:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
 .btn-success{background:var(--success);color:white}
-.btn-success:hover:not(:disabled){filter:brightness(0.9)}
 .btn-danger{background:var(--danger);color:white}
-.btn-danger:hover:not(:disabled){filter:brightness(0.9)}
-.btn-warning{background:var(--warning);color:white}
-.btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
-.btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
 .btn-sm{padding:.4rem .875rem;font-size:.8rem}
-.btn-block{width:100%}
 
 .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
 .btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
@@ -164,184 +139,140 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
 .card-body{padding:1.5rem}
-.card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
 
-/* ===== FORMS ===== */
+/* Quick Filter */
+.quick-filter{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.quick-filter-btn{padding:0.5rem 1rem;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-secondary);border-radius:var(--radius-lg);cursor:pointer;font-size:0.875rem;font-weight:500;transition:all 0.15s;white-space:nowrap}
+.quick-filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+.quick-filter-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+
+/* Category Tabs */
+.category-tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid var(--border-color);padding-bottom:0.5rem;overflow-x:auto;scrollbar-width:none}
+.category-tabs::-webkit-scrollbar{display:none}
+.category-tab{padding:0.75rem 1.25rem;border:none;background:transparent;color:var(--text-secondary);cursor:pointer;font-size:0.9rem;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-0.5rem;transition:all 0.15s}
+.category-tab:hover{color:var(--primary)}
+.category-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* Summary Cards - 3 kolom */
+.summary-cards{display:grid;grid-template-columns:repeat(3, 1fr);gap:1.5rem;margin-bottom:2rem}
+.summary-card{background:var(--bg-card);border-radius:var(--radius-xl);padding:1.5rem;border:1px solid var(--border-color);box-shadow:var(--shadow-sm);transition:all 0.25s}
+.summary-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.summary-card-title{font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;font-weight:600}
+.summary-card-value{font-size:1.75rem;font-weight:700;color:var(--text-primary);line-height:1.2}
+.summary-card-value.success{color:var(--success)}
+.summary-card-value.danger{color:var(--danger)}
+.summary-card-value.warning{color:var(--warning)}
+
+@media(max-width:1024px){.summary-cards{grid-template-columns:repeat(3, 1fr);gap:1rem}}
+@media(max-width:640px){.summary-cards{grid-template-columns:1fr;gap:0.75rem}.summary-card{padding:1rem}.summary-card-value{font-size:1.5rem}}
+
+/* Date Filter Toolbar */
+.riwayat-toolbar{display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;padding:1rem;background:var(--bg-card);border-radius:var(--radius-lg);border:1px solid var(--border-color)}
+.date-filter{display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap}
+.date-filter input{padding:0.625rem 1rem;border:1px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-secondary);color:var(--text-primary);font-size:0.875rem;font-family:inherit}
+.date-filter span{color:var(--text-muted);font-weight:500}
+
+/* Transaction Table */
+.transaction-table{width:100%;border-collapse:collapse;font-size:0.9rem}
+.transaction-table th,.transaction-table td{padding:1rem;text-align:left;border-bottom:1px solid var(--border-color);vertical-align:middle}
+.transaction-table th{background:var(--bg-secondary);font-weight:600;font-size:0.75rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em}
+.transaction-table tr:hover{background:rgba(99, 102, 241, 0.05)}
+
+.transaction-type{display:inline-flex;align-items:center;gap:0.5rem;padding:0.35rem 0.875rem;border-radius:50px;font-size:0.75rem;font-weight:600;white-space:nowrap}
+.transaction-type.penjualan{background:rgba(99, 102, 241, 0.1);color:var(--primary)}
+.transaction-type.topup{background:rgba(16, 185, 129, 0.1);color:var(--success)}
+.transaction-type.tarik{background:rgba(239, 68, 68, 0.1);color:var(--danger)}
+.transaction-type.kas_masuk{background:rgba(16, 185, 129, 0.15);color:var(--success)}
+.transaction-type.kas_keluar{background:rgba(239, 68, 68, 0.15);color:var(--danger)}
+
+/* Action Dropdown */
+.action-dropdown{position:relative;display:inline-block}
+.action-btn{width:32px;height:32px;border:none;background:transparent;border-radius:0.5rem;cursor:pointer;color:var(--text-muted);transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.action-btn:hover{background:var(--bg-secondary);color:var(--primary)}
+.action-menu{position:absolute;right:0;top:calc(100% + 5px);background:var(--bg-card);border:1px solid var(--border-color);border-radius:0.75rem;box-shadow:var(--shadow-lg);min-width:180px;z-index:1000;display:none;overflow:hidden}
+.action-dropdown.open .action-menu{display:block;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+.action-menu-item{display:flex;align-items:center;gap:0.75rem;padding:0.875rem 1rem;cursor:pointer;transition:all 0.15s;font-size:0.875rem;color:var(--text-primary);text-decoration:none;border-bottom:1px solid var(--border-color)}
+.action-menu-item:last-child{border-bottom:none}
+.action-menu-item:hover{background:var(--bg-secondary)}
+.action-menu-item i{width:16px;text-align:center;color:var(--text-muted)}
+.action-menu-item:hover i{color:var(--primary)}
+.action-menu-item.delete{color:var(--danger)}
+.action-menu-item.delete:hover{background:rgba(239, 68, 68, 0.1)}
+.action-menu-item.delete i{color:var(--danger)}
+
+/* Modals */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all 0.25s;padding:1rem;backdrop-filter:blur(4px)}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal-content{background:var(--bg-card);border-radius:1rem;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;transform:scale(0.9) translateY(20px);transition:all 0.25s;box-shadow:0 25px 50px -12px rgba(0, 0, 0, 0.25)}
+.modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
+.modal-header{padding:1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:0.75rem}
+.modal-close{width:36px;height:36px;border:none;background:var(--bg-secondary);border-radius:0.75rem;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.modal-close:hover{background:var(--danger);color:white}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:0.75rem;justify-content:flex-end;background:var(--bg-secondary)}
+
+/* Detail Grid */
+.detail-grid{display:grid;gap:0;margin-bottom:1.5rem;border:1px solid var(--border-color);border-radius:var(--radius-lg);overflow:hidden}
+.detail-item{display:flex;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border-color);background:var(--bg-card)}
+.detail-item:last-child{border-bottom:none}
+.detail-label{color:var(--text-muted);font-size:0.875rem;font-weight:500}
+.detail-value{font-weight:600;color:var(--text-primary);font-size:0.95rem}
+
+.items-list{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:1.25rem;margin-top:1.5rem}
+.items-list h4{margin-bottom:1rem;color:var(--text-primary);font-size:1rem;font-weight:600;padding-bottom:0.75rem;border-bottom:1px solid var(--border-color)}
+.item-row{display:flex;justify-content:space-between;padding:0.75rem 0;border-bottom:1px solid var(--border-color);font-size:0.9rem}
+.item-row:last-child{border-bottom:none;margin-top:0.5rem;padding-top:1rem;border-top:2px solid var(--border-color);font-weight:700;font-size:1rem}
+
+/* Form Elements */
 .form-group{margin-bottom:1.25rem}
-.form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
-.form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-.form-input::placeholder{color:var(--text-muted)}
+.form-label{display:block;font-size:0.875rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.5rem}
+.form-input,.form-select,.form-textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-secondary);color:var(--text-primary);font-size:0.95rem;transition:all 0.15s;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99, 102, 241, 0.1)}
 .form-textarea{min-height:100px;resize:vertical}
 .form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
 
-/* ===== BADGES ===== */
-.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.35rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
-.badge-primary{background:rgba(99,102,241,.1);color:var(--primary)}
-.badge-success{background:rgba(16,185,129,.1);color:var(--success)}
-.badge-warning{background:rgba(245,158,11,.1);color:var(--warning)}
-.badge-danger{background:rgba(239,68,68,.1);color:var(--danger)}
-
-/* ===== TOAST ===== */
-.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
-.toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
+/* Toast */
+.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;max-width:400px}
+.toast{padding:1rem 1.5rem;background:var(--bg-card);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);border-left:4px solid var(--primary);display:flex;align-items:center;gap:0.75rem;animation:slideIn 0.3s ease;font-size:0.9rem}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 .toast.success{border-left-color:var(--success)}
 .toast.error{border-left-color:var(--danger)}
 .toast.warning{border-left-color:var(--warning)}
-.toast.info{border-left-color:var(--info)}
 
-/* ===== LOADING ===== */
+/* Loading */
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
 .loading-overlay.active{opacity:1;visibility:visible}
 .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ===== MOBILE NAV ===== */
+/* Mobile Nav */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
 .mobile-nav-item i{font-size:1.25rem}
 .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
 @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
 
-/* ===== MODAL ===== */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
-.modal-overlay.active{opacity:1;visibility:visible}
-.modal-content,.modal{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
-.modal-overlay.active .modal-content,.modal-overlay.active .modal{transform:scale(1) translateY(0)}
-.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-.modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-.modal-close:hover{background:var(--danger);color:white}
-.modal-body{padding:1.5rem}
-.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
+/* Empty State */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--text-muted)}
+.empty-state i{font-size:4rem;margin-bottom:1.5rem;opacity:0.3}
+.empty-state p{font-size:1.1rem;font-weight:500}
 
-/* ===== UTILITIES ===== */
+/* Utilities */
 .d-none{display:none!important}
-.d-block{display:block!important}
-.d-flex{display:flex!important}
-@media(max-width:1024px){.d-md-none{display:none!important}}
-.text-center{text-align:center!important}
-.text-primary{color:var(--primary)!important}
-.text-success{color:var(--success)!important}
-.text-danger{color:var(--danger)!important}
-.font-bold{font-weight:700!important}
-.mb-2{margin-bottom:1rem!important}
-.w-full{width:100%!important}
-
-/* ===== KASIR LAYOUT ===== */
-.kasir-layout{display:grid;grid-template-columns:1fr 400px;gap:1.5rem;height:calc(100vh - 140px)}
-@media(max-width:1200px){.kasir-layout{grid-template-columns:1fr 360px}}
-@media(max-width:1024px){.kasir-layout{grid-template-columns:1fr;height:auto}}
-
-/* Product Section */
-.product-section{display:flex;flex-direction:column;gap:1rem;overflow:hidden}
-.product-toolbar{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
-.search-box{flex:1;min-width:200px;position:relative}
-.search-box i{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted)}
-.search-box input{width:100%;padding:.875rem 1rem .875rem 2.5rem;border:1px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-card);color:var(--text-primary);font-size:.875rem;font-family:inherit;transition:all .15s}
-.search-box input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-
-.view-toggle{display:flex;gap:.25rem;background:var(--bg-secondary);padding:.25rem;border-radius:var(--radius-lg)}
-.view-btn{width:40px;height:40px;border:none;background:transparent;color:var(--text-muted);border-radius:var(--radius-md);cursor:pointer;transition:all .15s}
-.view-btn.active{background:var(--bg-card);color:var(--primary);box-shadow:var(--shadow-sm)}
-
-/* Category Pills */
-.category-pills{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none}
-.category-pills::-webkit-scrollbar{display:none}
-.category-pill{padding:.5rem 1rem;border:1px solid var(--border-color);background:var(--bg-card);border-radius:50px;font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s}
-.category-pill:hover,.category-pill.active{background:var(--primary);color:white;border-color:var(--primary)}
-
-/* Products Grid */
-.products-container{flex:1;overflow-y:auto;padding-right:.5rem}
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem}
-@media(max-width:640px){.products-grid{grid-template-columns:repeat(2,1fr);gap:.75rem}}
-
-.product-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);overflow:hidden;cursor:pointer;transition:all .25s}
-.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary)}
-.product-card-image{aspect-ratio:1;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;position:relative}
-.product-card-image img{width:100%;height:100%;object-fit:cover}
-.product-card-image i{font-size:2.5rem;color:var(--text-muted)}
-.product-stock-badge{position:absolute;top:.5rem;right:.5rem;padding:.25rem .5rem;background:var(--success);color:white;font-size:.65rem;font-weight:600;border-radius:50px}
-.product-stock-badge.low{background:var(--warning)}
-.product-stock-badge.empty{background:var(--danger)}
-.product-card-info{padding:1rem}
-.product-card-name{font-weight:600;font-size:.875rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.25rem}
-.product-card-price{font-weight:700;color:var(--primary);font-size:1rem}
-.product-card-code{font-size:.75rem;color:var(--text-muted)}
-
-/* Skeleton */
-.skeleton{background:linear-gradient(90deg,var(--bg-secondary) 25%,var(--border-color) 50%,var(--bg-secondary) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-md)}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.product-card.skeleton{height:220px}
-
-/* Cart Section */
-.cart-section{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);display:flex;flex-direction:column;height:100%;max-height:calc(100vh - 140px)}
-@media(max-width:1024px){
-  .cart-section{position:fixed;bottom:70px;left:0;right:0;max-height:60vh;z-index:100;transform:translateY(100%);transition:transform .3s ease;border-radius:var(--radius-xl) var(--radius-xl) 0 0}
-  .cart-section.open{transform:translateY(0)}
-}
-.cart-header{padding:1rem 1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
-.cart-title{font-weight:700;font-size:1.125rem;display:flex;align-items:center;gap:.5rem}
-.cart-count{background:var(--primary);color:white;font-size:.75rem;padding:.125rem .5rem;border-radius:50px}
-.cart-clear{font-size:.75rem;color:var(--danger);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:.25rem}
-.cart-items{flex:1;overflow-y:auto;padding:.75rem}
-.cart-item{display:flex;gap:.75rem;padding:.875rem;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:.5rem;position:relative}
-.cart-item-image{width:50px;height:50px;border-radius:var(--radius-md);background:var(--bg-card);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
-.cart-item-image i{color:var(--text-muted);font-size:1.25rem}
-.cart-item-details{flex:1;min-width:0}
-.cart-item-name{font-weight:600;font-size:.875rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.25rem}
-.cart-item-price{font-size:.75rem;color:var(--text-muted)}
-.cart-item-actions{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}
-.qty-btn{width:28px;height:28px;border:1px solid var(--border-color);background:var(--bg-card);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;transition:all .15s}
-.qty-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
-.qty-input{width:40px;text-align:center;border:1px solid var(--border-color);background:var(--bg-card);border-radius:var(--radius-md);padding:.25rem;font-size:.875rem;font-weight:600;color:var(--text-primary)}
-.cart-item-total{font-weight:700;color:var(--primary);font-size:.9375rem;align-self:center}
-.cart-item-remove{position:absolute;top:.5rem;right:.5rem;width:24px;height:24px;border:none;background:rgba(239,68,68,.1);color:var(--danger);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;opacity:0;transition:all .15s}
-.cart-item:hover .cart-item-remove{opacity:1}
-.cart-item-remove:hover{background:var(--danger);color:white}
-.cart-empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
-.cart-empty i{font-size:3rem;margin-bottom:1rem;opacity:.5}
-
-/* Cart Footer */
-.cart-footer{padding:1rem 1.25rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
-.cart-summary{margin-bottom:1rem}
-.summary-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.875rem}
-.summary-row.discount{color:var(--success)}
-.summary-row.total{font-size:1.125rem;font-weight:700;color:var(--text-primary);border-top:2px solid var(--border-color);padding-top:.75rem;margin-top:.75rem}
-.cart-actions{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-.cart-actions .btn{padding:.875rem;font-size:.875rem}
-.btn-pay{grid-column:span 2;background:linear-gradient(135deg,var(--success),#059669);color:white;font-size:1rem;padding:1rem}
-.btn-pay:hover{filter:brightness(1.05)}
-
-/* Mobile Cart Toggle */
-.cart-toggle{position:fixed;bottom:90px;right:1rem;width:56px;height:56px;background:var(--primary);color:white;border:none;border-radius:50%;box-shadow:var(--shadow-lg);display:none;align-items:center;justify-content:center;font-size:1.25rem;z-index:101;cursor:pointer}
-@media(max-width:1024px){.cart-toggle{display:flex}}
-.cart-toggle .badge{position:absolute;top:-5px;right:-5px;width:24px;height:24px;background:var(--danger);color:white;font-size:.75rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0}
-
-/* Quick Actions */
-.quick-actions-bar{display:flex;gap:.5rem;padding:.75rem;background:var(--bg-card);border-radius:var(--radius-lg);margin-bottom:1rem;overflow-x:auto}
-.quick-action-btn{display:flex;align-items:center;gap:.5rem;padding:.625rem 1rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-lg);font-size:.875rem;font-weight:500;color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s}
-.quick-action-btn:hover{background:var(--primary);color:white;border-color:var(--primary)}
-
-/* Payment Modal */
-.payment-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem}
-.payment-method{padding:1rem;border:2px solid var(--border-color);border-radius:var(--radius-lg);text-align:center;cursor:pointer;transition:all .15s}
-.payment-method:hover,.payment-method.active{border-color:var(--primary);background:rgba(99,102,241,.05)}
-.payment-method i{font-size:1.5rem;margin-bottom:.5rem;color:var(--text-secondary);display:block}
-.payment-method.active i{color:var(--primary)}
-.payment-method span{display:block;font-size:.75rem;font-weight:600}
-.amount-display{text-align:center;padding:1.5rem;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:1rem}
-.amount-label{font-size:.875rem;color:var(--text-muted);margin-bottom:.5rem}
-.amount-value{font-size:2rem;font-weight:700;color:var(--text-primary)}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
-.numpad-btn{padding:1.25rem;border:1px solid var(--border-color);background:var(--bg-card);border-radius:var(--radius-lg);font-size:1.25rem;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text-primary)}
-.numpad-btn:hover{background:var(--bg-secondary)}
-.numpad-btn.action{background:var(--primary);color:white;border-color:var(--primary)}
-.quick-amounts{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
-.quick-amount{padding:.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;font-size:.875rem;cursor:pointer;transition:all .15s;color:var(--text-secondary)}
-.quick-amount:hover{background:var(--primary);color:white;border-color:var(--primary)}
+@media(max-width:768px){.d-md-none{display:none!important}}
   </style>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -349,162 +280,82 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-container">
-          <div class="logo-icon">
-            <i class="fas fa-cash-register"></i>
-          </div>
+          <div class="logo-icon"><i class="fas fa-cash-register"></i></div>
           <span class="logo-text">WebPOS</span>
         </div>
       </div>
-
-      <button class="menu-toggle" id="menuToggle">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-chevron-left"></i></button>
+      
       <div class="sidebar-search">
         <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" class="search-input" id="menuSearch" placeholder="Cari menu...">
+          <input type="text" class="search-input" placeholder="Cari menu...">
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <!-- Utama -->
         <div class="nav-section">
           <div class="nav-section-title">Utama</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="index.html" class="nav-link" data-menu="dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-kasir.html" class="nav-link active" data-menu="kasir">
-                <i class="fas fa-cash-register"></i>
-                <span>Kasir</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-produk.html" class="nav-link" data-menu="produk">
-                <i class="fas fa-box"></i>
-                <span>Produk</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="index.html" class="nav-link" data-menu="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="page-kasir.html" class="nav-link" data-menu="kasir"><i class="fas fa-cash-register"></i><span>Kasir</span></a></li>
+            <li class="nav-item"><a href="page-produk.html" class="nav-link" data-menu="produk"><i class="fas fa-box"></i><span>Produk</span></a></li>
           </ul>
         </div>
-
-        <!-- Transaksi -->
+        
         <div class="nav-section">
           <div class="nav-section-title">Transaksi</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-riwayat.html" class="nav-link" data-menu="riwayat">
-                <i class="fas fa-history"></i>
-                <span>Riwayat Transaksi</span>
-              </a>
-            </li>
-            <li class="nav-item nav-dropdown" id="dropdownKas">
-              <div class="nav-link nav-dropdown-toggle" onclick="toggleDropdown('dropdownKas')">
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                  <i class="fas fa-wallet"></i>
-                  <span>Kas Management</span>
-                </div>
+            <li class="nav-item"><a href="page-riwayat.html" class="nav-link active" data-menu="riwayat"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
+            <li class="nav-item nav-dropdown" data-dropdown>
+              <div class="nav-link nav-dropdown-toggle" data-menu="kas">
+                <div style="display:flex;align-items:center;gap:0.75rem"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
               </div>
               <ul class="nav-submenu">
                 <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
                 <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
                 <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
-    <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
                 <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
                 <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
             </li>
-            <li class="nav-item">
-              <a href="page-hutang.html" class="nav-link" data-menu="hutang">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span>Hutang & Piutang</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-hutang.html" class="nav-link" data-menu="hutang"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a></li>
           </ul>
         </div>
 
-        <!-- Laporan -->
         <div class="nav-section">
           <div class="nav-section-title">Laporan</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
-                <i class="fas fa-chart-bar"></i>
-                <span>Laporan Penjualan</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
           </ul>
         </div>
 
-        <!-- Integrasi -->
         <div class="nav-section">
           <div class="nav-section-title">Integrasi</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram">
-                <i class="fab fa-telegram"></i>
-                <span>Saldo Telegram</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan">
-                <i class="fas fa-users"></i>
-                <span>Data Pelanggan</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram"><i class="fab fa-telegram"></i><span>Saldo Telegram</span></a></li>
+            <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
           </ul>
         </div>
 
-        <!-- Sistem -->
         <div class="nav-section">
           <div class="nav-section-title">Sistem</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-pengguna.html" class="nav-link" data-menu="pengguna">
-                <i class="fas fa-user-cog"></i>
-                <span>Pengguna</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-setting.html" class="nav-link" data-menu="setting">
-                <i class="fas fa-cog"></i>
-                <span>Pengaturan</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-backup.html" class="nav-link" data-menu="backup">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Backup & Sync</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-printer.html" class="nav-link" data-menu="printer">
-                <i class="fas fa-print"></i>
-                <span>Printer & Struk</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-reset.html" class="nav-link" data-menu="reset">
-                <i class="fas fa-trash-alt"></i>
-                <span>Reset Data</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-pengguna.html" class="nav-link" data-menu="pengguna"><i class="fas fa-user-cog"></i><span>Pengguna</span></a></li>
+            <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
+            <li class="nav-item"><a href="page-backup.html" class="nav-link" data-menu="backup"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a></li>
+            <li class="nav-item"><a href="page-printer.html" class="nav-link" data-menu="printer"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
+            <li class="nav-item"><a href="page-reset.html" class="nav-link" data-menu="reset"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
           </ul>
         </div>
       </nav>
 
       <div class="sidebar-footer">
         <div class="user-profile" id="userProfile">
-          <div class="user-avatar" id="userAvatar">
-            <i class="fas fa-user"></i>
-          </div>
+          <div class="user-avatar" id="userAvatar"><i class="fas fa-user"></i></div>
           <div class="user-info">
             <div class="user-name" id="userName">Loading...</div>
             <div class="user-role" id="userRole">-</div>
@@ -513,276 +364,159 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Header -->
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
-          <h1 class="header-title">Kasir</h1>
+          <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+          <h1 class="header-title">Riwayat Transaksi</h1>
         </div>
-
-        <div class="header-stats" id="headerStats">
-          <div class="stat-item">
-            <span class="stat-label">Kas di Tangan</span>
-            <span class="stat-value" id="kasDitangan">Rp 0</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Total Penjualan</span>
-            <span class="stat-value positive" id="totalPenjualan">Rp 0</span>
-          </div>
-        </div>
-
         <div class="header-actions">
-          <button class="btn-icon" id="btnScan" title="Scan Barcode">
-            <i class="fas fa-barcode"></i>
-          </button>
-          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button class="btn-icon" id="btnLogout" title="Logout">
-            <i class="fas fa-sign-out-alt"></i>
-          </button>
+          <button class="btn btn-secondary" id="btnExport"><i class="fas fa-file-export"></i><span class="d-none d-md-inline">Export</span></button>
+          <button class="btn-icon" id="btnLogout"><i class="fas fa-sign-out-alt"></i></button>
         </div>
       </header>
 
-      <!-- Page Content -->
       <div class="page-content">
-        <!-- Quick Actions -->
-        <div class="quick-actions-bar">
-           <button class="quick-action-btn" id="btnTopup" onclick="window.location.href='page-kas-topup.html'">
-            <i class="fas fa-arrow-up"></i>
-            <span>Top Up</span>
-          </button>
-          <button class="quick-action-btn" id="btnTarik" onclick="window.location.href='page-kas-tarik.html'">
-            <i class="fas fa-arrow-down"></i>
-            <span>Tarik Tunai</span>
-          </button>
-          <button class="quick-action-btn" id="btnManual">
-            <i class="fas fa-edit"></i>
-            <span>Input Manual</span>
-          </button>
-          <button class="quick-action-btn" id="btnHold">
-            <i class="fas fa-pause"></i>
-            <span>Tahan</span>
-          </button>
+        <!-- Quick Date Filter -->
+        <div class="quick-filter">
+          <button class="quick-filter-btn active" data-period="today">Hari Ini</button>
+          <button class="quick-filter-btn" data-period="yesterday">Kemarin</button>
+          <button class="quick-filter-btn" data-period="week">Minggu Ini</button>
+          <button class="quick-filter-btn" data-period="month">Bulan Ini</button>
+          <button class="quick-filter-btn" data-period="year">Tahun Ini</button>
+          <button class="quick-filter-btn" data-period="custom">Pilih Tanggal</button>
         </div>
 
-        <!-- Kasir Layout -->
-        <div class="kasir-layout">
-          <!-- Products Section -->
-          <div class="product-section">
-            <div class="product-toolbar">
-              <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="productSearch" placeholder="Cari produk (Ctrl+K)...">
-              </div>
-              <div class="view-toggle">
-                <button class="view-btn active" data-view="grid" title="Grid View">
-                  <i class="fas fa-th-large"></i>
-                </button>
-                <button class="view-btn" data-view="list" title="List View">
-                  <i class="fas fa-list"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Categories -->
-            <div class="category-pills" id="categoryPills">
-              <button class="category-pill active" data-category="all">Semua</button>
-            </div>
-
-            <!-- Products -->
-            <div class="products-container">
-              <div class="products-grid" id="productsGrid">
-                <div class="product-card skeleton"></div>
-                <div class="product-card skeleton"></div>
-                <div class="product-card skeleton"></div>
-                <div class="product-card skeleton"></div>
-                <div class="product-card skeleton"></div>
-                <div class="product-card skeleton"></div>
-              </div>
-            </div>
+        <!-- Custom Date Filter -->
+        <div class="riwayat-toolbar" id="customDateFilter" style="display: none;">
+          <div class="date-filter">
+            <input type="date" id="startDate">
+            <span>s/d</span>
+            <input type="date" id="endDate">
+            <button class="btn btn-primary" id="btnFilter"><i class="fas fa-filter"></i> Filter</button>
           </div>
+        </div>
 
-          <!-- Cart Section -->
-          <div class="cart-section" id="cartSection">
-            <div class="cart-header">
-              <div class="cart-title">
-                <i class="fas fa-shopping-cart"></i>
-                Keranjang
-                <span class="cart-count" id="cartCount">0</span>
-              </div>
-              <button class="cart-clear" id="btnClearCart">
-                <i class="fas fa-trash"></i>
-                Hapus
-              </button>
-            </div>
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+          <button class="category-tab active" data-category="all">Semua</button>
+          <button class="category-tab" data-category="penjualan">Produk</button>
+          <button class="category-tab" data-category="kas">Kas Masuk/Keluar</button>
+          <button class="category-tab" data-category="topup_tarik">Top Up & Tarik</button>
+        </div>
 
-            <div class="cart-items" id="cartItems">
-              <div class="cart-empty">
-                <i class="fas fa-shopping-basket"></i>
-                <p>Keranjang masih kosong</p>
-                <p style="font-size:.75rem;margin-top:.5rem;">Klik produk untuk menambahkan</p>
-              </div>
-            </div>
+        <!-- Summary Cards - 3 card tanpa rata-rata -->
+        <div class="summary-cards">
+          <div class="summary-card">
+            <div class="summary-card-title">Total Penjualan</div>
+            <div class="summary-card-value success" id="totalPenjualan">Rp 0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">Total Transaksi</div>
+            <div class="summary-card-value" id="totalTransaksi">0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-card-title">Total Laba</div>
+            <div class="summary-card-value success" id="totalLaba">Rp 0</div>
+          </div>
+        </div>
 
-            <div class="cart-footer">
-              <div class="cart-summary">
-                <div class="summary-row">
-                  <span>Subtotal</span>
-                  <span id="subtotal">Rp 0</span>
-                </div>
-                <div class="summary-row">
-                  <span>Diskon</span>
-                  <span id="discount">Rp 0</span>
-                </div>
-                <div class="summary-row" id="taxRow" style="display:none;">
-                  <span>PPN (11%)</span>
-                  <span id="tax">Rp 0</span>
-                </div>
-                <div class="summary-row" style="font-size:.8rem;align-items:center;margin-bottom:.25rem;">
-                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text-secondary);font-weight:500;">
-                    <input type="checkbox" id="ppnToggle" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
-                    Kenakan PPN 11%
-                  </label>
-                <div class="summary-row total">
-                  <span>Total</span>
-                  <span id="total">Rp 0</span>
-                </div>
-              </div>
-
-              <div class="cart-actions">
-                <button class="btn btn-secondary" id="btnDiskon">
-                  <i class="fas fa-percent"></i>
-                  Diskon
-                </button>
-                <button class="btn btn-secondary" id="btnCatatan">
-                  <i class="fas fa-sticky-note"></i>
-                  Catatan
-                </button>
-                <button class="btn btn-pay" id="btnBayar">
-                  <i class="fas fa-credit-card"></i>
-                  Bayar
-                </button>
-              </div>
-            </div>
+        <!-- Transactions Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list"></i> Daftar Transaksi</h3>
+          </div>
+          <div class="card-body" style="padding: 0; overflow-x: auto;">
+            <table class="transaction-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tanggal</th>
+                  <th>Tipe</th>
+                  <th>Metode</th>
+                  <th>Kasir</th>
+                  <th>Total</th>
+                  <th style="text-align: center;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="transactionList">
+                <tr>
+                  <td colspan="7" style="text-align: center; padding: 3rem;">
+                    <div class="empty-state">
+                      <i class="fas fa-receipt"></i>
+                      <p>Belum ada transaksi</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Mobile Cart Toggle -->
-    <button class="cart-toggle" id="cartToggle">
-      <i class="fas fa-shopping-cart"></i>
-      <span class="badge" id="cartBadge">0</span>
-    </button>
-
-    <!-- Mobile Bottom Nav -->
     <nav class="mobile-nav">
-      <a href="index.html" class="mobile-nav-item">
-        <i class="fas fa-home"></i>
-        <span>Dashboard</span>
-      </a>
-      <a href="page-kasir.html" class="mobile-nav-item active">
-        <i class="fas fa-cash-register"></i>
-        <span>Kasir</span>
-      </a>
-      <a href="page-produk.html" class="mobile-nav-item">
-        <i class="fas fa-box"></i>
-        <span>Produk</span>
-      </a>
-      <a href="page-riwayat.html" class="mobile-nav-item">
-        <i class="fas fa-history"></i>
-        <span>Riwayat</span>
-      </a>
-      <a href="page-setting.html" class="mobile-nav-item">
-        <i class="fas fa-cog"></i>
-        <span>Setting</span>
-      </a>
+      <a href="index.html" class="mobile-nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+      <a href="page-kasir.html" class="mobile-nav-item"><i class="fas fa-cash-register"></i><span>Kasir</span></a>
+      <a href="page-produk.html" class="mobile-nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
+      <a href="page-riwayat.html" class="mobile-nav-item active"><i class="fas fa-history"></i><span>Riwayat</span></a>
+      <a href="page-setting.html" class="mobile-nav-item"><i class="fas fa-cog"></i><span>Setting</span></a>
     </nav>
   </div>
 
-  <!-- Payment Modal -->
-  <div class="modal-overlay" id="paymentModal">
-    <div class="modal" style="max-width:400px;">
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Pembayaran</h3>
-        <button class="modal-close" id="closePaymentModal">
-          <i class="fas fa-times"></i>
-        </button>
+        <h3 class="modal-title"><i class="fas fa-receipt"></i> Detail Transaksi</h3>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
       </div>
-      <div class="modal-body">
-        <div class="payment-methods">
-          <div class="payment-method active" data-method="cash">
-            <i class="fas fa-money-bill-wave"></i>
-            <span>Tunai</span>
-          </div>
-          <div class="payment-method" data-method="transfer">
-            <i class="fas fa-university"></i>
-            <span>Transfer</span>
-          </div>
-          <div class="payment-method" data-method="qris">
-            <i class="fas fa-qrcode"></i>
-            <span>QRIS</span>
-          </div>
-        </div>
-
-        <div class="amount-display">
-          <div class="amount-label">Total Bayar</div>
-          <div class="amount-value" id="paymentTotal">Rp 0</div>
-        </div>
-
-        <div class="amount-display" style="background:rgba(99,102,241,.08);border:2px solid var(--primary);">
-          <div class="amount-label">Jumlah Diterima</div>
-          <div class="amount-value" id="paymentInput" style="color:var(--primary);font-size:2.25rem;">Rp 0</div>
-        </div>
-
-        <div class="amount-display" style="background:rgba(16,185,129,.1);">
-          <div class="amount-label">Kembalian</div>
-          <div class="amount-value" id="paymentChange" style="color:var(--success);">Rp 0</div>
-        </div>
-
-        <div class="quick-amounts">
-          <button class="quick-amount" data-amount="exact">Uang Pas</button>
-          <button class="quick-amount" data-amount="50000">50.000</button>
-          <button class="quick-amount" data-amount="100000">100.000</button>
-        </div>
-
-        <div class="numpad">
-          <button class="numpad-btn" data-num="1">1</button>
-          <button class="numpad-btn" data-num="2">2</button>
-          <button class="numpad-btn" data-num="3">3</button>
-          <button class="numpad-btn" data-num="4">4</button>
-          <button class="numpad-btn" data-num="5">5</button>
-          <button class="numpad-btn" data-num="6">6</button>
-          <button class="numpad-btn" data-num="7">7</button>
-          <button class="numpad-btn" data-num="8">8</button>
-          <button class="numpad-btn" data-num="9">9</button>
-          <button class="numpad-btn action" data-action="clear">C</button>
-          <button class="numpad-btn" data-num="0">0</button>
-          <button class="numpad-btn action" data-action="backspace"><i class="fas fa-backspace"></i></button>
-        </div>
-      </div>
+      <div class="modal-body" id="modalBody"></div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnCancelPayment">Batal</button>
-        <button class="btn btn-success" id="btnConfirmPayment">
-          <i class="fas fa-check"></i>
-          Proses Bayar
-        </button>
+        <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+        <button class="btn btn-primary" onclick="printCurrentTransaction()"><i class="fas fa-print"></i> Cetak</button>
       </div>
     </div>
   </div>
 
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <p style="margin-top:1rem;color:var(--text-secondary);">Loading...</p>
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-edit"></i> Edit Transaksi</h3>
+        <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Total</label>
+          <input type="number" class="form-input" id="editTotal">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Metode Pembayaran</label>
+          <select class="form-select" id="editMethod">
+            <option value="cash">Cash</option>
+            <option value="transfer">Transfer</option>
+            <option value="qris">QRIS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan</label>
+          <textarea class="form-textarea" id="editNote" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveEdit()"><i class="fas fa-save"></i> Simpan</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
 
   <!-- Scripts -->
@@ -791,679 +525,665 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   <script src="js/auth.js"></script>
 
   <script>
-    // ===== SIDEBAR DROPDOWN =====
-    function toggleDropdown(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const isOpen = el.classList.contains('open');
-      // Tutup semua dropdown lain
-      document.querySelectorAll('.nav-dropdown.open').forEach(d => d.classList.remove('open'));
-      // Buka yang diklik (kalau sebelumnya tertutup)
-      if (!isOpen) el.classList.add('open');
-    }
+    // Global variables
+    let allTransactions = [];
+    let currentFilter = 'all';
+    let currentPeriod = 'today';
+    let currentTransaction = null;
 
-    // ===== SIDEBAR COLLAPSE =====
-    const sidebar = document.getElementById('sidebar');
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-    });
+    // ===== THEME & INIT =====
+    document.addEventListener('DOMContentLoaded', () => {
+      // Load theme from localStorage (sama seperti setting & kasir)
+      const savedTheme = localStorage.getItem('webpos_theme') || 'light';
+      const savedThemeColor = localStorage.getItem('webpos_theme_color') || 'indigo';
+      
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.documentElement.setAttribute('data-theme-color', savedThemeColor);
 
-    // Mobile menu
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
+      // Auth state
+      auth.onAuthStateChanged((user) => {
+        if (!user && !Utils.getStorage('webpos_session')) {
+          window.location.href = '../login.html';
+          return;
+        }
+        if (user) {
+          Auth.loadUserData(user.uid);
+        }
+        initRiwayat();
       });
+    });
+
+    function initRiwayat() {
+      const user = Auth.getCurrentUser();
+      document.getElementById('userName').textContent = user?.name || user?.email || 'User';
+      document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
+      document.getElementById('userAvatar').textContent = (user?.name || user?.email || 'U').charAt(0).toUpperCase();
+
+      // Set default dates
+      const today = Utils.getTodayString ? Utils.getTodayString() : new Date().toISOString().split('T')[0];
+      document.getElementById('startDate').value = today;
+      document.getElementById('endDate').value = today;
+
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
+
+      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+      });
+
+      // Logout
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        if (Utils.confirm) {
+          Utils.confirm('Yakin ingin logout?', () => Auth.logout());
+        } else {
+          if (confirm('Yakin ingin logout?')) Auth.logout();
+        }
+      });
+
+      // Dropdown menus
+      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          const parent = this.closest('.nav-dropdown');
+          document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+            if (openDropdown !== parent) openDropdown.classList.remove('open');
+          });
+          parent.classList.toggle('open');
+        });
+      });
+
+      // Quick Filter
+      document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentPeriod = this.dataset.period;
+          
+          if (currentPeriod === 'custom') {
+            document.getElementById('customDateFilter').style.display = 'block';
+          } else {
+            document.getElementById('customDateFilter').style.display = 'none';
+            setDateRange(currentPeriod);
+            loadTransactions();
+          }
+        });
+      });
+
+      // Category Tabs
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.category;
+          filterAndRender();
+        });
+      });
+
+      document.getElementById('btnFilter').addEventListener('click', loadTransactions);
+      document.getElementById('btnExport').addEventListener('click', exportData);
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.action-dropdown')) {
+          document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('open'));
+        }
+      });
+
+      // Initial load
+      setDateRange('today');
+      loadTransactions();
     }
 
-    // Tutup sidebar mobile saat klik di luar
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && e.target !== mobileMenuToggle) {
-        sidebar.classList.remove('mobile-open');
+    // ... (rest of the JavaScript functions remain the same)
+    function setDateRange(period) {
+      const today = new Date();
+      let start, end;
+
+      switch(period) {
+        case 'today':
+          start = new Date(today);
+          end = new Date(today);
+          break;
+        case 'yesterday':
+          start = new Date(today);
+          start.setDate(start.getDate() - 1);
+          end = new Date(start);
+          break;
+        case 'week':
+          start = new Date(today);
+          start.setDate(start.getDate() - start.getDay());
+          end = new Date(today);
+          break;
+        case 'month':
+          start = new Date(today.getFullYear(), today.getMonth(), 1);
+          end = new Date(today);
+          break;
+        case 'year':
+          start = new Date(today.getFullYear(), 0, 1);
+          end = new Date(today);
+          break;
       }
-    });
 
-    // ===== DARK MODE =====
-    const btnTheme = document.getElementById('btnTheme');
-    const savedTheme = localStorage.getItem('webpos_theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    if (savedTheme === 'dark') btnTheme.querySelector('i').className = 'fas fa-sun';
-
-    btnTheme.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('webpos_theme', next);
-      btnTheme.querySelector('i').className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    });
-
-    // ===== FORMAT RUPIAH =====
-    function formatRupiah(num) {
-      return 'Rp ' + Math.round(num || 0).toLocaleString('id-ID');
+      document.getElementById('startDate').value = formatDate(start);
+      document.getElementById('endDate').value = formatDate(end);
     }
 
-    // ===== TOAST =====
-    function showToast(msg, type = 'info') {
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    async function loadTransactions() {
+      if (Utils.showLoading) Utils.showLoading();
+      else document.getElementById('loadingOverlay').classList.add('active');
+      
+      try {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        allTransactions = [];
+        
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const snapshot = await database.ref(`transactions/${dateStr}`).once('value');
+          const trans = snapshot.val() || {};
+          
+          Object.entries(trans).forEach(([id, data]) => {
+            if (data.status !== 'cancelled' && data.status !== 'returned') {
+              allTransactions.push({ 
+                id, 
+                dateKey: dateStr,
+                ...data 
+              });
+            }
+          });
+        }
+        
+        allTransactions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        
+        filterAndRender();
+        
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        showToast('Gagal memuat transaksi: ' + error.message, 'error');
+      }
+      
+      if (Utils.hideLoading) Utils.hideLoading();
+      else document.getElementById('loadingOverlay').classList.remove('active');
+    }
+
+    function filterAndRender() {
+      let filtered = allTransactions;
+      
+      if (currentFilter !== 'all') {
+        filtered = allTransactions.filter(t => {
+          switch(currentFilter) {
+            case 'penjualan':
+              return t.type === 'penjualan';
+            case 'kas':
+              return t.type === 'kas_masuk' || t.type === 'kas_keluar';
+            case 'topup_tarik':
+              return t.type === 'topup' || t.type === 'tarik';
+            default:
+              return true;
+          }
+        });
+      }
+      
+      renderTable(filtered);
+      updateSummary(filtered);
+    }
+
+    function renderTable(transactions) {
+      const tbody = document.getElementById('transactionList');
+      const typeLabels = {
+        penjualan: 'Penjualan',
+        topup: 'Top Up',
+        tarik: 'Tarik Tunai',
+        kas_masuk: 'Kas Masuk',
+        kas_keluar: 'Kas Keluar'
+      };
+
+      if (transactions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 3rem;">
+              <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>Belum ada transaksi</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = transactions.map(t => `
+        <tr>
+          <td style="font-family: monospace; font-size: 0.85rem;">${t.id}</td>
+          <td>${formatDateTime(t.timestamp)}</td>
+          <td><span class="transaction-type ${t.type}">${typeLabels[t.type] || t.type}</span></td>
+          <td>${t.paymentMethod || '-'}</td>
+          <td>${t.cashierName || '-'}</td>
+          <td style="font-weight: 600;">${formatRupiah(t.total || t.amount || 0)}</td>
+          <td style="text-align: center;">
+            <div class="action-dropdown" id="dropdown-${t.id}">
+              <button class="action-btn" onclick="toggleDropdown('${t.id}', event)">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="action-menu">
+                <div class="action-menu-item" onclick="viewDetail('${t.id}')">
+                  <i class="fas fa-eye"></i> Lihat Detail
+                </div>
+                <div class="action-menu-item" onclick="editTransaction('${t.id}')">
+                  <i class="fas fa-edit"></i> Edit
+                </div>
+                ${t.type === 'penjualan' ? `
+                <div class="action-menu-item" onclick="returnTransaction('${t.id}')">
+                  <i class="fas fa-undo"></i> Return
+                </div>
+                ` : ''}
+                <div class="action-menu-item" onclick="printTransaction('${t.id}')">
+                  <i class="fas fa-print"></i> Cetak
+                </div>
+                <div class="action-menu-item delete" onclick="deleteTransaction('${t.id}')">
+                  <i class="fas fa-trash"></i> Hapus
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateSummary(transactions) {
+      let totalPenjualan = 0;
+      let totalLaba = 0;
+
+      transactions.forEach(t => {
+        if (t.type === 'penjualan') {
+          totalPenjualan += t.total || 0;
+          totalLaba += t.profit || 0;
+        }
+        if (t.type === 'topup' && t.adminFee) {
+          totalLaba += t.adminFee;
+        }
+        if (t.type === 'tarik' && t.adminFee) {
+          totalLaba += t.adminFee;
+        }
+      });
+
+      document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
+      document.getElementById('totalTransaksi').textContent = transactions.length;
+      document.getElementById('totalLaba').textContent = formatRupiah(totalLaba);
+    }
+
+    function toggleDropdown(id, event) {
+      event.stopPropagation();
+      document.querySelectorAll('.action-dropdown').forEach(d => {
+        if (d.id !== `dropdown-${id}`) d.classList.remove('open');
+      });
+      document.getElementById(`dropdown-${id}`).classList.toggle('open');
+    }
+
+    function viewDetail(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+      currentTransaction = t;
+      
+      const typeLabels = {
+        penjualan: 'Penjualan',
+        topup: 'Top Up',
+        tarik: 'Tarik Tunai',
+        kas_masuk: 'Kas Masuk',
+        kas_keluar: 'Kas Keluar'
+      };
+
+      let itemsHtml = '';
+      if (t.items && t.items.length > 0) {
+        itemsHtml = `
+          <div class="items-list">
+            <h4>Item Produk</h4>
+            ${t.items.map(item => `
+              <div class="item-row">
+                <span>${item.name} x${item.qty}</span>
+                <span>${formatRupiah(item.subtotal)}</span>
+              </div>
+            `).join('')}
+            <div class="item-row" style="margin-top: 0.5rem; padding-top: 1rem;">
+              <span>Total</span>
+              <span>${formatRupiah(t.total)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">ID Transaksi</span>
+            <span class="detail-value">${t.id}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tanggal</span>
+            <span class="detail-value">${formatDateTime(t.timestamp)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipe</span>
+            <span class="detail-value">${typeLabels[t.type] || t.type}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Metode Pembayaran</span>
+            <span class="detail-value">${t.paymentMethod || '-'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Kasir</span>
+            <span class="detail-value">${t.cashierName || '-'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Total</span>
+            <span class="detail-value">${formatRupiah(t.total || t.amount || 0)}</span>
+          </div>
+          ${t.profit ? `
+          <div class="detail-item">
+            <span class="detail-label">Laba</span>
+            <span class="detail-value" style="color: var(--success)">${formatRupiah(t.profit)}</span>
+          </div>
+          ` : ''}
+          ${t.adminFee ? `
+          <div class="detail-item">
+            <span class="detail-label">Biaya Admin</span>
+            <span class="detail-value" style="color: var(--warning)">${formatRupiah(t.adminFee)}</span>
+          </div>
+          ` : ''}
+          ${t.note ? `
+          <div class="detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+            <span class="detail-label">Catatan</span>
+            <span>${t.note}</span>
+          </div>
+          ` : ''}
+        </div>
+        ${itemsHtml}
+      `;
+
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function editTransaction(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+      currentTransaction = t;
+      document.getElementById('editTotal').value = t.total || t.amount || 0;
+      document.getElementById('editMethod').value = t.paymentMethod || 'cash';
+      document.getElementById('editNote').value = t.note || '';
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    async function saveEdit() {
+      if (!currentTransaction) return;
+      if (Utils.showLoading) Utils.showLoading();
+      
+      try {
+        const updates = {
+          total: parseInt(document.getElementById('editTotal').value) || 0,
+          paymentMethod: document.getElementById('editMethod').value,
+          note: document.getElementById('editNote').value,
+          updatedAt: Date.now()
+        };
+
+        await database.ref(`transactions/${currentTransaction.dateKey}/${currentTransaction.id}`).update(updates);
+        showToast('Transaksi berhasil diupdate', 'success');
+        closeEditModal();
+        loadTransactions();
+      } catch (error) {
+        showToast('Gagal mengupdate transaksi: ' + error.message, 'error');
+      }
+      
+      if (Utils.hideLoading) Utils.hideLoading();
+    }
+
+    async function deleteTransaction(id) {
+      if (!confirm('Yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan jika ini transaksi penjualan.')) return;
+      if (Utils.showLoading) Utils.showLoading();
+      
+      try {
+        const t = allTransactions.find(tr => tr.id === id);
+        if (!t) {
+          showToast('Transaksi tidak ditemukan', 'error');
+          return;
+        }
+
+        if (t.type === 'penjualan' && t.items && Array.isArray(t.items)) {
+          for (const item of t.items) {
+            if (item.productId) {
+              try {
+                const productRef = database.ref(`products/${item.productId}`);
+                const snapshot = await productRef.once('value');
+                const product = snapshot.val();
+                if (product) {
+                  const currentStock = product.stock || 0;
+                  const qtyToReturn = item.qty || 0;
+                  await productRef.update({ stock: currentStock + qtyToReturn });
+                }
+              } catch (itemError) {
+                console.error(`Error returning stock:`, itemError);
+              }
+            }
+          }
+        }
+
+        await database.ref(`transactions/${t.dateKey}/${id}`).update({
+          status: 'cancelled',
+          cancelledAt: Date.now(),
+          cancelledBy: Auth.getCurrentUser()?.uid || 'unknown'
+        });
+
+        showToast('Transaksi berhasil dihapus, stok dikembalikan', 'success');
+        loadTransactions();
+      } catch (error) {
+        console.error('Error deleting:', error);
+        showToast('Gagal menghapus transaksi: ' + error.message, 'error');
+      }
+      
+      if (Utils.hideLoading) Utils.hideLoading();
+    }
+
+    async function returnTransaction(id) {
+      if (!confirm('Yakin ingin return transaksi ini? Stok akan dikembalikan ke inventory.')) return;
+      if (Utils.showLoading) Utils.showLoading();
+      
+      try {
+        const t = allTransactions.find(tr => tr.id === id);
+        if (!t || !t.items || !Array.isArray(t.items)) {
+          showToast('Transaksi tidak valid', 'error');
+          return;
+        }
+
+        for (const item of t.items) {
+          if (item.productId) {
+            try {
+              const productRef = database.ref(`products/${item.productId}`);
+              const snapshot = await productRef.once('value');
+              const product = snapshot.val();
+              if (product) {
+                const currentStock = product.stock || 0;
+                await productRef.update({ stock: currentStock + (item.qty || 0) });
+              }
+            } catch (e) {
+              console.error(`Error returning stock:`, e);
+            }
+          }
+        }
+
+        await database.ref(`transactions/${t.dateKey}/${id}`).update({
+          status: 'returned',
+          returnedAt: Date.now(),
+          returnedBy: Auth.getCurrentUser()?.uid || 'unknown'
+        });
+
+        showToast('Return berhasil, stok dikembalikan', 'success');
+        loadTransactions();
+      } catch (error) {
+        showToast('Gagal return transaksi: ' + error.message, 'error');
+      }
+      
+      if (Utils.hideLoading) Utils.hideLoading();
+    }
+
+    function printTransaction(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+      currentTransaction = t;
+      printCurrentTransaction();
+    }
+
+    function printCurrentTransaction() {
+      if (!currentTransaction) return;
+      const t = currentTransaction;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Struk ${t.id}</title>
+          <style>
+            body { font-family: 'Courier New', monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
+            .header h2 { margin: 0; font-size: 18px; }
+            .line { border-top: 1px dashed #000; margin: 10px 0; }
+            .item { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
+            .total { font-weight: bold; font-size: 14px; margin-top: 10px; border-top: 2px solid #000; padding-top: 10px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 11px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>WEBPOS</h2>
+            <p style="font-size: 11px; margin: 5px 0;">${formatDateTime(t.timestamp)}</p>
+          </div>
+          <div class="item">
+            <span>ID:</span>
+            <span>${t.id.substring(0, 12)}...</span>
+          </div>
+          <div class="item">
+            <span>Kasir:</span>
+            <span>${t.cashierName || '-'}</span>
+          </div>
+          <div class="line"></div>
+          ${t.items ? t.items.map(item => `
+            <div class="item">
+              <span>${item.name} x${item.qty}</span>
+              <span>${formatRupiah(item.subtotal)}</span>
+            </div>
+          `).join('') : `
+            <div class="item">
+              <span>${t.type}</span>
+              <span>${formatRupiah(t.total || t.amount || 0)}</span>
+            </div>
+          `}
+          <div class="line"></div>
+          <div class="item total">
+            <span>TOTAL</span>
+            <span>${formatRupiah(t.total || t.amount || 0)}</span>
+          </div>
+          <div class="footer">
+            <p>Terima Kasih<br>Atas Kunjungan Anda</p>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function exportData() {
+      if (allTransactions.length === 0) {
+        showToast('Tidak ada data untuk diexport', 'warning');
+        return;
+      }
+
+      let csv = 'ID,Tanggal,Tipe,Metode,Kasir,Total,Status\n';
+      allTransactions.forEach(t => {
+        csv += `${t.id},"${formatDateTime(t.timestamp)}",${t.type},${t.paymentMethod || '-'},${t.cashierName || '-'},${t.total || t.amount || 0},${t.status || 'completed'}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transaksi_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Data berhasil diexport', 'success');
+    }
+
+    // Helper functions
+    function formatRupiah(angka) {
+      if (angka === undefined || angka === null) return 'Rp 0';
+      const number = typeof angka === 'string' ? parseInt(angka) : angka;
+      if (isNaN(number)) return 'Rp 0';
+      return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatDateTime(timestamp) {
+      if (!timestamp) return '-';
+      try {
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return '-';
+        return date.toLocaleString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return '-';
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      if (Utils.showToast) {
+        Utils.showToast(message, type);
+        return;
+      }
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : type === 'warning' ? 'exclamation-circle' : 'info-circle'}"></i><span>${msg}</span>`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
       container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3500);
+      setTimeout(() => toast.remove(), 3000);
     }
 
-    // ===== LOAD HEADER STATS DARI FIREBASE =====
-    async function loadHeaderStats() {
-      const today = new Date();
-      const todayStr = today.getFullYear() + '-' +
-        String(today.getMonth() + 1).padStart(2, '0') + '-' +
-        String(today.getDate()).padStart(2, '0');
-      // --- Total Penjualan dari transaksi hari ini ---
-      try {
-        const txSnapshot = await firebase.database().ref('transactions/' + todayStr).once('value');
-        const txData = txSnapshot.val() || {};
-
-        let totalPenjualan = 0;
-        let kasTunai = 0;
-        Object.values(txData).forEach(tx => {
-          if (tx.status === 'completed') {
-            totalPenjualan += tx.total || 0;
-            if (!tx.paymentMethod || tx.paymentMethod === 'cash') {
-              kasTunai += tx.total || 0;
-            }
-          }
-        });
-
-                // Hitung kas ditangan dari transaksi hari ini (tunai)
-        let kasDariPenjualanTunai = 0;
-        let kasDitangan = 0;
-        
-        // Hitung penjualan tunai dari transaksi
-        Object.values(txData).forEach(tx => {
-          if (tx.status === 'completed' && (!tx.paymentMethod || tx.paymentMethod === 'cash')) {
-            kasDariPenjualanTunai += tx.total || 0;
-          }
-        });
-
-        // Coba ambil dari path kas/saldo dulu
-        const kasPaths = ['kas/saldo', 'kas/currentBalance', 'settings/kas/saldo'];
-        for (const path of kasPaths) {
-          try {
-            const snap = await db.ref(path).once('value');
-            const val = snap.val();
-            if (val !== null && typeof val === 'number') {
-              kasDitangan = val;
-              break;
-            }
-          } catch (e) {
-            // Path tidak bisa diakses, lanjut ke path berikutnya
-          }
-        }
-
-        // Jika tidak ada saldo di database, hitung dari modal + penjualan tunai
-        if (kasDitangan === 0) {
-          try {
-            const modalSnap = await db.ref('kas_harian/' + todayStr).once('value');
-            const modalData = modalSnap.val() || {};
-            let modalAwal = 0;
-            Object.values(modalData).forEach(k => {
-              if (k.type === 'modal' || k.type === 'masuk') modalAwal += k.amount || 0;
-              if (k.type === 'keluar' || k.type === 'tarik') modalAwal -= k.amount || 0;
-            });
-            kasDitangan = modalAwal + kasDariPenjualanTunai;
-          } catch (e) {
-            // Fallback: hanya pakai penjualan tunai kalau modal error
-            kasDitangan = kasDariPenjualanTunai;
-          }
-        }
-        
-        document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
-        document.getElementById('kasDitangan').textContent = formatRupiah(kasDitangan);
-      } catch (err) {
-        console.error('Error loading header stats:', err);
-      }
-    }
-
-    // ===== STATE =====
-    let products = [];
-    let categories = [];
-    let cart = [];
-    let discount = 0;
-    let currentCategory = 'all';
-    let paymentAmount = 0;
-    let paymentMethod = 'cash';
-    const TAX_RATE = 0.11;
-
-    // ===== LOAD USER =====
-    function loadUserData() {
-      try {
-        firebase.auth().onAuthStateChanged(user => {
-          if (user) {
-            firebase.database().ref('users/' + user.uid).once('value').then(snap => {
-              const data = snap.val() || {};
-              const name = data.name || user.email || 'Kasir';
-              const role = data.role || 'kasir';
-              document.getElementById('userName').textContent = name;
-              document.getElementById('userRole').textContent = role;
-              document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
-            });
-          }
-        });
-      } catch (e) {}
-    }
-
-    // ===== LOAD CATEGORIES =====
-    async function loadCategories() {
-      try {
-        const snap = await firebase.database().ref('categories').once('value');
-        const data = snap.val() || {};
-        categories = Object.entries(data).map(([id, d]) => ({ id, ...d }));
-
-        const container = document.getElementById('categoryPills');
-        const pills = categories.map(c =>
-          `<button class="category-pill" data-category="${c.id}">${c.name}</button>`
-        ).join('');
-        container.innerHTML = `<button class="category-pill active" data-category="all">Semua</button>${pills}`;
-
-        container.querySelectorAll('.category-pill').forEach(pill => {
-          pill.addEventListener('click', () => {
-            container.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            currentCategory = pill.dataset.category;
-            renderProducts();
-          });
-        });
-      } catch (e) {
-        console.error('Error loading categories:', e);
-      }
-    }
-
-    // ===== LOAD PRODUCTS =====
-    async function loadProducts() {
-      try {
-        const snap = await firebase.database().ref('products').once('value');
-        const data = snap.val() || {};
-        products = Object.entries(data)
-          .map(([id, d]) => ({ id, ...d }))
-          .filter(p => p.status !== 'inactive');
-        renderProducts();
-      } catch (e) {
-        console.error('Error loading products:', e);
-        showToast('Gagal memuat produk', 'error');
-      }
-    }
-
-    // ===== RENDER PRODUCTS =====
-    function renderProducts() {
-      const container = document.getElementById('productsGrid');
-      let filtered = [...products];
-
-      if (currentCategory !== 'all') {
-        filtered = filtered.filter(p => p.categoryId === currentCategory);
-      }
-
-      const q = document.getElementById('productSearch').value.toLowerCase();
-      if (q) {
-        filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(q) ||
-          (p.code && p.code.toLowerCase().includes(q))
-        );
-      }
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
-            <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;opacity:.5;display:block;"></i>
-            <p>Produk tidak ditemukan</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = filtered.map(p => {
-        const stockClass = p.stock <= 0 ? 'empty' : p.stock <= 5 ? 'low' : '';
-        const stockText = p.stock <= 0 ? 'Habis' : p.stock <= 5 ? `${p.stock} sisa` : p.stock;
-        return `
-          <div class="product-card" onclick="addToCart('${p.id}')">
-            <div class="product-card-image">
-              ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '<i class="fas fa-box"></i>'}
-              <span class="product-stock-badge ${stockClass}">${stockText}</span>
-            </div>
-            <div class="product-card-info">
-              <div class="product-card-name">${p.name}</div>
-              <div class="product-card-price">${formatRupiah(p.sellingPrice)}</div>
-              ${p.code ? `<div class="product-card-code">${p.code}</div>` : ''}
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    // ===== SEARCH =====
-    let searchTimer;
-    document.getElementById('productSearch').addEventListener('input', () => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(renderProducts, 300);
-    });
-
-    // ===== ADD TO CART =====
-    window.addToCart = function(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
-
-      if (product.stock <= 0) {
-        showToast('Produk habis', 'warning');
-        return;
-      }
-
-      const existing = cart.find(i => i.productId === productId);
-      if (existing) {
-        if (existing.quantity + 1 > product.stock) {
-          showToast('Stok tidak mencukupi', 'warning');
-          return;
-        }
-        existing.quantity++;
-        existing.total = existing.quantity * existing.price;
-      } else {
-        cart.push({
-          productId: product.id,
-          name: product.name,
-          price: product.sellingPrice,
-          cost: product.costPrice || 0,
-          quantity: 1,
-          total: product.sellingPrice,
-          image: product.image || null
-        });
-      }
-
-      saveCart();
-      renderCart();
-      updateSummary();
-      showToast(`${product.name} ditambahkan`, 'success');
-    };
-
-    // ===== UPDATE QTY =====
-    window.updateQty = function(productId, delta) {
-      const item = cart.find(i => i.productId === productId);
-      if (!item) return;
-
-      const product = products.find(p => p.id === productId);
-      const newQty = item.quantity + delta;
-
-      if (newQty <= 0) {
-        removeFromCart(productId);
-        return;
-      }
-
-      if (product && newQty > product.stock) {
-        showToast('Stok tidak mencukupi', 'warning');
-        return;
-      }
-
-      item.quantity = newQty;
-      item.total = item.quantity * item.price;
-      saveCart();
-      renderCart();
-      updateSummary();
-    };
-
-    // ===== REMOVE FROM CART =====
-    window.removeFromCart = function(productId) {
-      cart = cart.filter(i => i.productId !== productId);
-      saveCart();
-      renderCart();
-      updateSummary();
-    };
-
-    // ===== RENDER CART =====
-    function renderCart() {
-      const container = document.getElementById('cartItems');
-      const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-      document.getElementById('cartCount').textContent = totalItems;
-      document.getElementById('cartBadge').textContent = totalItems;
-
-      if (cart.length === 0) {
-        container.innerHTML = `
-          <div class="cart-empty">
-            <i class="fas fa-shopping-basket"></i>
-            <p>Keranjang masih kosong</p>
-            <p style="font-size:.75rem;margin-top:.5rem;">Klik produk untuk menambahkan</p>
-          </div>`;
-        return;
-      }
-
-      container.innerHTML = cart.map(item => `
-        <div class="cart-item">
-          <div class="cart-item-image">
-            ${item.image
-              ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">`
-              : '<i class="fas fa-box"></i>'}
-          </div>
-          <div class="cart-item-details">
-            <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-price">${formatRupiah(item.price)}</div>
-            <div class="cart-item-actions">
-              <button class="qty-btn" onclick="updateQty('${item.productId}', -1)">-</button>
-              <input type="text" class="qty-input" value="${item.quantity}" readonly>
-              <button class="qty-btn" onclick="updateQty('${item.productId}', 1)">+</button>
-            </div>
-          </div>
-          <div class="cart-item-total">${formatRupiah(item.total)}</div>
-          <button class="cart-item-remove" onclick="removeFromCart('${item.productId}')">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>`).join('');
-    }
-
-    // ===== UPDATE SUMMARY =====
-    function updateSummary() {
-      const subtotal = cart.reduce((s, i) => s + i.total, 0);
-      const ppnAktif = document.getElementById('ppnToggle').checked;
-      const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
-      const total = subtotal + taxAmount - discount;
-
-      document.getElementById('subtotal').textContent = formatRupiah(subtotal);
-      document.getElementById('discount').textContent = formatRupiah(discount);
-      document.getElementById('tax').textContent = formatRupiah(taxAmount);
-      document.getElementById('taxRow').style.display = ppnAktif ? 'flex' : 'none';
-      document.getElementById('total').textContent = formatRupiah(total);
-    }
-
-    function calculateTotal() {
-      const subtotal = cart.reduce((s, i) => s + i.total, 0);
-      const ppnAktif = document.getElementById('ppnToggle').checked;
-      const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
-      return subtotal + taxAmount - discount;
-    }
-    // PPN Toggle event
-    document.getElementById('ppnToggle').addEventListener('change', updateSummary);
-
-    // ===== SAVE / LOAD CART =====
-    function saveCart() {
-      try {
-        localStorage.setItem('kasir_cart', JSON.stringify(cart));
-        localStorage.setItem('kasir_discount', discount);
-      } catch (e) {}
-    }
-
-    function loadCart() {
-      try {
-        const savedCart = JSON.parse(localStorage.getItem('kasir_cart') || '[]');
-        const savedDiscount = parseFloat(localStorage.getItem('kasir_discount') || '0');
-        if (Array.isArray(savedCart)) cart = savedCart;
-        discount = savedDiscount || 0;
-      } catch (e) { cart = []; discount = 0; }
-      renderCart();
-      updateSummary();
-    }
-
-    // ===== CLEAR CART =====
-    document.getElementById('btnClearCart').addEventListener('click', () => {
-      if (cart.length === 0) return;
-      if (confirm('Yakin ingin mengosongkan keranjang?')) {
-        cart = [];
-        discount = 0;
-        saveCart();
-        renderCart();
-        updateSummary();
-        showToast('Keranjang dikosongkan', 'info');
-      }
-    });
-
-    // ===== DISKON =====
-    document.getElementById('btnDiskon').addEventListener('click', () => {
-      const input = prompt('Masukkan jumlah diskon (Rp):', discount);
-      if (input !== null) {
-        discount = parseInt(input) || 0;
-        saveCart();
-        updateSummary();
-      }
-    });
-
-    // ===== CATATAN =====
-    document.getElementById('btnCatatan').addEventListener('click', () => {
-      const note = prompt('Catatan untuk transaksi:', localStorage.getItem('kasir_note') || '');
-      if (note !== null) {
-        localStorage.setItem('kasir_note', note);
-        showToast('Catatan disimpan', 'success');
-      }
-    });
-
-    // ===== PAYMENT MODAL =====
-    const paymentModal = document.getElementById('paymentModal');
-
-    document.getElementById('btnBayar').addEventListener('click', () => {
-      if (cart.length === 0) {
-        showToast('Keranjang masih kosong', 'warning');
-        return;
-      }
-      const total = calculateTotal();
-      document.getElementById('paymentTotal').textContent = formatRupiah(total);
-      paymentAmount = 0;
-      document.getElementById('paymentInput').textContent = 'Rp 0';
-      document.getElementById('paymentChange').textContent = 'Rp 0';
-      paymentModal.classList.add('active');
-    });
-
-    document.getElementById('closePaymentModal').addEventListener('click', () => {
-      paymentModal.classList.remove('active');
-    });
-
-    document.getElementById('btnCancelPayment').addEventListener('click', () => {
-      paymentModal.classList.remove('active');
-    });
-
-    // Payment method selection
-    document.querySelectorAll('.payment-method').forEach(m => {
-      m.addEventListener('click', () => {
-        document.querySelectorAll('.payment-method').forEach(x => x.classList.remove('active'));
-        m.classList.add('active');
-        paymentMethod = m.dataset.method;
+    // Close modals on outside click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
       });
     });
 
-    // Numpad
-    document.querySelectorAll('.numpad-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const num = btn.dataset.num;
-        const action = btn.dataset.action;
-        if (num !== undefined) {
-          paymentAmount = paymentAmount * 10 + parseInt(num);
-        } else if (action === 'clear') {
-          paymentAmount = 0;
-        } else if (action === 'backspace') {
-          paymentAmount = Math.floor(paymentAmount / 10);
-        }
-        updatePaymentDisplay();
-      });
-    });
-
-    // Quick amounts
-    document.querySelectorAll('.quick-amount').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (btn.dataset.amount === 'exact') {
-          paymentAmount = Math.ceil(calculateTotal());
-        } else {
-          paymentAmount = parseInt(btn.dataset.amount);
-        }
-        updatePaymentDisplay();
-      });
-    });
-
-    function updatePaymentDisplay() {
-      const total = calculateTotal();
-      const change = paymentAmount - total;
-      document.getElementById('paymentInput').textContent = formatRupiah(paymentAmount);
-      document.getElementById('paymentChange').textContent = formatRupiah(change > 0 ? change : 0);
-    }
-
-    // ===== PROSES BAYAR =====
-    document.getElementById('btnConfirmPayment').addEventListener('click', async () => {
-      const total = calculateTotal();
-
-      if (paymentAmount < total) {
-        showToast('Jumlah bayar kurang dari total', 'error');
-        return;
-      }
-
-      try {
-        document.getElementById('loadingOverlay').classList.add('active');
-
-        const user = firebase.auth().currentUser;
-        const transactionId = 'TRX' + Date.now();
-        const today = new Date();
-        const todayStr = today.getFullYear() + '-' +
-          String(today.getMonth() + 1).padStart(2, '0') + '-' +
-          String(today.getDate()).padStart(2, '0');
-
-        const subtotal = cart.reduce((s, i) => s + i.total, 0);
-        const profit = cart.reduce((s, i) => s + ((i.price - i.cost) * i.quantity), 0);
-        const ppnAktif = document.getElementById('ppnToggle').checked;
-        const taxAmount = ppnAktif ? subtotal * TAX_RATE : 0;
-
-        const transaction = {
-          id: transactionId,
-          type: 'penjualan',
-          items: cart,
-          subtotal,
-          tax: taxAmount,
-          discount,
-          total,
-          profit,
-          paymentMethod,
-          paymentAmount,
-          change: paymentAmount - total,
-          cashierId: user ? user.uid : 'unknown',
-          cashierName: document.getElementById('userName').textContent,
-          note: localStorage.getItem('kasir_note') || '',
-          timestamp: Date.now(),
-          status: 'completed'
-        };
-
-        const db = firebase.database();
-        await db.ref(`transactions/${todayStr}/${transactionId}`).set(transaction);
-
-        // Update stok produk
-        for (const item of cart) {
-          const ref = db.ref(`products/${item.productId}`);
-          const snap = await ref.once('value');
-          const prod = snap.val();
-          if (prod) {
-            await ref.update({
-              stock: Math.max(0, (prod.stock || 0) - item.quantity),
-              soldCount: (prod.soldCount || 0) + item.quantity
-            });
-          }
-        }
-
-        cart = [];
-        discount = 0;
-        localStorage.removeItem('kasir_note');
-        saveCart();
-        renderCart();
-        updateSummary();
-        paymentModal.classList.remove('active');
-        document.getElementById('loadingOverlay').classList.remove('active');
-        showToast('Transaksi berhasil!', 'success');
-
-        // Reload produk & stats
-        loadProducts();
-        loadHeaderStats();
-
-      } catch (e) {
-        console.error('Payment error:', e);
-        document.getElementById('loadingOverlay').classList.remove('active');
-        showToast('Gagal memproses transaksi', 'error');
-      }
-    });
-
-    // ===== QUICK ACTIONS =====
-    // btnTopup & btnTarik sudah pakai onclick di HTML
-    document.getElementById('btnManual').addEventListener('click', () => {
-      const name = prompt('Nama produk:');
-      if (!name) return;
-      const price = parseInt(prompt('Harga:'));
-      if (!price) return;
-      const manual = {
-        id: 'manual_' + Date.now(),
-        name,
-        sellingPrice: price,
-        costPrice: 0,
-        stock: 9999
-      };
-      products.unshift(manual);
-      renderProducts();
-      addToCart(manual.id);
-    });
-
-    document.getElementById('btnHold').addEventListener('click', () => {
-      if (cart.length === 0) {
-        showToast('Keranjang masih kosong', 'warning');
-        return;
-      }
-      const held = JSON.parse(localStorage.getItem('held_transactions') || '[]');
-      held.push({ cart, discount, timestamp: Date.now() });
-      localStorage.setItem('held_transactions', JSON.stringify(held));
-      cart = [];
-      discount = 0;
-      saveCart();
-      renderCart();
-      updateSummary();
-      showToast('Transaksi ditahan', 'success');
-    });
-
-    // ===== LOGOUT =====
-    document.getElementById('btnLogout').addEventListener('click', () => {
-      if (confirm('Yakin ingin logout?')) {
-        firebase.auth().signOut().then(() => {
-          window.location.href = 'login.html';
-        });
-      }
-    });
-
-    // ===== MOBILE CART TOGGLE =====
-    document.getElementById('cartToggle').addEventListener('click', () => {
-      document.getElementById('cartSection').classList.toggle('open');
-    });
-
-    // ===== KEYBOARD SHORTCUTS =====
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        document.getElementById('productSearch').focus();
-      }
-      if (e.key === 'F2' && cart.length > 0) {
-        e.preventDefault();
-        document.getElementById('btnBayar').click();
-      }
       if (e.key === 'Escape') {
-        paymentModal.classList.remove('active');
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('open'));
       }
-    });
-
-    // ===== VIEW TOGGLE =====
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const grid = document.getElementById('productsGrid');
-        if (btn.dataset.view === 'list') {
-          grid.style.gridTemplateColumns = '1fr';
-        } else {
-          grid.style.gridTemplateColumns = '';
-        }
-      });
-    });
-
-    // ===== INISIALISASI =====
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = 'login.html';
-        return;
-      }
-      loadUserData();
-      loadCategories();
-      loadProducts();
-      loadCart();
-      loadHeaderStats();
     });
   </script>
 </body>
