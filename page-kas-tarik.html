@@ -718,10 +718,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         
         // Validasi: jika ada admin fee, minimal ada keterangan
         if (adminFee > 0 && !note) {
-          Utils.showToast('Keterangan wajib diisi jika ada biaya admin', 'warning');
-          document.getElementById('tarikNote').focus();
-          return;
-        }
+  Utils.showToast('Disarankan mengisi keterangan jika ada biaya admin', 'info');
+}
 
         try {
           Utils.showLoading('Menyimpan...');
