@@ -578,12 +578,16 @@
   }
 
   function getFiltered() {
-    const q = document.getElementById('searchInput').value.trim().toLowerCase();
-    if (!q) return allData;
-    const kw = q.split(/\s+/);
-    return allData.filter(r => kw.every(k => r.nama.toLowerCase().includes(k) || r.nomor.toLowerCase().includes(k)));
-  }
-
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return allData;
+  const kw = q.split(/\s+/);
+  return allData.filter(r => {
+    const nama = (r.nama || '').toLowerCase();
+    const nomor = String(r.nomor || '').toLowerCase(); // ← Konversi ke String!
+    return kw.every(k => nama.includes(k) || nomor.includes(k));
+  });
+} 
+  
   function renderTable(rows) {
     const container = document.getElementById('tableContainer');
     const copyAllBtn = document.getElementById('btnCopyAll');
