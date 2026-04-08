@@ -1445,29 +1445,26 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
     });
 
-      <!-- Modal Detail Transaksi -->
-  <div class="modal-overlay" id="detailModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
-    <div class="modal-content" style="background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-      <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="modal-title">Detail Transaksi</h3>
-        <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem;">
-        <div id="detailContent">
-          <!-- Content akan diisi via JS -->
-        </div>
-        
-        <!-- Aksi Buttons -->
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-          <button class="btn btn-primary" id="btnPrint"><i class="fas fa-print"></i> Cetak Struk</button>
-          <button class="btn btn-secondary" id="btnEdit"><i class="fas fa-edit"></i> Edit</button>
-          <button class="btn btn-warning" id="btnReturn" style="display:none;"><i class="fas fa-undo"></i> Return (Stok)</button>
-          <button class="btn btn-danger" id="btnDelete"><i class="fas fa-trash"></i> Hapus</button>
-        </div>
+     </script>
+
+<!-- Modal Detail Transaksi -->
+<div class="modal-overlay" id="detailModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="modal-content" style="background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+    <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+      <h3 class="modal-title">Detail Transaksi</h3>
+      <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" style="padding: 1.5rem;">
+      <div id="detailContent"></div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+        <button class="btn btn-primary" id="btnPrint"><i class="fas fa-print"></i> Cetak</button>
+        <button class="btn btn-secondary" id="btnEdit"><i class="fas fa-edit"></i> Edit</button>
+        <button class="btn btn-warning" id="btnReturn" style="display:none;"><i class="fas fa-undo"></i> Return</button>
+        <button class="btn btn-danger" id="btnDelete"><i class="fas fa-trash"></i> Hapus</button>
       </div>
     </div>
   </div>
-    
-  </script>
+</div>
+  
 </body>
 </html>
