@@ -1121,8 +1121,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         // Theme toggle
         document.getElementById('btnTheme').addEventListener('click', () => {
           const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-          document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-          localStorage.setItem('dark_mode', !isDark);
+          const newTheme = isDark ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('webpos_theme', newTheme);
         });
 
         // Logout
@@ -1353,7 +1354,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             document.getElementById('gasUrl').value = config.gasUrl || '';
             document.getElementById('n8nUrl').value = config.n8nUrl || '';
             
-            if (config.botToken && config.chatId) {
+            if (config.botToken) {
               isConnected = true;
               updateStatusUI(true);
             }
@@ -1386,8 +1387,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             const gasUrl = document.getElementById('gasUrl').value;
             const n8nUrl = document.getElementById('n8nUrl').value;
             
-            if (!botToken || !chatId) {
-              Utils.showToast('Bot token dan chat ID harus diisi', 'error');
+            if (!botToken) {
+              Utils.showToast('Bot token harus diisi', 'error');
               Utils.hideLoading();
               return;
             }
@@ -1422,8 +1423,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         }
 
         function connectTelegram() {
-          if (!config.botToken || !config.chatId) {
-            Utils.showToast('Isi konfigurasi bot token dan chat ID terlebih dahulu', 'error');
+          if (!config.botToken) {
+            Utils.showToast('Isi bot token terlebih dahulu', 'error');
             return;
           }
           
