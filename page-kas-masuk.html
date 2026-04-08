@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="light" data-theme-color="green">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -12,35 +12,57 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-:root{--primary:#10b981;--primary-dark:#059669;--secondary:#34d399;--danger:#ef4444;--warning:#f59e0b;--info:#3b82f6;--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+/* Theme Colors - Green for Kas Masuk */
+:root{--primary:#10b981;--primary-dark:#059669;--secondary:#34d399;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+[data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
+[data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
+[data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
+[data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
+[data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
+[data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
+[data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+
+/* Base */
+:root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+
 [data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-track{background:var(--bg-secondary)}
 ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
+
 .app-container{display:flex;min-height:100vh}
+
+/* Sidebar */
 .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
 .sidebar.collapsed{width:var(--sidebar-collapsed)}
 @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
+
 .sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
 .logo-container{display:flex;align-items:center;gap:.5rem}
 .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
 .logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .sidebar.collapsed .logo-text{opacity:0;width:0}
+
 .menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
 .menu-toggle:hover{background:var(--primary-dark)}
 .sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
+
 .sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
 .search-input-wrapper{position:relative;display:flex;align-items:center}
 .search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
 .search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
 .search-input:focus{outline:none;border-color:var(--primary)}
+
 .sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
 .nav-section{margin-bottom:1.5rem}
 .nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
 .sidebar.collapsed .nav-section-title{display:none}
+
 .nav-menu{list-style:none}
 .nav-item{margin-bottom:2px}
 .nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
@@ -51,6 +73,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .nav-link i{width:22px;text-align:center;font-size:1.05rem}
 .nav-link span{white-space:nowrap}
 .sidebar.collapsed .nav-link span{display:none}
+
 .nav-dropdown{position:relative}
 .nav-dropdown-toggle{justify-content:space-between}
 .nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto}
@@ -59,51 +82,72 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .sidebar.collapsed .nav-submenu{display:none}
 .nav-dropdown.open .nav-submenu{max-height:500px}
 .nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
+
 .sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
 .user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
+.user-profile:hover{opacity:.8}
 .user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
 .user-info{flex:1;overflow:hidden}
 .sidebar.collapsed .user-info{display:none}
 .user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
+
+/* Main Content */
 .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
 .sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
 @media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
+
+/* Header */
 .main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
 .header-left{display:flex;align-items:center;gap:1rem}
 .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
 .header-actions{display:flex;align-items:center;gap:.5rem}
+
+/* Page Content */
 .page-content{flex:1;padding:1.5rem;overflow-y:auto}
 @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
 .btn:disabled{opacity:.6;cursor:not-allowed}
-.btn-success{background:var(--primary);color:white}
-.btn-success:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover:not(:disabled){filter:brightness(0.9)}
 .btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
 .btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
 .btn-sm{padding:.4rem .875rem;font-size:.8rem}
 .btn-block{width:100%}
+
 .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
 .btn-icon:hover{background:rgba(16,185,129,.05);color:var(--primary);border-color:var(--primary)}
+
+/* Cards */
 .card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
 .card:hover{box-shadow:var(--shadow-lg)}
 .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
 .card-body{padding:1.5rem}
+
+/* Forms */
 .form-group{margin-bottom:1.25rem}
 .form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
 .form-input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
 .form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(16,185,129,.1)}
 .form-input::placeholder{color:var(--text-muted)}
+
+/* Loading */
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
 .loading-overlay.active{opacity:1;visibility:visible}
 .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* Mobile Nav */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
 .mobile-nav-item i{font-size:1.25rem}
 .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
 @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+/* Kas Specific Styles */
 .kas-card{max-width:500px;margin:0 auto}
 .kas-amount{font-size:3rem;font-weight:700;color:var(--primary);text-align:center;padding:2rem;background:rgba(16,185,129,.1);border-radius:var(--radius-xl);margin-bottom:1.5rem;border:2px solid rgba(16,185,129,.2)}
 .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem}
@@ -116,11 +160,14 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .kas-info{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;text-align:center}
 .kas-info-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem}
 .kas-info-value{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+
+/* Toast */
 .toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
 .toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.toast.success{border-left-color:var(--primary)}
+.toast.success{border-left-color:var(--success)}
 .toast.error{border-left-color:var(--danger)}
+
 .d-md-none{display:none!important}
 @media(max-width:768px){.d-md-none{display:flex!important}}
   </style>
@@ -131,6 +178,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 </head>
 <body>
   <div class="app-container">
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-container">
@@ -146,6 +194,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         </div>
       </div>
       <nav class="sidebar-nav">
+        <!-- Utama -->
         <div class="nav-section">
           <div class="nav-section-title">Utama</div>
           <ul class="nav-menu">
@@ -154,6 +203,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <li class="nav-item"><a href="page-produk.html" class="nav-link" data-menu="produk"><i class="fas fa-box"></i><span>Produk</span></a></li>
           </ul>
         </div>
+
+        <!-- Transaksi -->
         <div class="nav-section">
           <div class="nav-section-title">Transaksi</div>
           <ul class="nav-menu">
@@ -168,6 +219,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
                 <li><a href="page-kas-masuk.html" class="nav-link active"><span>Kas Masuk</span></a></li>
                 <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
                 <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
@@ -175,17 +227,33 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <li class="nav-item"><a href="page-hutang.html" class="nav-link" data-menu="hutang"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a></li>
           </ul>
         </div>
+
+        <!-- Laporan -->
         <div class="nav-section">
           <div class="nav-section-title">Laporan</div>
           <ul class="nav-menu">
             <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
           </ul>
         </div>
+
+        <!-- Integrasi -->
+        <div class="nav-section">
+          <div class="nav-section-title">Integrasi</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram"><i class="fab fa-telegram"></i><span>Saldo Telegram</span></a></li>
+            <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
+          </ul>
+        </div>
+
+        <!-- Sistem -->
         <div class="nav-section">
           <div class="nav-section-title">Sistem</div>
           <ul class="nav-menu">
-            <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
             <li class="nav-item"><a href="page-pengguna.html" class="nav-link" data-menu="pengguna"><i class="fas fa-user-cog"></i><span>Pengguna</span></a></li>
+            <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
+            <li class="nav-item"><a href="page-backup.html" class="nav-link" data-menu="backup"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a></li>
+            <li class="nav-item"><a href="page-printer.html" class="nav-link" data-menu="printer"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
+            <li class="nav-item"><a href="page-reset.html" class="nav-link" data-menu="reset"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
           </ul>
         </div>
       </nav>
@@ -215,7 +283,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         <div class="kas-card">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-arrow-down" style="color:var(--primary)"></i> Tambah Kas Masuk</h3>
+              <h3 class="card-title"><i class="fas fa-arrow-down" style="color:var(--success)"></i> Tambah Kas Masuk</h3>
             </div>
             <div class="card-body">
               <div class="kas-info">
@@ -305,6 +373,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     });
 
     function initEventListeners() {
+      // Sidebar toggle
       document.getElementById('menuToggle').addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('collapsed');
       });
@@ -313,26 +382,35 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         document.getElementById('sidebar').classList.toggle('mobile-open');
       });
 
+      // Dropdown toggle
+      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          const parent = this.closest('.nav-dropdown');
+          document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+            if (openDropdown !== parent) openDropdown.classList.remove('open');
+          });
+          parent.classList.toggle('open');
+        });
+      });
+
       document.getElementById('btnLogout').addEventListener('click', () => {
         Utils.confirm('Yakin ingin logout?', () => Auth.logout());
       });
 
+      // Numpad
       document.querySelectorAll('.numpad-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const num = btn.dataset.num;
           const action = btn.dataset.action;
-          
-          if (num !== undefined) {
-            amount = (amount * 10) + parseInt(num);
-          } else if (action === 'clear') {
-            amount = 0;
-          } else if (action === 'backspace') {
-            amount = Math.floor(amount / 10);
-          }
+          if (num !== undefined) amount = (amount * 10) + parseInt(num);
+          else if (action === 'clear') amount = 0;
+          else if (action === 'backspace') amount = Math.floor(amount / 10);
           updateDisplay();
         });
       });
 
+      // Quick amounts
       document.querySelectorAll('.quick-amount').forEach(btn => {
         btn.addEventListener('click', () => {
           amount = parseInt(btn.dataset.amount);
@@ -347,14 +425,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       try {
         const today = Utils.getTodayString();
         let kas = 0;
-        
         const modalSnap = await database.ref(`modal/${today}/${user.uid}`).once('value');
         const modal = modalSnap.val();
         if (modal) kas = modal.amount || 0;
 
         const transSnap = await database.ref(`transactions/${today}`).once('value');
         const transactions = transSnap.val() || {};
-        
         Object.values(transactions).forEach(trans => {
           if (trans.status === 'cancelled') return;
           if (trans.type === 'penjualan') kas += trans.total || 0;
@@ -375,12 +451,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     async function saveKasMasuk() {
       const note = document.getElementById('kasNote').value.trim();
-      
       if (amount <= 0) {
         Utils.showToast('Masukkan jumlah uang terlebih dahulu', 'warning');
         return;
       }
-      
       if (!note) {
         Utils.showToast('Keterangan wajib diisi', 'warning');
         document.getElementById('kasNote').focus();
@@ -390,7 +464,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       try {
         Utils.showLoading('Menyimpan...');
         const today = Utils.getTodayString();
-        
         await database.ref(`transactions/${today}`).push({
           type: 'kas_masuk',
           amount: amount,
@@ -403,11 +476,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         });
 
         Utils.hideLoading();
-        Utils.showToast(`Kas masuk ${Utils.formatRupiah(amount)} berhasil disimpan! Total kas sekarang: ${Utils.formatRupiah(currentKas + amount)}`, 'success');
-        
-        setTimeout(() => {
-          window.location.href = 'page-kas.html';
-        }, 2000);
+        Utils.showToast(`Kas masuk ${Utils.formatRupiah(amount)} berhasil disimpan!`, 'success');
+        setTimeout(() => window.location.href = 'page-kas.html', 1500);
       } catch (error) {
         Utils.hideLoading();
         Utils.showToast('Gagal menyimpan: ' + error.message, 'error');
