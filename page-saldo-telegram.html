@@ -554,6 +554,96 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       margin-bottom: 0.5rem;
       opacity: 0.5;
     }
+
+    /* Tambahan untuk fitur baru */
+    .gas-config {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .transaction-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-saldo {
+      padding: 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-saldo:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .btn-saldo.active {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-saldo i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
+    .nominal-input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .nominal-input-group input {
+      flex: 1;
+    }
+
+    .sheet-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .sheet-status.connected {
+      color: var(--success);
+    }
+
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .5; }
+    }
   </style>
 </head>
 <body>
@@ -770,6 +860,48 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </button>
             </div>
 
+            <!-- Transaction Panel (Baru - untuk alur n8n) -->
+            <div class="transaction-panel" id="transactionPanel" style="display: none;">
+              <h3 class="card-title">
+                <i class="fas fa-paper-plane" style="color: var(--primary);"></i>
+                Input Saldo ke Google Sheets
+              </h3>
+              
+              <div class="form-group">
+                <label class="form-label">Jenis Saldo</label>
+                <div class="quick-actions">
+                  <button type="button" class="btn-saldo" data-value="DANA">
+                    <i class="fas fa-wallet"></i>
+                    <span>DANA</span>
+                  </button>
+                  <button type="button" class="btn-saldo" data-value="DIGIPOS">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>DIGIPOS</span>
+                  </button>
+                  <button type="button" class="btn-saldo" data-value="MASTERLOAD">
+                    <i class="fas fa-bolt"></i>
+                    <span>MASTERLOAD</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" id="nominalGroup" style="display: none;">
+                <label class="form-label">Nominal Top Up</label>
+                <div class="nominal-input-group">
+                  <input type="number" class="form-input" id="nominalInput" placeholder="Masukkan nominal">
+                  <button class="btn btn-primary" id="btnSubmitSaldo">
+                    <i class="fas fa-save"></i>
+                    Simpan
+                  </button>
+                </div>
+              </div>
+
+              <div class="sheet-status" id="sheetStatus">
+                <i class="fas fa-circle-notch fa-spin pulse"></i>
+                <span>Menunggu koneksi Google Sheets...</span>
+              </div>
+            </div>
+
             <!-- Info Card -->
             <div class="info-card">
               <h3 class="card-title">
@@ -828,8 +960,30 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 </div>
                 
                 <div class="form-group">
-                  <label class="form-label">Google Sheet URL (Opsional)</label>
-                  <input type="text" class="form-input" id="sheetUrl" placeholder="URL Google Sheet untuk backup">
+                  <label class="form-label">Google Sheet ID (untuk n8n/GAS)</label>
+                  <input type="text" class="form-input" id="sheetId" placeholder="ID dari URL Google Sheet (1cPolj_xpBztq...)">
+                  <small style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                    Contoh: 1cPolj_xpBztq6RU3XVi_CZm1j_Kqo-zQC-wsbIYrLXE
+                  </small>
+                </div>
+
+                <!-- GAS Config (Baru) -->
+                <div class="gas-config">
+                  <div class="form-group">
+                    <label class="form-label">Google Apps Script URL (Optional)</label>
+                    <input type="text" class="form-input" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec">
+                    <small style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                      URL deployment GAS untuk koneksi langsung tanpa n8n
+                    </small>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">n8n Webhook URL (Optional)</label>
+                    <input type="text" class="form-input" id="n8nUrl" placeholder="https://n8n.yourdomain.com/webhook/...">
+                    <small style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; display: block;">
+                      URL webhook n8n untuk integrasi dengan workflow otomatis
+                    </small>
+                  </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary btn-block">
@@ -916,6 +1070,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       function initTelegram() {
         let isConnected = false;
         let config = {};
+        let selectedSaldoType = null;
+        let currentTransaction = null;
 
         // Load config
         loadConfig();
@@ -976,6 +1132,216 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           });
         });
 
+        // ============================================
+        // FUNGSI BARU: Integrasi n8n & Google Apps Script
+        // ============================================
+
+        // Handler untuk tombol jenis saldo
+        document.querySelectorAll('.btn-saldo').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.btn-saldo').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedSaldoType = btn.dataset.value;
+            document.getElementById('nominalGroup').style.display = 'block';
+            document.getElementById('nominalInput').focus();
+          });
+        });
+
+        // Handler submit saldo
+        document.getElementById('btnSubmitSaldo').addEventListener('click', submitSaldoTransaction);
+
+        // Enter key handler untuk nominal
+        document.getElementById('nominalInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            submitSaldoTransaction();
+          }
+        });
+
+        async function submitSaldoTransaction() {
+          const nominal = parseInt(document.getElementById('nominalInput').value);
+          
+          if (!selectedSaldoType) {
+            Utils.showToast('Pilih jenis saldo terlebih dahulu', 'error');
+            return;
+          }
+          
+          if (!nominal || nominal <= 0) {
+            Utils.showToast('Masukkan nominal yang valid', 'error');
+            return;
+          }
+
+          if (!config.sheetId) {
+            Utils.showToast('Sheet ID belum dikonfigurasi', 'error');
+            return;
+          }
+
+          Utils.showLoading();
+
+          try {
+            // Step 1: Init transaction (simulasi langkah n8n/GAS)
+            const initData = await initSaldoSheet(selectedSaldoType, nominal);
+            
+            if (initData.success) {
+              currentTransaction = initData;
+              
+              // Step 2: Complete transaction
+              const completeData = await completeSaldoSheet(initData.matchKey, nominal);
+              
+              if (completeData.success) {
+                Utils.showToast('Transaksi saldo berhasil disimpan!', 'success');
+                addSyncLog(`Sukses: ${selectedSaldoType} - Rp ${Utils.formatRupiah(nominal)}`, 'success');
+                
+                // Reset form
+                document.getElementById('nominalInput').value = '';
+                document.querySelectorAll('.btn-saldo').forEach(b => b.classList.remove('active'));
+                document.getElementById('nominalGroup').style.display = 'none';
+                selectedSaldoType = null;
+                
+                // Update balance display (simulasi)
+                updateBalanceDisplay(nominal);
+              } else {
+                throw new Error(completeData.error || 'Gagal complete transaction');
+              }
+            } else {
+              throw new Error(initData.error || 'Gagal init transaction');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            Utils.showToast('Error: ' + error.message, 'error');
+            addSyncLog(`Error: ${error.message}`, 'error');
+          }
+
+          Utils.hideLoading();
+        }
+
+        // Fungsi untuk inisialisasi saldo (mimic GAS initSaldo)
+        async function initSaldoSheet(namaItem, nominal) {
+          // Jika ada GAS URL, gunakan GAS
+          if (config.gasUrl) {
+            try {
+              const response = await fetch(config.gasUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'initSaldo',
+                  sheetId: config.sheetId,
+                  chatId: config.chatId || 'HTML_' + Date.now(),
+                  namaItem: namaItem
+                })
+              });
+              return await response.json();
+            } catch (e) {
+              console.log('GAS Error, fallback ke Firebase:', e);
+            }
+          }
+
+          // Fallback: Simpan ke Firebase Database (simulasi STEP sheet)
+          const transaksiId = `HTML_${Date.now()}`;
+          const matchKey = `${config.chatId || 'HTML'}_waiting_${Date.now()}`;
+          
+          const stepData = {
+            TRANSAKSI_ID: transaksiId,
+            CHAT_ID: config.chatId || 'HTML_USER',
+            resumeUrl: '',
+            'SALDO TOP UP': '',
+            STATUS: 'waiting',
+            MATCH_KEY: matchKey,
+            'NAMA ITEM': namaItem,
+            timestamp: Date.now()
+          };
+
+          // Simpan ke Firebase di path telegram_steps
+          await database.ref(`telegram_steps/${matchKey}`).set(stepData);
+          
+          return {
+            success: true,
+            transaksiId: transaksiId,
+            matchKey: matchKey,
+            row: Date.now(), // simulated row number
+            message: 'Silahkan input nominal'
+          };
+        }
+
+        // Fungsi untuk complete saldo (mimic GAS completeSaldo)
+        async function completeSaldoSheet(matchKey, nominal) {
+          // Jika ada GAS URL, gunakan GAS
+          if (config.gasUrl) {
+            try {
+              const response = await fetch(config.gasUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'completeSaldo',
+                  sheetId: config.sheetId,
+                  matchKey: matchKey,
+                  nominal: nominal
+                })
+              });
+              return await response.json();
+            } catch (e) {
+              console.log('GAS Error, fallback ke Firebase:', e);
+            }
+          }
+
+          // Fallback: Update Firebase dan tambah ke riwayat topup
+          const now = new Date();
+          const bulanIndo = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+          
+          // Update status di steps
+          await database.ref(`telegram_steps/${matchKey}`).update({
+            STATUS: 'DONE',
+            'SALDO TOP UP': nominal,
+            completedAt: Date.now()
+          });
+
+          // Tambah ke riwayat topup (simulasi sheet TOP UP)
+          const topupData = {
+            BULAN: bulanIndo[now.getMonth()],
+            TANGGAL: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`,
+            'NAMA ITEM': currentTransaction?.namaItem || selectedSaldoType,
+            'SALDO TOP UP': nominal,
+            timestamp: Date.now()
+          };
+
+          await database.ref('telegram_topup_history').push(topupData);
+
+          // Jika ada n8n URL, trigger webhook n8n juga
+          if (config.n8nUrl) {
+            try {
+              fetch(config.n8nUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  event: 'saldo_completed',
+                  data: topupData,
+                  matchKey: matchKey,
+                  sheetId: config.sheetId
+                })
+              }).catch(e => console.log('n8n webhook error:', e));
+            } catch (e) {
+              console.log('n8n trigger failed:', e);
+            }
+          }
+
+          return {
+            success: true,
+            message: 'Transaksi selesai!',
+            data: topupData
+          };
+        }
+
+        function updateBalanceDisplay(lastNominal) {
+          // Simulasi update balance display
+          const currentBalance = parseInt(document.getElementById('telegramBalance').dataset.raw || '0');
+          const newBalance = currentBalance + lastNominal;
+          document.getElementById('telegramBalance').dataset.raw = newBalance;
+          document.getElementById('telegramBalance').textContent = Utils.formatRupiah(newBalance);
+        }
+
+        // ============================================
+        // END FUNGSI BARU
+        // ============================================
+
         async function loadConfig() {
           try {
             const snapshot = await database.ref('settings/telegram').once('value');
@@ -983,11 +1349,25 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             
             document.getElementById('botToken').value = config.botToken || '';
             document.getElementById('chatId').value = config.chatId || '';
-            document.getElementById('sheetUrl').value = config.sheetUrl || '';
+            document.getElementById('sheetId').value = config.sheetId || '';
+            document.getElementById('gasUrl').value = config.gasUrl || '';
+            document.getElementById('n8nUrl').value = config.n8nUrl || '';
             
             if (config.botToken && config.chatId) {
               isConnected = true;
               updateStatusUI(true);
+            }
+
+            // Update sheet status indicator
+            if (config.sheetId) {
+              const sheetStatus = document.getElementById('sheetStatus');
+              sheetStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Google Sheets ID terkonfigurasi</span>';
+              sheetStatus.classList.add('connected');
+              
+              // Show transaction panel jika sudah terhubung
+              if (isConnected) {
+                document.getElementById('transactionPanel').style.display = 'block';
+              }
             }
           } catch (error) {
             console.error('Error loading config:', error);
@@ -1002,7 +1382,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           try {
             const botToken = document.getElementById('botToken').value;
             const chatId = document.getElementById('chatId').value;
-            const sheetUrl = document.getElementById('sheetUrl').value;
+            const sheetId = document.getElementById('sheetId').value;
+            const gasUrl = document.getElementById('gasUrl').value;
+            const n8nUrl = document.getElementById('n8nUrl').value;
             
             if (!botToken || !chatId) {
               Utils.showToast('Bot token dan chat ID harus diisi', 'error');
@@ -1013,14 +1395,24 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             await database.ref('settings/telegram').set({
               botToken,
               chatId,
-              sheetUrl,
+              sheetId,
+              gasUrl,
+              n8nUrl,
               updatedAt: Date.now()
             });
             
-            config = { botToken, chatId, sheetUrl };
+            config = { botToken, chatId, sheetId, gasUrl, n8nUrl };
             
             Utils.showToast('Konfigurasi berhasil disimpan', 'success');
             addSyncLog('Konfigurasi diperbarui', 'success');
+
+            // Refresh UI
+            if (sheetId) {
+              const sheetStatus = document.getElementById('sheetStatus');
+              sheetStatus.innerHTML = '<i class="fas fa-check-circle"></i><span>Google Sheets ID terkonfigurasi</span>';
+              sheetStatus.classList.add('connected');
+            }
+            
           } catch (error) {
             console.error('Error saving config:', error);
             Utils.showToast('Gagal menyimpan konfigurasi', 'error');
@@ -1042,6 +1434,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             isConnected = true;
             updateStatusUI(true);
             addSyncLog('Terhubung ke Telegram', 'success');
+            
+            // Show transaction panel jika ada sheetId
+            if (config.sheetId) {
+              document.getElementById('transactionPanel').style.display = 'block';
+            }
+            
             Utils.showToast('Berhasil terhubung ke Telegram', 'success');
             Utils.hideLoading();
           }, 1500);
@@ -1050,6 +1448,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         function disconnectTelegram() {
           isConnected = false;
           updateStatusUI(false);
+          document.getElementById('transactionPanel').style.display = 'none';
           addSyncLog('Terputus dari Telegram', 'pending');
           Utils.showToast('Terputus dari Telegram', 'info');
         }
@@ -1082,6 +1481,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         function loadTelegramBalance() {
           // Simulated balance - in real implementation, this would fetch from Telegram API
           const balance = Math.floor(Math.random() * 1000000) + 500000;
+          document.getElementById('telegramBalance').dataset.raw = balance;
           document.getElementById('telegramBalance').textContent = Utils.formatRupiah(balance);
         }
 
