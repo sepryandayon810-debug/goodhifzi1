@@ -1079,16 +1079,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       // Kategori grid — event delegation
       document.getElementById("kategoriGrid").addEventListener("click", function(e){
-         if(e.target.closest(".btn-edit-kategori") || e.target.closest(".btn-hapus-kategori")) return;
-        var card = e.target.closest(".kategori-card[data-id]");
-      if(card && !card.classList.contains("add-kategori-card")){
-        var catId = card.dataset.id;
-        var cat = categories.find(function(c){ return c.id === catId; });
-        var btn = e.target.closest(".btn-edit-kategori");
-        if(btn){ e.stopPropagation(); editCategory(btn.dataset.id); return; }
-        btn = e.target.closest(".btn-hapus-kategori");
-        if(btn){ e.stopPropagation(); deleteCategory(btn.dataset.id); }
-      });
+  if(e.target.closest(".btn-edit-kategori") || e.target.closest(".btn-hapus-kategori")) return;
+  var card = e.target.closest(".kategori-card[data-id]");
+  if(card && !card.classList.contains("add-kategori-card")){
+    var catId = card.dataset.id;
+    var cat = categories.find(function(c){ return c.id === catId; });
+    var btn = e.target.closest(".btn-edit-kategori");
+    if(btn){ e.stopPropagation(); editCategory(btn.dataset.id); return; }
+    btn = e.target.closest(".btn-hapus-kategori");
+    if(btn){ e.stopPropagation(); deleteCategory(btn.dataset.id); }
+  }
+});
 
       // Search & filter
       var searchInput = document.getElementById("searchProduk");
