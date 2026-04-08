@@ -413,8 +413,12 @@
       <div class="form-group">
         <label class="form-label">URL Google Apps Script Web App</label>
         <input type="url" class="form-input" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem">Deploy Google Apps Script sebagai Web App, lalu paste URL-nya di sini.</p>
+<p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">Deploy GAS sebagai Web App, lalu paste URL-nya di sini.</p>
       </div>
+      <div class="form-group">
+        <label class="form-label">Google Sheet ID</label>
+        <input type="text" class="form-input" id="gasSheetIdInput" placeholder="1cPolj_xpBztq6RU3XVi_CZm1j_Kqo-zQC-wsbIYrLXE">
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">ID spreadsheet dari URL: <code>docs.google.com/spreadsheets/d/<b>[ID ini]</b>/edit</code></p>      </div>
       <div id="gasTestResult" style="display:none;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;margin-top:.5rem"></div>
     </div>
     <div class="modal-footer">
@@ -480,6 +484,7 @@
      KONFIGURASI
      ===================================================== */
   const GAS_URL_KEY = 'gas_url';
+  const GAS_SHEET_ID_KEY = 'gas_sheet_id';
 
   /* =====================================================
      STATE
@@ -505,18 +510,22 @@
 
   function getGasUrl() { return localStorage.getItem(GAS_URL_KEY) || ''; }
   function setGasUrl(url) { localStorage.setItem(GAS_URL_KEY, url); }
+  function getSheetId() { return localStorage.getItem(GAS_SHEET_ID_KEY) || ''; }
+  function setSheetId(id) { localStorage.setItem(GAS_SHEET_ID_KEY, id); }
 
   /* =====================================================
      GAS API
      ===================================================== */
   async function gasRequest(params) {
     const url = getGasUrl();
+    const sheetId = getSheetId();
     if (!url) throw new Error('URL belum dikonfigurasi');
-    const qs = new URLSearchParams(params).toString();
+    if (!sheetId) throw new Error('Sheet ID belum dikonfigurasi');
+    const qs = new URLSearchParams({ sheetId, ...params }).toString();
     const res = await fetch(`${url}?${qs}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
-    if (!json.success) throw new Error(json.error || 'Terjadi kesalahan');
+    if (!json.success) throw new Error(json.error || json.message || 'Terjadi kesalahan')
     return json;
   }
 
@@ -736,6 +745,7 @@
      ===================================================== */
   function openGasModal() {
     document.getElementById('gasUrlInput').value = getGasUrl();
+    document.getElementById('gasSheetIdInput').value = getSheetId();
     document.getElementById('gasTestResult').style.display = 'none';
     document.getElementById('gasModal').classList.add('active');
   }
@@ -746,7 +756,9 @@
 
   async function saveGas() {
     const url = document.getElementById('gasUrlInput').value.trim();
+    const sheetId = document.getElementById('gasSheetIdInput').value.trim();
     if (!url) { showToast('URL tidak boleh kosong', 'warning'); return; }
+    if (!sheetId) { showToast('Sheet ID tidak boleh kosong', 'warning'); return; }
     const resultEl = document.getElementById('gasTestResult');
     const btn = document.getElementById('btnSaveGas');
     btn.disabled = true;
@@ -754,6 +766,7 @@
     resultEl.style.display = 'none';
     try {
       setGasUrl(url);
+      setSheetId(sheetId);
       const data = await apiGetData();
       resultEl.style.display = 'block';
       resultEl.style.background = 'rgba(16,185,129,.1)';
@@ -816,13 +829,8 @@
   document.getElementById('btnTheme').addEventListener('click', () => {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-    localStorage.setItem('webpos_dark', !isDark);
+    localStorage.setItem('dark_mode', !isDark);
   });
-
-  if (localStorage.getItem('webpos_dark') === 'true') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
-
   /* =====================================================
      EVENT LISTENERS
      ===================================================== */
@@ -869,11 +877,36 @@
   });
 
   /* =====================================================
+     THEME RESTORATION — baca dari localStorage saat halaman dibuka
+     Mengikuti tema yang sudah diset dari menu Pengaturan WebPOS
+     ===================================================== */
+  (function applyTheme() {
+    // Dark mode — key yang sama dengan WebPOS
+    const darkMode = localStorage.getItem('dark_mode');
+    if (darkMode === 'true' || darkMode === true) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    // Warna tema — coba semua key yang umum dipakai WebPOS
+    const colorKeys = ['theme_color', 'webpos_color', 'webpos_theme_color', 'themeColor', 'color_theme', 'primaryColor', 'accent_color'];
+    for (const key of colorKeys) {
+      const color = localStorage.getItem(key);
+      if (color) {
+        document.documentElement.setAttribute('data-theme-color', color);
+        break;
+      }
+    }
+  })();
+
+  /* =====================================================
      INIT
      ===================================================== */
   (function init() {
     const hasUrl = !!getGasUrl();
     updateGasIcon(hasUrl);
+    const hasSheetId = !!getSheetId();
+    const ready = hasUrl && hasSheetId;
+    updateGasIcon(ready);
+    if (ready) {
     if (hasUrl) {
       loadData();
     } else {
