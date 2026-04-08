@@ -1159,62 +1159,53 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         });
 
         async function submitSaldoTransaction() {
-          const nominal = parseInt(document.getElementById('nominalInput').value);
-          
-          if (!selectedSaldoType) {
-            Utils.showToast('Pilih jenis saldo terlebih dahulu', 'error');
-            return;
-          }
-          
-          if (!nominal || nominal <= 0) {
-            Utils.showToast('Masukkan nominal yang valid', 'error');
-            return;
-          }
+  const nominal = parseInt(document.getElementById('nominalInput').value);
+  
+  if (!selectedSaldoType) {
+    Utils.showToast('Pilih jenis saldo terlebih dahulu', 'error');
+    return;
+  }
+  
+  if (!nominal || nominal <= 0) {
+    Utils.showToast('Masukkan nominal yang valid', 'error');
+    return;
+  }
 
-          if (!config.sheetId) {
-            Utils.showToast('Sheet ID belum dikonfigurasi', 'error');
-            return;
-          }
+  Utils.showLoading();
 
-          Utils.showLoading();
+  try {
+    // LANGSUNG SIMPAN KE FIREBASE SAJA (tanpa GAS)
+    const now = new Date();
+    const bulanIndo = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+    
+    const topupData = {
+      BULAN: bulanIndo[now.getMonth()],
+      TANGGAL: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`,
+      'NAMA ITEM': selectedSaldoType,
+      'SALDO TOP UP': nominal,
+      timestamp: Date.now()
+    };
 
-          try {
-            // Step 1: Init transaction (simulasi langkah n8n/GAS)
-            const initData = await initSaldoSheet(selectedSaldoType, nominal);
-            
-            if (initData.success) {
-              currentTransaction = initData;
-              
-              // Step 2: Complete transaction
-              const completeData = await completeSaldoSheet(initData.matchKey, nominal);
-              
-              if (completeData.success) {
-                Utils.showToast('Transaksi saldo berhasil disimpan!', 'success');
-                addSyncLog(`Sukses: ${selectedSaldoType} - Rp ${Utils.formatRupiah(nominal)}`, 'success');
-                
-                // Reset form
-                document.getElementById('nominalInput').value = '';
-                document.querySelectorAll('.btn-saldo').forEach(b => b.classList.remove('active'));
-                document.getElementById('nominalGroup').style.display = 'none';
-                selectedSaldoType = null;
-                
-                // Update balance display (simulasi)
-                updateBalanceDisplay(nominal);
-              } else {
-                throw new Error(completeData.error || 'Gagal complete transaction');
-              }
-            } else {
-              throw new Error(initData.error || 'Gagal init transaction');
-            }
-          } catch (error) {
-            console.error('Error:', error);
-            Utils.showToast('Error: ' + error.message, 'error');
-            addSyncLog(`Error: ${error.message}`, 'error');
-          }
+    // Simpan ke Firebase
+    await database.ref('telegram_topup_history').push(topupData);
+    
+    Utils.showToast('Transaksi saldo berhasil disimpan!', 'success');
+    addSyncLog(`Sukses: ${selectedSaldoType} - ${Utils.formatRupiah(nominal)}`, 'success');
+    
+    // Reset form
+    document.getElementById('nominalInput').value = '';
+    document.querySelectorAll('.btn-saldo').forEach(b => b.classList.remove('active'));
+    document.getElementById('nominalGroup').style.display = 'none';
+    selectedSaldoType = null;
+    
+  } catch (error) {
+    console.error('Error:', error);
+    Utils.showToast('Error: ' + error.message, 'error');
+    addSyncLog(`Error: ${error.message}`, 'error');
+  }
 
-          Utils.hideLoading();
-        }
-
+  Utils.hideLoading();
+}
         // Fungsi untuk inisialisasi saldo (mimic GAS initSaldo)
         async function initSaldoSheet(namaItem, nominal) {
           // Jika ada GAS URL, gunakan GAS
@@ -1265,72 +1256,55 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
         // Fungsi untuk complete saldo (mimic GAS completeSaldo)
         async function completeSaldoSheet(matchKey, nominal) {
-          // Jika ada GAS URL, gunakan GAS
-          if (config.gasUrl) {
-            try {
-              const response = await fetch(config.gasUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'completeSaldo',
-                  sheetId: config.sheetId,
-                  matchKey: matchKey,
-                  nominal: nominal
-                })
-              });
-              return await response.json();
-            } catch (e) {
-              console.log('GAS Error, fallback ke Firebase:', e);
-            }
-          }
+  // Jika ada GAS URL, gunakan GAS - TAPI KALAU KOSONG LANGSUNG SKIP
+  if (config.gasUrl && config.gasUrl.trim() !== '') {
+    try {
+      const response = await fetch(config.gasUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'completeSaldo',
+          sheetId: config.sheetId,
+          matchKey: matchKey,
+          nominal: nominal
+        })
+      });
+      return await response.json();
+    } catch (e) {
+      console.log('GAS Error, fallback ke Firebase:', e);
+      // Lanjut ke Firebase fallback di bawah
+    }
+  }
 
-          // Fallback: Update Firebase dan tambah ke riwayat topup
-          const now = new Date();
-          const bulanIndo = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
-          
-          // Update status di steps
-          await database.ref(`telegram_steps/${matchKey}`).update({
-            STATUS: 'DONE',
-            'SALDO TOP UP': nominal,
-            completedAt: Date.now()
-          });
+  // Fallback: Update Firebase dan tambah ke riwayat topup
+  const now = new Date();
+  const bulanIndo = ["JANUARI","FEBRUARI","MARET","APRIL","MEI","JUNI","JULI","AGUSTUS","SEPTEMBER","OKTOBER","NOVEMBER","DESEMBER"];
+  
+  // Update status di steps
+  await database.ref(`telegram_steps/${matchKey}`).update({
+    STATUS: 'DONE',
+    'SALDO TOP UP': nominal,
+    completedAt: Date.now()
+  });
 
-          // Tambah ke riwayat topup (simulasi sheet TOP UP)
-          const topupData = {
-            BULAN: bulanIndo[now.getMonth()],
-            TANGGAL: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`,
-            'NAMA ITEM': currentTransaction?.namaItem || selectedSaldoType,
-            'SALDO TOP UP': nominal,
-            timestamp: Date.now()
-          };
+  // Tambah ke riwayat topup
+  const topupData = {
+    BULAN: bulanIndo[now.getMonth()],
+    TANGGAL: `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`,
+    'NAMA ITEM': currentTransaction?.namaItem || selectedSaldoType,
+    'SALDO TOP UP': nominal,
+    timestamp: Date.now()
+  };
 
-          await database.ref('telegram_topup_history').push(topupData);
+  await database.ref('telegram_topup_history').push(topupData);
 
-          // Jika ada n8n URL, trigger webhook n8n juga
-          if (config.n8nUrl) {
-            try {
-              fetch(config.n8nUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  event: 'saldo_completed',
-                  data: topupData,
-                  matchKey: matchKey,
-                  sheetId: config.sheetId
-                })
-              }).catch(e => console.log('n8n webhook error:', e));
-            } catch (e) {
-              console.log('n8n trigger failed:', e);
-            }
-          }
-
-          return {
-            success: true,
-            message: 'Transaksi selesai!',
-            data: topupData
-          };
-        }
-
+  return {
+    success: true,
+    message: 'Transaksi selesai!',
+    data: topupData
+  };
+}
+        
         function updateBalanceDisplay(lastNominal) {
           // Simulasi update balance display
           const currentBalance = parseInt(document.getElementById('telegramBalance').dataset.raw || '0');
