@@ -383,18 +383,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
 
       // Dropdown toggle
-      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-          e.preventDefault();
-          const parent = this.closest('.nav-dropdown');
-          document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
-            if (openDropdown !== parent) openDropdown.classList.remove('open');
-          });
-          parent.classList.toggle('open');
-        });
-      });
-
-      document.getElementById('btnLogout').addEventListener('click', () => {
+          document.getElementById('btnLogout').addEventListener('click', () => {
         Utils.confirm('Yakin ingin logout?', () => Auth.logout());
       });
 
