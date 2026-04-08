@@ -9,9 +9,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Inline CSS -->
   <style>
-/* [CSS yang sudah ada tetap dipertahankan...] */
 :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
 :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
 
@@ -118,14 +116,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .d-md-none{display:none!important}
 @media(max-width:768px){.d-md-none{display:none!important}}
 
-/* [STYLE BARU UNTUK FITUR YANG DIMINTA] */
+/* ============================================
+   FIXED LAYOUT - PERBAIKAN UTAMA
+   ============================================ */
 
-/* Quick Filter Tabs */
+/* Quick Filter */
 .quick-filter {
   display: flex;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .quick-filter-btn {
@@ -138,6 +139,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   font-size: 0.875rem;
   font-weight: 500;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .quick-filter-btn:hover {
@@ -159,6 +161,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   border-bottom: 2px solid var(--border-color);
   padding-bottom: 0.5rem;
   overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .category-tab {
@@ -184,10 +191,108 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   border-bottom-color: var(--primary);
 }
 
-/* Transaction Table Enhanced */
+/* PERBAIKAN SUMMARY CARDS - Grid yang konsisten */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s;
+}
+
+.summary-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.summary-card-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.summary-card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.summary-card-value.success { color: var(--success); }
+.summary-card-value.danger { color: var(--danger); }
+
+/* Responsive Summary Cards */
+@media (max-width: 1200px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .summary-card {
+    padding: 1rem;
+  }
+  .summary-card-value {
+    font-size: 1.25rem;
+  }
+}
+
+/* Date Filter Toolbar */
+.riwayat-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.date-filter {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.date-filter input {
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.date-filter span {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Transaction Table */
 .transaction-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9rem;
 }
 
 .transaction-table th,
@@ -195,6 +300,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   padding: 1rem;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
 }
 
 .transaction-table th {
@@ -203,20 +309,22 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   font-size: 0.75rem;
   text-transform: uppercase;
   color: var(--text-muted);
+  letter-spacing: 0.05em;
 }
 
 .transaction-table tr:hover {
-  background: var(--bg-secondary);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .transaction-type {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.875rem;
   border-radius: 50px;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .transaction-type.penjualan {
@@ -235,12 +343,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 }
 
 .transaction-type.kas_masuk {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.15);
   color: var(--success);
 }
 
 .transaction-type.kas_keluar {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.15);
   color: var(--danger);
 }
 
@@ -251,50 +359,63 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 }
 
 .action-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border: none;
-  background: var(--bg-secondary);
+  background: transparent;
   border-radius: 0.5rem;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .action-btn:hover {
-  background: var(--primary);
-  color: white;
+  background: var(--bg-secondary);
+  color: var(--primary);
 }
 
 .action-menu {
   position: absolute;
   right: 0;
-  top: 100%;
-  margin-top: 0.25rem;
+  top: calc(100% + 5px);
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   box-shadow: var(--shadow-lg);
   min-width: 180px;
-  z-index: 100;
+  z-index: 1000;
   display: none;
   overflow: hidden;
 }
 
 .action-dropdown.open .action-menu {
   display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .action-menu-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   cursor: pointer;
   transition: all 0.15s;
   font-size: 0.875rem;
   color: var(--text-primary);
   text-decoration: none;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.action-menu-item:last-child {
+  border-bottom: none;
 }
 
 .action-menu-item:hover {
@@ -304,6 +425,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .action-menu-item i {
   width: 16px;
   text-align: center;
+  color: var(--text-muted);
+}
+
+.action-menu-item:hover i {
+  color: var(--primary);
 }
 
 .action-menu-item.delete {
@@ -314,14 +440,18 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   background: rgba(239, 68, 68, 0.1);
 }
 
-/* Detail Modal */
+.action-menu-item.delete i {
+  color: var(--danger);
+}
+
+/* Modals */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +460,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   visibility: hidden;
   transition: all 0.25s;
   padding: 1rem;
+  backdrop-filter: blur(4px);
 }
 
 .modal-overlay.active {
@@ -344,16 +475,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  transform: scale(0.9);
+  transform: scale(0.9) translateY(20px);
   transition: all 0.25s;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .modal-overlay.active .modal-content {
-  transform: scale(1);
+  transform: scale(1) translateY(0);
 }
 
 .modal-header {
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -363,6 +495,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .modal-title {
   font-size: 1.25rem;
   font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .modal-close {
@@ -373,51 +509,19 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   border-radius: 0.75rem;
   cursor: pointer;
   color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.modal-close:hover {
+  background: var(--danger);
+  color: white;
 }
 
 .modal-body {
   padding: 1.5rem;
-}
-
-.detail-grid {
-  display: grid;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.detail-label {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.detail-value {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.items-list {
-  background: var(--bg-secondary);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.item-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.item-row:last-child {
-  border-bottom: none;
 }
 
 .modal-footer {
@@ -426,19 +530,123 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
+  background: var(--bg-secondary);
 }
 
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 3rem;
+/* Detail Grid */
+.detail-grid {
+  display: grid;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
   color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
-.empty-state i {
-  font-size: 3rem;
+.detail-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.items-list {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.items-list h4 {
   margin-bottom: 1rem;
-  opacity: 0.5;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.9rem;
+}
+
+.item-row:last-child {
+  border-bottom: none;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--border-color);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
 }
 
 /* Toast */
@@ -450,18 +658,20 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width: 400px;
 }
 
 .toast {
   padding: 1rem 1.5rem;
   background: var(--bg-card);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   border-left: 4px solid var(--primary);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   animation: slideIn 0.3s ease;
+  font-size: 0.9rem;
 }
 
 @keyframes slideIn {
@@ -473,28 +683,55 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .toast.error { border-left-color: var(--danger); }
 .toast.warning { border-left-color: var(--warning); }
 
-/* Responsive */
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+}
+
+.empty-state i {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Responsive Table */
 @media (max-width: 768px) {
   .transaction-table {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
   }
   
   .transaction-table th,
   .transaction-table td {
-    padding: 0.5rem;
+    padding: 0.875rem 0.75rem;
   }
   
-  .category-tabs {
-    font-size: 0.8rem;
+  .transaction-table th:nth-child(1),
+  .transaction-table td:nth-child(1) {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .quick-filter {
-    justify-content: center;
+    gap: 0.5rem;
   }
   
-  .action-menu {
-    right: -100%;
-    left: auto;
+  .quick-filter-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  .category-tab {
+    padding: 0.625rem 1rem;
+    font-size: 0.85rem;
   }
 }
   </style>
@@ -667,7 +904,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                   <th>Metode</th>
                   <th>Kasir</th>
                   <th>Total</th>
-                  <th>Aksi</th>
+                  <th style="text-align: center;">Aksi</th>
                 </tr>
               </thead>
               <tbody id="transactionList">
@@ -707,7 +944,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
-        <button class="btn btn-primary" onclick="printTransaction()"><i class="fas fa-print"></i> Cetak</button>
+        <button class="btn btn-primary" onclick="printCurrentTransaction()"><i class="fas fa-print"></i> Cetak</button>
       </div>
     </div>
   </div>
@@ -781,7 +1018,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
 
       // Set default dates
-      const today = Utils.getTodayString();
+      const today = Utils.getTodayString ? Utils.getTodayString() : new Date().toISOString().split('T')[0];
       document.getElementById('startDate').value = today;
       document.getElementById('endDate').value = today;
 
@@ -795,7 +1032,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
 
       document.getElementById('btnLogout').addEventListener('click', () => {
-        Utils.confirm('Yakin ingin logout?', () => Auth.logout());
+        if (Utils.confirm) {
+          Utils.confirm('Yakin ingin logout?', () => Auth.logout());
+        } else {
+          if (confirm('Yakin ingin logout?')) Auth.logout();
+        }
       });
 
       document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
@@ -857,22 +1098,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       switch(period) {
         case 'today':
-          start = end = today;
+          start = new Date(today);
+          end = new Date(today);
           break;
         case 'yesterday':
-          start = end = new Date(today.setDate(today.getDate() - 1));
+          start = new Date(today);
+          start.setDate(start.getDate() - 1);
+          end = new Date(start);
           break;
         case 'week':
-          start = new Date(today.setDate(today.getDate() - today.getDay()));
-          end = new Date();
+          start = new Date(today);
+          start.setDate(start.getDate() - start.getDay());
+          end = new Date(today);
           break;
         case 'month':
           start = new Date(today.getFullYear(), today.getMonth(), 1);
-          end = new Date();
+          end = new Date(today);
           break;
         case 'year':
           start = new Date(today.getFullYear(), 0, 1);
-          end = new Date();
+          end = new Date(today);
           break;
       }
 
@@ -885,7 +1130,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     async function loadTransactions() {
-      Utils.showLoading();
+      if (Utils.showLoading) Utils.showLoading();
+      else document.getElementById('loadingOverlay').classList.add('active');
       
       try {
         const startDate = document.getElementById('startDate').value;
@@ -918,10 +1164,11 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         
       } catch (error) {
         console.error('Error loading transactions:', error);
-        showToast('Gagal memuat transaksi', 'error');
+        showToast('Gagal memuat transaksi: ' + error.message, 'error');
       }
       
-      Utils.hideLoading();
+      if (Utils.hideLoading) Utils.hideLoading();
+      else document.getElementById('loadingOverlay').classList.remove('active');
     }
 
     function filterAndRender() {
@@ -973,13 +1220,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       tbody.innerHTML = transactions.map(t => `
         <tr>
-          <td>${t.id}</td>
-          <td>${Utils.formatDateTime(t.timestamp)}</td>
+          <td style="font-family: monospace; font-size: 0.85rem;">${t.id}</td>
+          <td>${formatDateTime(t.timestamp)}</td>
           <td><span class="transaction-type ${t.type}">${typeLabels[t.type] || t.type}</span></td>
           <td>${t.paymentMethod || '-'}</td>
           <td>${t.cashierName || '-'}</td>
-          <td>${Utils.formatRupiah(t.total || t.amount || 0)}</td>
-          <td>
+          <td style="font-weight: 600;">${formatRupiah(t.total || t.amount || 0)}</td>
+          <td style="text-align: center;">
             <div class="action-dropdown" id="dropdown-${t.id}">
               <button class="action-btn" onclick="toggleDropdown('${t.id}', event)">
                 <i class="fas fa-ellipsis-v"></i>
@@ -1023,10 +1270,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         }
       });
 
-      document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
+      document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
       document.getElementById('totalTransaksi').textContent = transactions.length;
-      document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
-      document.getElementById('rataRata').textContent = Utils.formatRupiah(
+      document.getElementById('totalLaba').textContent = formatRupiah(totalLaba);
+      document.getElementById('rataRata').textContent = formatRupiah(
         transactions.length ? totalPenjualan / transactions.length : 0
       );
     }
@@ -1057,16 +1304,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       if (t.items && t.items.length > 0) {
         itemsHtml = `
           <div class="items-list">
-            <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Item Produk</h4>
+            <h4>Item Produk</h4>
             ${t.items.map(item => `
               <div class="item-row">
                 <span>${item.name} x${item.qty}</span>
-                <span>${Utils.formatRupiah(item.subtotal)}</span>
+                <span>${formatRupiah(item.subtotal)}</span>
               </div>
             `).join('')}
-            <div class="item-row" style="border-top: 2px solid var(--border-color); margin-top: 0.5rem; padding-top: 0.5rem; font-weight: bold;">
+            <div class="item-row" style="margin-top: 0.5rem; padding-top: 1rem;">
               <span>Total</span>
-              <span>${Utils.formatRupiah(t.total)}</span>
+              <span>${formatRupiah(t.total)}</span>
             </div>
           </div>
         `;
@@ -1080,7 +1327,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           </div>
           <div class="detail-item">
             <span class="detail-label">Tanggal</span>
-            <span class="detail-value">${Utils.formatDateTime(t.timestamp)}</span>
+            <span class="detail-value">${formatDateTime(t.timestamp)}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Tipe</span>
@@ -1096,18 +1343,18 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           </div>
           <div class="detail-item">
             <span class="detail-label">Total</span>
-            <span class="detail-value">${Utils.formatRupiah(t.total || t.amount || 0)}</span>
+            <span class="detail-value">${formatRupiah(t.total || t.amount || 0)}</span>
           </div>
           ${t.profit ? `
           <div class="detail-item">
             <span class="detail-label">Laba</span>
-            <span class="detail-value text-success">${Utils.formatRupiah(t.profit)}</span>
+            <span class="detail-value text-success">${formatRupiah(t.profit)}</span>
           </div>
           ` : ''}
           ${t.note ? `
-          <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
+          <div class="detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
             <span class="detail-label">Catatan</span>
-            <span style="margin-top: 0.5rem;">${t.note}</span>
+            <span>${t.note}</span>
           </div>
           ` : ''}
         </div>
@@ -1140,7 +1387,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     async function saveEdit() {
       if (!currentTransaction) return;
       
-      Utils.showLoading();
+      if (Utils.showLoading) Utils.showLoading();
       
       try {
         const updates = {
@@ -1156,16 +1403,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         closeEditModal();
         loadTransactions();
       } catch (error) {
-        showToast('Gagal mengupdate transaksi', 'error');
+        showToast('Gagal mengupdate transaksi: ' + error.message, 'error');
       }
       
-      Utils.hideLoading();
+      if (Utils.hideLoading) Utils.hideLoading();
     }
 
     async function deleteTransaction(id) {
       if (!confirm('Yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan jika ini transaksi penjualan.')) return;
 
-      Utils.showLoading();
+      if (Utils.showLoading) Utils.showLoading();
       
       try {
         const t = allTransactions.find(tr => tr.id === id);
@@ -1196,16 +1443,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         showToast('Transaksi berhasil dihapus', 'success');
         loadTransactions();
       } catch (error) {
-        showToast('Gagal menghapus transaksi', 'error');
+        showToast('Gagal menghapus transaksi: ' + error.message, 'error');
       }
       
-      Utils.hideLoading();
+      if (Utils.hideLoading) Utils.hideLoading();
     }
 
     async function returnTransaction(id) {
       if (!confirm('Yakin ingin return transaksi ini? Stok akan dikembalikan ke inventory.')) return;
 
-      Utils.showLoading();
+      if (Utils.showLoading) Utils.showLoading();
       
       try {
         const t = allTransactions.find(tr => tr.id === id);
@@ -1234,51 +1481,72 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         showToast('Return berhasil, stok dikembalikan', 'success');
         loadTransactions();
       } catch (error) {
-        showToast('Gagal return transaksi', 'error');
+        showToast('Gagal return transaksi: ' + error.message, 'error');
       }
       
-      Utils.hideLoading();
+      if (Utils.hideLoading) Utils.hideLoading();
     }
 
     function printTransaction(id) {
       const t = allTransactions.find(tr => tr.id === id);
       if (!t) return;
 
-      // Simple print implementation
+      currentTransaction = t;
+      printCurrentTransaction();
+    }
+
+    function printCurrentTransaction() {
+      if (!currentTransaction) return;
+      const t = currentTransaction;
+
       const printWindow = window.open('', '_blank');
       printWindow.document.write(`
         <html>
         <head>
           <title>Struk ${t.id}</title>
           <style>
-            body { font-family: monospace; padding: 20px; }
-            .header { text-align: center; margin-bottom: 20px; }
+            body { font-family: 'Courier New', monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #000; padding-bottom: 10px; }
+            .header h2 { margin: 0; font-size: 18px; }
             .line { border-top: 1px dashed #000; margin: 10px 0; }
-            .item { display: flex; justify-content: space-between; margin: 5px 0; }
+            .item { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
+            .total { font-weight: bold; font-size: 14px; margin-top: 10px; border-top: 2px solid #000; padding-top: 10px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 11px; }
           </style>
         </head>
         <body>
           <div class="header">
             <h2>WEBPOS</h2>
-            <p>${Utils.formatDateTime(t.timestamp)}</p>
+            <p style="font-size: 11px; margin: 5px 0;">${formatDateTime(t.timestamp)}</p>
           </div>
-          <div class="line"></div>
-          <p>ID: ${t.id}</p>
-          <p>Kasir: ${t.cashierName || '-'}</p>
+          <div class="item">
+            <span>ID:</span>
+            <span>${t.id.substring(0, 12)}...</span>
+          </div>
+          <div class="item">
+            <span>Kasir:</span>
+            <span>${t.cashierName || '-'}</span>
+          </div>
           <div class="line"></div>
           ${t.items ? t.items.map(item => `
             <div class="item">
               <span>${item.name} x${item.qty}</span>
-              <span>${Utils.formatRupiah(item.subtotal)}</span>
+              <span>${formatRupiah(item.subtotal)}</span>
             </div>
-          `).join('') : ''}
+          `).join('') : `
+            <div class="item">
+              <span>${t.type}</span>
+              <span>${formatRupiah(t.total || t.amount || 0)}</span>
+            </div>
+          `}
           <div class="line"></div>
-          <div class="item">
-            <span><strong>TOTAL</strong></span>
-            <span><strong>${Utils.formatRupiah(t.total || t.amount || 0)}</strong></span>
+          <div class="item total">
+            <span>TOTAL</span>
+            <span>${formatRupiah(t.total || t.amount || 0)}</span>
           </div>
-          <div class="line"></div>
-          <p style="text-align: center;">Terima Kasih</p>
+          <div class="footer">
+            <p>Terima Kasih<br>Atas Kunjungan Anda</p>
+          </div>
         </body>
         </html>
       `);
@@ -1294,20 +1562,52 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       let csv = 'ID,Tanggal,Tipe,Metode,Kasir,Total,Status\n';
       allTransactions.forEach(t => {
-        csv += `${t.id},${Utils.formatDateTime(t.timestamp)},${t.type},${t.paymentMethod || '-'},${t.cashierName || '-'},${t.total || t.amount || 0},${t.status || 'completed'}\n`;
+        csv += `${t.id},"${formatDateTime(t.timestamp)}",${t.type},${t.paymentMethod || '-'},${t.cashierName || '-'},${t.total || t.amount || 0},${t.status || 'completed'}\n`;
       });
 
-      const blob = new Blob([csv], { type: 'text/csv' });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `transaksi_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       
       showToast('Data berhasil diexport', 'success');
     }
 
+    // Helper functions
+    function formatRupiah(angka) {
+      if (angka === undefined || angka === null) return 'Rp 0';
+      const number = typeof angka === 'string' ? parseInt(angka) : angka;
+      if (isNaN(number)) return 'Rp 0';
+      return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatDateTime(timestamp) {
+      if (!timestamp) return '-';
+      try {
+        const date = new Date(timestamp);
+        if (isNaN(date.getTime())) return '-';
+        return date.toLocaleString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (e) {
+        return '-';
+      }
+    }
+
     function showToast(message, type = 'info') {
+      if (Utils.showToast) {
+        Utils.showToast(message, type);
+        return;
+      }
+      
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
@@ -1326,6 +1626,14 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           modal.classList.remove('active');
         }
       });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('open'));
+      }
     });
   </script>
 </body>
