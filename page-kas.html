@@ -574,6 +574,23 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           window.location.href = '../login.html';
           return;
         }
+
+        document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+  toggle.addEventListener('click', function(e) {
+    e.preventDefault();
+    const parent = this.closest('.nav-dropdown');
+    
+    // Tutup dropdown lain yang sedang terbuka (opsional - single open)
+    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+      if (openDropdown !== parent) {
+        openDropdown.classList.remove('open');
+      }
+    });
+    
+    // Toggle current dropdown
+    parent.classList.toggle('open');
+  });
+});
         
         // Load user data if available
         if (user) {
