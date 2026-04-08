@@ -608,14 +608,18 @@
       <tr>
         <td style="color:var(--text-muted);width:48px">${i + 1}</td>
         <td><strong>${escHtml(r.nama)}</strong></td>
-        <td style="font-family:monospace">${escHtml(r.nomor)}</td>
-        <td>
-          <div class="action-btns">
-            <button class="action-btn copy-btn" title="Salin" onclick="copyRow(${r.row})"><i class="fas fa-copy"></i></button>
-            <button class="action-btn edit-btn" title="Edit" onclick="openEditModal(${r.row})"><i class="fas fa-edit"></i></button>
-            <button class="action-btn del-btn" title="Hapus" onclick="openDeleteModal(${r.row})"><i class="fas fa-trash"></i></button>
-          </div>
-        </td>
+        <td style="font-family:monospace">
+  ${escHtml(r.nomor)}
+  <button class="action-btn copy-btn" title="Copy Nomor" onclick="copyRow(${r.row})" style="margin-left:8px;vertical-align:middle;">
+    <i class="fas fa-copy"></i>
+  </button>
+</td>
+<td>
+  <div class="action-btns">
+    <button class="action-btn edit-btn" title="Edit" onclick="openEditModal(${r.row})"><i class="fas fa-edit"></i></button>
+    <button class="action-btn del-btn" title="Hapus" onclick="openDeleteModal(${r.row})"><i class="fas fa-trash"></i></button>
+  </div>
+</td>
       </tr>`).join('');
 
     container.innerHTML = `
@@ -646,12 +650,12 @@
      COPY
      ===================================================== */
   function copyRow(row) {
-    const r = allData.find(x => x.row === row);
-    if (!r) return;
-    navigator.clipboard.writeText(`${r.nama}\n${r.nomor}`)
-      .then(() => showToast(`Disalin: ${r.nama}`, 'success'))
-      .catch(() => showToast('Gagal menyalin', 'error'));
-  }
+  const r = allData.find(x => x.row === row);
+  if (!r) return;
+  navigator.clipboard.writeText(r.nomor) // ← Hanya nomor, tanpa nama
+    .then(() => showToast(`Nomor ${r.nomor} disalin`, 'success'))
+    .catch(() => showToast('Gagal menyalin', 'error'));
+}
 
   function copyFiltered() {
     const rows = getFiltered();
