@@ -900,19 +900,17 @@
   /* =====================================================
      INIT
      ===================================================== */
-  (function init() {
+    (function init() {
     const hasUrl = !!getGasUrl();
-    updateGasIcon(hasUrl);
     const hasSheetId = !!getSheetId();
     const ready = hasUrl && hasSheetId;
     updateGasIcon(ready);
     if (ready) {
-    if (hasUrl) {
       loadData();
     } else {
       setTimeout(openGasModal, 400);
     }
   })();
-</script>
+  
 </body>
 </html>
