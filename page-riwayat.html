@@ -117,7 +117,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 @media(max-width:768px){.d-md-none{display:none!important}}
 
 /* ============================================
-   FIXED LAYOUT - PERBAIKAN UTAMA
+   FIXED LAYOUT - 3 CARDS (TANPA RATA-RATA)
    ============================================ */
 
 /* Quick Filter */
@@ -191,10 +191,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   border-bottom-color: var(--primary);
 }
 
-/* PERBAIKAN SUMMARY CARDS - Grid yang konsisten */
+/* PERBAIKAN: Hanya 3 kolom sekarang */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -231,25 +231,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
 .summary-card-value.success { color: var(--success); }
 .summary-card-value.danger { color: var(--danger); }
+.summary-card-value.warning { color: var(--warning); }
 
-/* Responsive Summary Cards */
-@media (max-width: 1200px) {
+/* Responsive Summary Cards - 3 kolom */
+@media (max-width: 1024px) {
   .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
   }
 }
 
 @media (max-width: 640px) {
   .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 0.75rem;
   }
   .summary-card {
     padding: 1rem;
   }
   .summary-card-value {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
   }
 }
 
@@ -869,7 +870,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <button class="category-tab" data-category="topup_tarik">Top Up & Tarik</button>
         </div>
 
-        <!-- Summary Cards -->
+        <!-- Summary Cards - Hanya 3 card, rata-rata dihapus -->
         <div class="summary-cards">
           <div class="summary-card">
             <div class="summary-card-title">Total Penjualan</div>
@@ -882,10 +883,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <div class="summary-card">
             <div class="summary-card-title">Total Laba</div>
             <div class="summary-card-value success" id="totalLaba">Rp 0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-card-title">Rata-rata Transaksi</div>
-            <div class="summary-card-value" id="rataRata">Rp 0</div>
           </div>
         </div>
 
@@ -1256,16 +1253,25 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       `).join('');
     }
 
+    // PERBAIKAN: Tambah perhitungan admin tarik tunai ke laba
     function updateSummary(transactions) {
       let totalPenjualan = 0;
       let totalLaba = 0;
 
       transactions.forEach(t => {
+        // Hitung total penjualan (hanya transaksi penjualan)
         if (t.type === 'penjualan') {
           totalPenjualan += t.total || 0;
           totalLaba += t.profit || 0;
         }
+        
+        // PERBAIKAN: Admin fee dari topup masuk ke laba
         if (t.type === 'topup' && t.adminFee) {
+          totalLaba += t.adminFee;
+        }
+        
+        // PERBAIKAN: Admin fee dari tarik tunai juga masuk ke laba
+        if (t.type === 'tarik' && t.adminFee) {
           totalLaba += t.adminFee;
         }
       });
@@ -1273,9 +1279,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
       document.getElementById('totalTransaksi').textContent = transactions.length;
       document.getElementById('totalLaba').textContent = formatRupiah(totalLaba);
-      document.getElementById('rataRata').textContent = formatRupiah(
-        transactions.length ? totalPenjualan / transactions.length : 0
-      );
     }
 
     function toggleDropdown(id, event) {
@@ -1351,6 +1354,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <span class="detail-value text-success">${formatRupiah(t.profit)}</span>
           </div>
           ` : ''}
+          ${t.adminFee ? `
+          <div class="detail-item">
+            <span class="detail-label">Biaya Admin</span>
+            <span class="detail-value warning">${formatRupiah(t.adminFee)}</span>
+          </div>
+          ` : ''}
           ${t.note ? `
           <div class="detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
             <span class="detail-label">Catatan</span>
@@ -1409,6 +1418,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       if (Utils.hideLoading) Utils.hideLoading();
     }
 
+    // PERBAIKAN: Hapus transaksi dengan rollback stok yang benar
     async function deleteTransaction(id) {
       if (!confirm('Yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan jika ini transaksi penjualan.')) return;
 
@@ -1416,39 +1426,58 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       
       try {
         const t = allTransactions.find(tr => tr.id === id);
-        if (!t) return;
+        if (!t) {
+          showToast('Transaksi tidak ditemukan', 'error');
+          return;
+        }
 
-        // Return stock if penjualan
-        if (t.type === 'penjualan' && t.items) {
+        console.log('Deleting transaction:', t.id, 'Type:', t.type);
+        console.log('Items:', t.items);
+
+        // PERBAIKAN: Return stock if penjualan dengan pengecekan lebih ketat
+        if (t.type === 'penjualan' && t.items && Array.isArray(t.items)) {
           for (const item of t.items) {
             if (item.productId) {
-              const productRef = database.ref(`products/${item.productId}`);
-              const snapshot = await productRef.once('value');
-              const product = snapshot.val();
-              if (product) {
-                await productRef.update({
-                  stock: (product.stock || 0) + (item.qty || 0)
-                });
+              try {
+                const productRef = database.ref(`products/${item.productId}`);
+                const snapshot = await productRef.once('value');
+                const product = snapshot.val();
+                
+                if (product) {
+                  const currentStock = product.stock || 0;
+                  const qtyToReturn = item.qty || 0;
+                  const newStock = currentStock + qtyToReturn;
+                  
+                  await productRef.update({ stock: newStock });
+                  console.log(`Stock returned for ${item.name}: ${currentStock} + ${qtyToReturn} = ${newStock}`);
+                } else {
+                  console.warn(`Product ${item.productId} not found in database`);
+                }
+              } catch (itemError) {
+                console.error(`Error returning stock for item ${item.productId}:`, itemError);
               }
             }
           }
         }
 
-        // Soft delete
+        // Soft delete - update status
         await database.ref(`transactions/${t.dateKey}/${id}`).update({
           status: 'cancelled',
-          cancelledAt: Date.now()
+          cancelledAt: Date.now(),
+          cancelledBy: Auth.getCurrentUser()?.uid || 'unknown'
         });
 
-        showToast('Transaksi berhasil dihapus', 'success');
+        showToast('Transaksi berhasil dihapus, stok dikembalikan', 'success');
         loadTransactions();
       } catch (error) {
+        console.error('Error deleting transaction:', error);
         showToast('Gagal menghapus transaksi: ' + error.message, 'error');
       }
       
       if (Utils.hideLoading) Utils.hideLoading();
     }
 
+    // PERBAIKAN: Return transaksi dengan rollback stok yang benar
     async function returnTransaction(id) {
       if (!confirm('Yakin ingin return transaksi ini? Stok akan dikembalikan ke inventory.')) return;
 
@@ -1456,18 +1485,34 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       
       try {
         const t = allTransactions.find(tr => tr.id === id);
-        if (!t || !t.items) return;
+        if (!t) {
+          showToast('Transaksi tidak ditemukan', 'error');
+          return;
+        }
 
-        // Return stock
+        if (!t.items || !Array.isArray(t.items)) {
+          showToast('Transaksi ini tidak memiliki item produk', 'warning');
+          return;
+        }
+
+        // Return stock dengan pengecekan ketat
         for (const item of t.items) {
           if (item.productId) {
-            const productRef = database.ref(`products/${item.productId}`);
-            const snapshot = await productRef.once('value');
-            const product = snapshot.val();
-            if (product) {
-              await productRef.update({
-                stock: (product.stock || 0) + (item.qty || 0)
-              });
+            try {
+              const productRef = database.ref(`products/${item.productId}`);
+              const snapshot = await productRef.once('value');
+              const product = snapshot.val();
+              
+              if (product) {
+                const currentStock = product.stock || 0;
+                const qtyToReturn = item.qty || 0;
+                const newStock = currentStock + qtyToReturn;
+                
+                await productRef.update({ stock: newStock });
+                console.log(`Stock returned (return) for ${item.name}: ${currentStock} + ${qtyToReturn} = ${newStock}`);
+              }
+            } catch (itemError) {
+              console.error(`Error returning stock for item ${item.productId}:`, itemError);
             }
           }
         }
@@ -1475,12 +1520,14 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         // Mark as returned
         await database.ref(`transactions/${t.dateKey}/${id}`).update({
           status: 'returned',
-          returnedAt: Date.now()
+          returnedAt: Date.now(),
+          returnedBy: Auth.getCurrentUser()?.uid || 'unknown'
         });
 
         showToast('Return berhasil, stok dikembalikan', 'success');
         loadTransactions();
       } catch (error) {
+        console.error('Error returning transaction:', error);
         showToast('Gagal return transaksi: ' + error.message, 'error');
       }
       
