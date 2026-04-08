@@ -814,21 +814,22 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
         // ── Dark Mode (sinkron dengan halaman lain via webpos_dark_mode) ──
     function applyTheme(){
-      var isDark = localStorage.getItem('webpos_dark_mode') === 'true';
-      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-      var btn = document.getElementById('btnTheme');
-      if(btn) btn.innerHTML = isDark ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' : '<i class="fas fa-moon"></i>';
-    }
-    applyTheme();
-    window.addEventListener('storage', function(e){ if(e.key === 'webpos_dark_mode') applyTheme(); });
-    var btnTheme = document.getElementById("btnTheme");
+  var savedTheme = localStorage.getItem('webpos_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  var btn = document.getElementById('btnTheme');
+  if(btn) btn.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' : '<i class="fas fa-moon"></i>';
+}
+applyTheme();
+window.addEventListener('storage', function(e){ if(e.key === 'webpos_theme') applyTheme(); });
+    
     if(btnTheme){
-      btnTheme.addEventListener("click", function(){
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        localStorage.setItem('webpos_dark_mode', (!isDark).toString());
-        applyTheme();
-      });
-    }
+  btnTheme.addEventListener("click", function(){
+    var current = document.documentElement.getAttribute('data-theme');
+    var next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('webpos_theme', next);
+    applyTheme();
+  });
+}}
 
     // ============================================================
     // DATA LOADING
