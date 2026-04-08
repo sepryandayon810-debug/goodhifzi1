@@ -14,6 +14,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- SheetJS for Excel Support -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -165,6 +168,76 @@
 
     .status-toggle-label.active {
       color: var(--primary);
+    }
+
+    /* Checkbox Styling */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .checkbox-group:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .checkbox-sublabel {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    /* Kas Option Box */
+    .kas-option-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .kas-option-box.active {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .kas-option-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .kas-option-title {
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     /* Hutang Container */
@@ -862,6 +935,21 @@
       .d-md-none { display: none !important; }
       .d-sm-none { display: none !important; }
     }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-primary {
+      background: rgba(99, 102, 241, 0.1);
+      color: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -1068,7 +1156,7 @@
                     <i class="fas fa-users"></i>
                   </div>
                   <span>Daftar Pelanggan</span>
-                  <span class="badge badge-primary" id="customerCount" style="margin-left: 0.5rem; background: rgba(99,102,241,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">0</span>
+                  <span class="badge badge-primary" id="customerCount" style="margin-left: 0.5rem;">0</span>
                 </div>
                 <i class="fas fa-chevron-down customer-toggle-icon"></i>
               </div>
@@ -1243,6 +1331,23 @@
             <label class="form-label">Catatan</label>
             <textarea class="form-textarea" id="hutangNote" placeholder="Catatan tambahan..."></textarea>
           </div>
+
+          <!-- Kas Option for New Hutang -->
+          <div class="kas-option-box" id="kasOptionBoxHutang" style="display: none;">
+            <div class="kas-option-header">
+              <span class="kas-option-title">
+                <i class="fas fa-wallet"></i>
+                Pengaruh ke Kas
+              </span>
+            </div>
+            <label class="checkbox-group">
+              <input type="checkbox" id="hutangAffectKas" checked>
+              <div>
+                <span class="checkbox-label">Catat ke Kas Keluar</span>
+                <span class="checkbox-sublabel">Otomatis mengurangi saldo kas saat menyimpan</span>
+              </div>
+            </label>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -1255,7 +1360,7 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
+  <!-- Payment Modal with Kas Option -->
   <div class="modal-overlay" id="paymentModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1281,6 +1386,23 @@
         <div class="form-group">
           <label class="form-label">Catatan</label>
           <input type="text" class="form-input" id="paymentNote" placeholder="Catatan pembayaran...">
+        </div>
+
+        <!-- Kas Option -->
+        <div class="kas-option-box" id="kasOptionBox">
+          <div class="kas-option-header">
+            <span class="kas-option-title">
+              <i class="fas fa-wallet"></i>
+              Pengaruh ke Kas
+            </span>
+          </div>
+          <label class="checkbox-group" id="kasCheckboxLabel">
+            <input type="checkbox" id="affectKas" checked>
+            <div>
+              <span class="checkbox-label" id="kasLabelText">Catat ke Kas Masuk</span>
+              <span class="checkbox-sublabel" id="kasSubLabelText">Otomatis menambah saldo kas saat menerima pembayaran</span>
+            </div>
+          </label>
         </div>
       </div>
       <div class="modal-footer">
@@ -1336,11 +1458,13 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Pilih File (JSON atau CSV)</label>
-          <input type="file" class="form-input" id="importFile" accept=".json,.csv" style="padding: 0.5rem;">
+          <label class="form-label">Pilih File (JSON, CSV, atau Excel)</label>
+          <input type="file" class="form-input" id="importFile" accept=".json,.csv,.xls,.xlsx" style="padding: 0.5rem;">
           <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
-            Format JSON: [{name, type, amount, dueDate, note, status}]<br>
-            Format CSV: name,type,amount,dueDate,note,status
+            Format yang didukung:<br>
+            • JSON: [{name, type, amount, dueDate, note, status}]<br>
+            • CSV/Excel: name | type | amount | dueDate | note | status<br>
+            <strong>type:</strong> hutang/piutang | <strong>status:</strong> active/paid
           </small>
         </div>
         <div class="form-group">
@@ -1424,6 +1548,26 @@
       };
     }
 
+    // LOCAL STORAGE FALLBACK for customers (fix permission issue)
+    const CustomerStorage = {
+      getAll: () => {
+        try {
+          return JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+        } catch (e) { return {}; }
+      },
+      save: (id, data) => {
+        const all = CustomerStorage.getAll();
+        all[id] = { ...data, id, updatedAt: Date.now() };
+        localStorage.setItem('webpos_customers', JSON.stringify(all));
+        return all[id];
+      },
+      delete: (id) => {
+        const all = CustomerStorage.getAll();
+        delete all[id];
+        localStorage.setItem('webpos_customers', JSON.stringify(all));
+      }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
       // Auth check
       const checkAuth = () => {
@@ -1449,6 +1593,7 @@
         let currentPaymentId = null;
         let hutangData = {};
         let customerData = {};
+        let currentPaymentType = null; // 'hutang' or 'piutang'
 
         // Format currency inputs
         document.getElementById('hutangAmount').addEventListener('input', (e) => {
@@ -1491,8 +1636,29 @@
           document.getElementById('hutangForm').reset();
           document.getElementById('hutangId').value = '';
           updateCustomerSelect();
+          updateKasOptionHutang();
           document.getElementById('hutangModal').classList.add('active');
         });
+
+        // Hutang type change - update kas option visibility
+        document.getElementById('hutangType').addEventListener('change', updateKasOptionHutang);
+
+        function updateKasOptionHutang() {
+          const type = document.getElementById('hutangType').value;
+          const kasBox = document.getElementById('kasOptionBoxHutang');
+          const checkbox = document.getElementById('hutangAffectKas');
+          const label = kasBox.querySelector('.checkbox-label');
+          const sublabel = kasBox.querySelector('.checkbox-sublabel');
+          
+          kasBox.style.display = 'block';
+          if (type === 'hutang') {
+            label.textContent = 'Catat ke Kas Keluar';
+            sublabel.textContent = 'Otomatis mengurangi saldo kas saat menyimpan hutang baru';
+          } else {
+            label.textContent = 'Catat ke Kas Masuk';
+            sublabel.textContent = 'Otomatis menambah saldo kas saat menyimpan piutang baru';
+          }
+        }
 
         document.getElementById('btnAddCustomer').addEventListener('click', () => {
           document.getElementById('customerModalTitle').textContent = 'Tambah Pelanggan';
@@ -1574,6 +1740,7 @@
         function closePaymentModal() {
           document.getElementById('paymentModal').classList.remove('active');
           currentPaymentId = null;
+          currentPaymentType = null;
         }
 
         function closeCustomerModal() {
@@ -1589,13 +1756,12 @@
           Utils.showLoading();
           
           try {
-            // Load hutang data
+            // Load hutang data from Firebase
             const hutangSnapshot = await database.ref('debts').once('value');
             hutangData = hutangSnapshot.val() || {};
             
-            // Load customer data
-            const customerSnapshot = await database.ref('customers').once('value');
-            customerData = customerSnapshot.val() || {};
+            // Load customer data from LOCAL STORAGE (fix permission issue)
+            customerData = CustomerStorage.getAll();
             
             updateSummary();
             renderCustomerList();
@@ -1759,6 +1925,7 @@
           const amount = parseInt(document.getElementById('hutangAmount').value.replace(/\./g, '')) || 0;
           const dueDate = document.getElementById('hutangDueDate').value;
           const note = document.getElementById('hutangNote').value;
+          const affectKas = document.getElementById('hutangAffectKas').checked;
           
           if (!name || amount <= 0) {
             Utils.showToast('Nama dan jumlah harus diisi', 'error');
@@ -1771,7 +1938,7 @@
             const hutangId = id || 'debt_' + Date.now();
             const user = Auth.getCurrentUser();
             
-            await database.ref('debts/' + hutangId).set({
+            const hutangData = {
               id: hutangId,
               type,
               name,
@@ -1782,9 +1949,18 @@
               status: 'active',
               userId: user.uid,
               userName: user.name || user.email,
-              createdAt: id ? (hutangData[id]?.createdAt || Date.now()) : Date.now(),
-              updatedAt: Date.now()
-            });
+              createdAt: id ? (hutangData[hutangId]?.createdAt || Date.now()) : Date.now(),
+              updatedAt: Date.now(),
+              affectKas: affectKas
+            };
+            
+            await database.ref('debts/' + hutangId).set(hutangData);
+            
+            // If affectKas is checked, record to kas
+            if (affectKas && !id) { // Only for new records
+              await recordToKas(type === 'hutang' ? 'keluar' : 'masuk', amount, 
+                `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
+            }
             
             Utils.showToast('Data berhasil disimpan', 'success');
             closeModal();
@@ -1807,30 +1983,27 @@
             return;
           }
           
-          Utils.showLoading();
-          
           try {
             const customerId = id || 'cust_' + Date.now();
-            const user = Auth.getCurrentUser();
             
-            await database.ref('customers/' + customerId).set({
-              id: customerId,
+            // SAVE TO LOCAL STORAGE (fix Firebase permission issue)
+            CustomerStorage.save(customerId, {
               name,
               phone: phone || null,
-              userId: user.uid,
-              createdAt: id ? (customerData[id]?.createdAt || Date.now()) : Date.now(),
-              updatedAt: Date.now()
+              createdAt: id ? (customerData[customerId]?.createdAt || Date.now()) : Date.now()
             });
             
             Utils.showToast('Pelanggan berhasil disimpan', 'success');
             closeCustomerModal();
-            loadAllData();
+            
+            // Reload customer data
+            customerData = CustomerStorage.getAll();
+            renderCustomerList();
+            updateCustomerSelect();
           } catch (error) {
             console.error('Error saving customer:', error);
-            Utils.showToast('Gagal menyimpan pelanggan', 'error');
+            Utils.showToast('Gagal menyimpan pelanggan: ' + error.message, 'error');
           }
-          
-          Utils.hideLoading();
         }
 
         window.editCustomer = (id) => {
@@ -1845,19 +2018,16 @@
         };
 
         window.deleteCustomer = (id) => {
-          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', async () => {
-            Utils.showLoading();
-            
+          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', () => {
             try {
-              await database.ref('customers/' + id).remove();
+              CustomerStorage.delete(id);
               Utils.showToast('Pelanggan berhasil dihapus', 'success');
-              loadAllData();
+              customerData = CustomerStorage.getAll();
+              renderCustomerList();
+              updateCustomerSelect();
             } catch (error) {
-              console.error('Error deleting customer:', error);
               Utils.showToast('Gagal menghapus pelanggan', 'error');
             }
-            
-            Utils.hideLoading();
           });
         };
 
@@ -1866,10 +2036,31 @@
           if (!item) return;
           
           currentPaymentId = id;
+          currentPaymentType = item.type;
           const remaining = item.remaining || item.amount || 0;
+          
           document.getElementById('remainingAmount').textContent = Utils.formatRupiah(remaining);
           document.getElementById('paymentAmount').value = '';
           document.getElementById('paymentNote').value = '';
+          
+          // Update kas option based on type
+          const kasBox = document.getElementById('kasOptionBox');
+          const labelText = document.getElementById('kasLabelText');
+          const subLabelText = document.getElementById('kasSubLabelText');
+          const checkbox = document.getElementById('affectKas');
+          
+          checkbox.checked = true; // Default checked
+          
+          if (item.type === 'hutang') {
+            // Bayar hutang = uang keluar dari kas (kita bayar utang)
+            labelText.textContent = 'Catat ke Kas Keluar';
+            subLabelText.textContent = 'Otomatis mencatat pengeluaran kas saat membayar hutang';
+          } else {
+            // Bayar piutang = uang masuk ke kas (kita terima pembayaran)
+            labelText.textContent = 'Catat ke Kas Masuk';
+            subLabelText.textContent = 'Otomatis mencatat pemasukan kas saat menerima pembayaran piutang';
+          }
+          
           document.getElementById('paymentModal').classList.add('active');
         };
 
@@ -1884,6 +2075,8 @@
           document.getElementById('hutangAmount').value = Utils.formatNumberInput(item.amount.toString());
           document.getElementById('hutangDueDate').value = item.dueDate || '';
           document.getElementById('hutangNote').value = item.note || '';
+          document.getElementById('hutangAffectKas').checked = item.affectKas !== false;
+          updateKasOptionHutang();
           updateCustomerSelect();
           document.getElementById('hutangModal').classList.add('active');
         };
@@ -1936,6 +2129,7 @@
           
           const paymentAmount = parseInt(document.getElementById('paymentAmount').value.replace(/\./g, '')) || 0;
           const note = document.getElementById('paymentNote').value;
+          const affectKas = document.getElementById('affectKas').checked;
           
           if (paymentAmount <= 0) {
             Utils.showToast('Jumlah pembayaran harus lebih dari 0', 'error');
@@ -1954,13 +2148,14 @@
           
           try {
             const newRemaining = remaining - paymentAmount;
+            const isFullyPaid = newRemaining <= 0;
             const user = Auth.getCurrentUser();
             
             // Update debt
             await database.ref('debts/' + currentPaymentId).update({
               remaining: newRemaining,
-              status: newRemaining <= 0 ? 'paid' : 'active',
-              paidAt: newRemaining <= 0 ? Date.now() : null,
+              status: isFullyPaid ? 'paid' : 'active',
+              paidAt: isFullyPaid ? Date.now() : null,
               updatedAt: Date.now()
             });
             
@@ -1968,12 +2163,24 @@
             await database.ref('debt_payments/' + currentPaymentId + '/' + Date.now()).set({
               amount: paymentAmount,
               note,
+              affectKas,
               userId: user.uid,
               userName: user.name || user.email,
               timestamp: Date.now()
             });
             
-            Utils.showToast('Pembayaran berhasil', 'success');
+            // Record to kas if checked
+            if (affectKas) {
+              if (item.type === 'hutang') {
+                // Bayar hutang = kas keluar
+                await recordToKas('keluar', paymentAmount, `Pembayaran hutang - ${item.name}`, user);
+              } else {
+                // Terima piutang = kas masuk
+                await recordToKas('masuk', paymentAmount, `Pembayaran piutang - ${item.name}`, user);
+              }
+            }
+            
+            Utils.showToast('Pembayaran berhasil' + (affectKas ? ' dan tercatat di kas' : ''), 'success');
             closePaymentModal();
             loadAllData();
           } catch (error) {
@@ -1982,6 +2189,47 @@
           }
           
           Utils.hideLoading();
+        }
+
+        // Helper function to record to kas
+        async function recordToKas(type, amount, description, user) {
+          try {
+            const kasId = 'kas_' + Date.now();
+            const kasData = {
+              id: kasId,
+              type: type, // 'masuk' or 'keluar'
+              amount: amount,
+              description: description,
+              category: type === 'masuk' ? 'Pemasukan' : 'Pengeluaran',
+              source: 'hutang_piutang',
+              userId: user.uid,
+              userName: user.name || user.email,
+              timestamp: Date.now(),
+              date: new Date().toISOString().split('T')[0]
+            };
+            
+            await database.ref('cash_flow/' + kasId).set(kasData);
+            
+            // Update daily cash summary if needed
+            const today = new Date().toISOString().split('T')[0];
+            const summaryRef = database.ref('cash_summary/' + today);
+            const summarySnap = await summaryRef.once('value');
+            const summary = summarySnap.val() || { masuk: 0, keluar: 0, saldo: 0 };
+            
+            if (type === 'masuk') {
+              summary.masuk = (summary.masuk || 0) + amount;
+              summary.saldo = (summary.saldo || 0) + amount;
+            } else {
+              summary.keluar = (summary.keluar || 0) + amount;
+              summary.saldo = (summary.saldo || 0) - amount;
+            }
+            
+            await summaryRef.set(summary);
+            
+          } catch (error) {
+            console.error('Error recording to kas:', error);
+            throw error;
+          }
         }
 
         // Export Data
@@ -2011,7 +2259,7 @@
           Utils.showToast('Data berhasil diexport', 'success');
         }
 
-        // Import Data
+        // Import Data with Excel Support
         function importData() {
           const fileInput = document.getElementById('importFile');
           const overwrite = document.getElementById('importOverwrite').checked;
@@ -2022,21 +2270,37 @@
           }
 
           const file = fileInput.files[0];
+          Utils.showLoading();
+          
           const reader = new FileReader();
           
           reader.onload = async (e) => {
-            Utils.showLoading();
-            
             try {
               let importedData = [];
               
-              if (file.name.endsWith('.csv')) {
+              if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
+                // Parse Excel using SheetJS
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                importedData = XLSX.utils.sheet_to_json(worksheet);
+                
+                // Normalize keys to lowercase
+                importedData = importedData.map(row => {
+                  const normalized = {};
+                  Object.keys(row).forEach(key => {
+                    normalized[key.toLowerCase()] = row[key];
+                  });
+                  return normalized;
+                });
+              } else if (file.name.endsWith('.csv')) {
                 // Parse CSV
-                const lines = e.target.result.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
                 
                 for (let i = 1; i < lines.length; i++) {
-                  if (!lines[i].trim()) continue;
                   const values = lines[i].split(',').map(v => v.trim());
                   const obj = {};
                   headers.forEach((h, idx) => {
@@ -2057,24 +2321,33 @@
               let count = 0;
               
               for (const item of importedData) {
-                if (!item.name || !item.type || !item.amount) continue;
+                // Handle various field names
+                const name = item.name || item.nama || item.pelanggan || '';
+                const type = (item.type || item.tipe || 'hutang').toLowerCase();
+                const amount = parseInt(item.amount || item.jumlah || item.total || 0);
+                const dueDate = item.duedate || item.due_date || item.tanggal || item.tanggal_jatuh_tempo || '';
+                const note = item.note || item.catatan || item.keterangan || '';
+                const status = (item.status || 'active').toLowerCase();
+                
+                if (!name || amount <= 0) continue;
                 
                 const hutangId = 'debt_' + Date.now() + '_' + count;
                 
                 await database.ref('debts/' + hutangId).set({
                   id: hutangId,
-                  name: item.name,
-                  type: item.type,
-                  amount: parseInt(item.amount) || 0,
-                  remaining: parseInt(item.remaining) || parseInt(item.amount) || 0,
-                  dueDate: item.dueDate || null,
-                  note: item.note || '',
-                  status: item.status || 'active',
+                  name,
+                  type: type === 'piutang' ? 'piutang' : 'hutang',
+                  amount: amount,
+                  remaining: status === 'paid' ? 0 : amount,
+                  dueDate: dueDate || null,
+                  note,
+                  status: status === 'paid' ? 'paid' : 'active',
                   userId: user.uid,
                   userName: user.name || user.email,
                   createdAt: Date.now(),
                   updatedAt: Date.now(),
-                  imported: true
+                  imported: true,
+                  affectKas: false // Default false for imported data
                 });
                 
                 count++;
@@ -2091,7 +2364,11 @@
             Utils.hideLoading();
           };
           
-          reader.readAsText(file);
+          if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
+            reader.readAsArrayBuffer(file);
+          } else {
+            reader.readAsText(file);
+          }
         }
       }
     });
