@@ -1053,63 +1053,113 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     // ========== DELETE (dengan rollback stok yang benar) ==========
-    async function deleteTransaction(id) {
-      if (!confirm('Yakin ingin menghapus transaksi ini?\nStok produk akan dikembalikan jika ini transaksi penjualan.')) return;
+    // ========== DELETE (dengan rollback stok yang benar & debugging) ==========
+async function deleteTransaction(id) {
+  if (!confirm('Yakin ingin menghapus transaksi ini?\nStok produk akan dikembalikan jika ini transaksi penjualan.')) return;
 
-      document.getElementById('loadingText').textContent = 'Menghapus & mengembalikan stok...';
-      document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('loadingText').textContent = 'Menghapus & mengembalikan stok...';
+  document.getElementById('loadingOverlay').classList.add('active');
 
-      try {
-        const t = allTransactions.find(tr => tr.id === id);
-        if (!t) throw new Error('Transaksi tidak ditemukan');
+  try {
+    const t = allTransactions.find(tr => tr.id === id);
+    if (!t) throw new Error('Transaksi tidak ditemukan di memory');
 
-        // Kembalikan stok jika transaksi penjualan
-        if (t.type === 'penjualan' && t.items && Array.isArray(t.items)) {
-          const stockResults = [];
-          for (const item of t.items) {
-            // Cek productId atau fallback ke id
-            const productId = item.productId || item.id;
-            if (!productId) {
-              console.warn('Item tanpa productId:', item);
-              continue;
-            }
-            try {
-              const productRef = database.ref(`products/${productId}`);
-              const snap = await productRef.once('value');
-              const product = snap.val();
+    console.log('=== DEBUG DELETE ===');
+    console.log('Transaksi ID:', id);
+    console.log('Tipe:', t.type);
+    console.log('Items:', JSON.stringify(t.items, null, 2));
 
-              if (product) {
-                const newStock = (product.stock || 0) + (item.qty || 0);
-                await productRef.update({ stock: newStock });
-                stockResults.push(`${item.name}: +${item.qty} (stok jadi ${newStock})`);
-              } else {
-                console.warn(`Produk ${productId} tidak ditemukan`);
-                stockResults.push(`${item.name || productId}: produk tidak ditemukan`);
+    // Kembalikan stok jika transaksi penjualan
+    if (t.type === 'penjualan' && t.items && Array.isArray(t.items)) {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const item of t.items) {
+        // Coba beberapa cara untuk mendapatkan productId
+        let productId = item.productId || item.id || item.product_id || item.productID;
+        
+        // Jika tidak ada productId tapi ada nama produk, coba cari berdasarkan nama
+        if (!productId && item.name) {
+          console.log('Mencari productId via nama produk:', item.name);
+          try {
+            const productsSnap = await database.ref('products').once('value');
+            const products = productsSnap.val() || {};
+            // Cari produk dengan nama yang sama (case insensitive)
+            for (const [pid, pdata] of Object.entries(products)) {
+              if (pdata.name && pdata.name.toLowerCase() === item.name.toLowerCase()) {
+                productId = pid;
+                console.log('✓ ProductId ditemukan via nama:', pid);
+                break;
               }
-            } catch (err) {
-              console.error(`Gagal kembalikan stok ${productId}:`, err);
             }
+          } catch (e) {
+            console.warn('Gagal mencari produk via nama:', e);
           }
-          console.log('Hasil rollback stok:', stockResults);
         }
 
-        // Soft delete
-        await database.ref(`transactions/${t.dateKey}/${id}`).update({
-          status: 'cancelled',
-          cancelledAt: Date.now(),
-          cancelledBy: (typeof Auth !== 'undefined' ? Auth.getCurrentUser()?.uid : null) || 'unknown'
-        });
+        if (!productId) {
+          console.warn('✗ Item tanpa productId dan nama:', item);
+          failCount++;
+          continue;
+        }
 
-        showToast('Transaksi dihapus' + (t.type === 'penjualan' ? ' & stok dikembalikan' : ''), 'success');
-        loadTransactions();
-      } catch (error) {
-        console.error('Error hapus transaksi:', error);
-        showToast('Gagal menghapus: ' + error.message, 'error');
-      } finally {
-        document.getElementById('loadingOverlay').classList.remove('active');
+        try {
+          const productRef = database.ref(`products/${productId}`);
+          const snap = await productRef.once('value');
+          const product = snap.val();
+
+          if (product) {
+            const currentStock = product.stock || 0;
+            const qtyToReturn = parseInt(item.qty) || 0;
+            const newStock = currentStock + qtyToReturn;
+
+            await productRef.update({ 
+              stock: newStock,
+              updatedAt: Date.now()
+            });
+
+            console.log(`✓ Stok dikembalikan: ${product.name} (${productId}): ${currentStock} + ${qtyToReturn} = ${newStock}`);
+            successCount++;
+          } else {
+            console.warn(`✗ Produk tidak ditemukan di database: ${productId}`);
+            failCount++;
+          }
+        } catch (err) {
+          console.error(`✗ Gagal update stok ${productId}:`, err);
+          failCount++;
+        }
+      }
+
+      // Notifikasi detail hasil rollback
+      if (successCount > 0) {
+        showToast(`${successCount} stok produk dikembalikan${failCount > 0 ? `, ${failCount} gagal` : ''}`, 'success');
+      } else if (failCount > 0) {
+        showToast(`Gagal mengembalikan ${failCount} stok produk`, 'warning');
+      } else {
+        showToast('Tidak ada stok yang perlu dikembalikan (mungkin bukan transaksi produk)', 'info');
       }
     }
 
+    // Soft delete transaksi
+    const updates = {
+      status: 'cancelled',
+      cancelledAt: Date.now(),
+      cancelledBy: (typeof Auth !== 'undefined' ? Auth.getCurrentUser()?.uid : null) || 'unknown',
+      stockReturned: t.type === 'penjualan' // flag untuk tracking
+    };
+
+    await database.ref(`transactions/${t.dateKey}/${id}`).update(updates);
+    console.log('✓ Transaksi ditandai cancelled');
+
+    loadTransactions(); // Refresh data
+    
+  } catch (error) {
+    console.error('Error detail:', error);
+    showToast('Gagal menghapus: ' + error.message, 'error');
+  } finally {
+    document.getElementById('loadingOverlay').classList.remove('active');
+  }
+}
     // ========== RETURN ==========
     async function returnTransaction(id) {
       if (!confirm('Yakin ingin return transaksi ini? Stok akan dikembalikan ke inventori.')) return;
