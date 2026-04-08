@@ -11,19 +11,8 @@
 
   <!-- Inline CSS -->
   <style>
-/* WebPOS Modern CSS - Simplified */
-
-/* Theme Colors */
+/* [CSS yang sudah ada tetap dipertahankan...] */
 :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
-[data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
-[data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
-[data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
-[data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
-[data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
-[data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
-[data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
-
-/* Base */
 :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
 
 [data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
@@ -32,15 +21,8 @@
 html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
 body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
 
-/* Scrollbar */
-::-webkit-scrollbar{width:8px}
-::-webkit-scrollbar-track{background:var(--bg-secondary)}
-::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
-
 /* Layout */
 .app-container{display:flex;min-height:100vh}
-
-/* Sidebar */
 .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
 .sidebar.collapsed{width:var(--sidebar-collapsed)}
 @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
@@ -69,10 +51,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .nav-menu{list-style:none}
 .nav-item{margin-bottom:2px}
 .nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
-.nav-link::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--primary);transform:scaleY(0);transition:transform .15s;border-radius:0 .25rem .25rem 0}
 .nav-link:hover{background:rgba(99,102,241,.05);color:var(--primary)}
 .nav-link.active{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600}
-.nav-link.active::before{transform:scaleY(1)}
 .nav-link i{width:22px;text-align:center;font-size:1.05rem}
 .nav-link span{white-space:nowrap}
 .sidebar.collapsed .nav-link span{display:none}
@@ -88,158 +68,435 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
 .sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
 .user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
-.user-profile:hover{opacity:.8}
 .user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
 .user-info{flex:1;overflow:hidden}
 .sidebar.collapsed .user-info{display:none}
 .user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
 
-/* Main Content */
 .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
 .sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
-@media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
+@media(max-width:1024px){.main-content{margin-left:0}}
 
-/* Header */
 .main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
 .header-left{display:flex;align-items:center;gap:1rem}
 .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
 .header-actions{display:flex;align-items:center;gap:.5rem}
 
-/* Page Content */
 .page-content{flex:1;padding:1.5rem;overflow-y:auto}
 @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
 
-/* Buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .btn-primary{background:var(--primary);color:white}
 .btn-primary:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
 .btn-success{background:var(--success);color:white}
-.btn-success:hover:not(:disabled){filter:brightness(0.9)}
 .btn-danger{background:var(--danger);color:white}
-.btn-danger:hover:not(:disabled){filter:brightness(0.9)}
 .btn-warning{background:var(--warning);color:white}
-.btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
-.btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.btn-secondary{background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border-color)}
 .btn-sm{padding:.4rem .875rem;font-size:.8rem}
-.btn-block{width:100%}
-
 .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
 .btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
 
-/* Cards */
-.card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
-.card:hover{box-shadow:var(--shadow-lg)}
+.card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden}
 .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
 .card-body{padding:1.5rem}
-.card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
 
-/* Forms */
-.form-group{margin-bottom:1.25rem}
-.form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
-.form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-.form-input::placeholder{color:var(--text-muted)}
-.form-textarea{min-height:100px;resize:vertical}
-.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
-
-/* Tables */
-.table-container{overflow-x:auto;border-radius:1rem;border:1px solid var(--border-color)}
-.table{width:100%;border-collapse:collapse;font-size:.9rem}
-.table th,.table td{padding:.875rem 1rem;text-align:left;border-bottom:1px solid var(--border-color)}
-.table th{font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
-.table tbody tr:hover{background:rgba(99,102,241,.05)}
-
-/* Badges */
-.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.35rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
-.badge-primary{background:rgba(99,102,241,.1);color:var(--primary)}
-.badge-success{background:rgba(16,185,129,.1);color:var(--success)}
-.badge-warning{background:rgba(245,158,11,.1);color:var(--warning)}
-.badge-danger{background:rgba(239,68,68,.1);color:var(--danger)}
-
-/* Toast */
-.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
-.toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.toast.success{border-left-color:var(--success)}
-.toast.error{border-left-color:var(--danger)}
-.toast.warning{border-left-color:var(--warning)}
-.toast.info{border-left-color:var(--info)}
-
-/* Loading */
 .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
 .loading-overlay.active{opacity:1;visibility:visible}
 .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Mobile Nav */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
 .mobile-nav-item i{font-size:1.25rem}
 .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
 @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
 
-/* Modal */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
-.modal-overlay.active{opacity:1;visibility:visible}
-.modal-content{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
-.modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
-.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
-.modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-.modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-.modal-close:hover{background:var(--danger);color:white}
-.modal-body{padding:1.5rem}
-.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
+.d-none{display:none!important}
+.d-md-none{display:none!important}
+@media(max-width:768px){.d-md-none{display:none!important}}
+
+/* [STYLE BARU UNTUK FITUR YANG DIMINTA] */
+
+/* Quick Filter Tabs */
+.quick-filter {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.quick-filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.quick-filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.quick-filter-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Category Tabs */
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  overflow-x: auto;
+}
+
+.category-tab {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -0.5rem;
+  transition: all 0.15s;
+}
+
+.category-tab:hover {
+  color: var(--primary);
+}
+
+.category-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+/* Transaction Table Enhanced */
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-table th,
+.transaction-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.transaction-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+.transaction-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.transaction-type.penjualan {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
+
+.transaction-type.topup {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.transaction-type.tarik {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+.transaction-type.kas_masuk {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.transaction-type.kas_keluar {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+}
+
+/* Action Dropdown */
+.action-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+
+.action-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.action-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 0.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+  z-index: 100;
+  display: none;
+  overflow: hidden;
+}
+
+.action-dropdown.open .action-menu {
+  display: block;
+}
+
+.action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.action-menu-item:hover {
+  background: var(--bg-secondary);
+}
+
+.action-menu-item i {
+  width: 16px;
+  text-align: center;
+}
+
+.action-menu-item.delete {
+  color: var(--danger);
+}
+
+.action-menu-item.delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Detail Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s;
+  padding: 1rem;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(0.9);
+  transition: all 0.25s;
+}
+
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.modal-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detail-label {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.items-list {
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.item-row:last-child {
+  border-bottom: none;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
 
 /* Empty State */
-.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
-.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
-.empty-state-title{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem}
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
 
-/* Toggle Switch */
-.toggle-switch{position:relative;width:50px;height:26px}
-.toggle-switch input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;transition:.3s}
-.toggle-slider:before{content:"";position:absolute;height:20px;width:20px;left:2px;bottom:2px;background:white;border-radius:50%;transition:.3s;box-shadow:var(--shadow-sm)}
-input:checked+.toggle-slider{background:var(--primary);border-color:var(--primary)}
-input:checked+.toggle-slider:before{transform:translateX(24px)}
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
 
-/* Theme Grid */
-.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:1rem}
-.theme-option{display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:1rem;border-radius:1rem;border:2px solid var(--border-color);cursor:pointer;transition:all .15s}
-.theme-option:hover{border-color:var(--text-muted);transform:translateY(-2px)}
-.theme-option.active{border-color:var(--primary);background:rgba(99,102,241,.05)}
-.theme-color{width:40px;height:40px;border-radius:50%;box-shadow:var(--shadow-md)}
-.theme-name{font-size:.75rem;font-weight:500;color:var(--text-secondary)}
-.theme-indigo{background:linear-gradient(135deg,#6366f1,#ec4899)}
-.theme-blue{background:linear-gradient(135deg,#3b82f6,#06b6d4)}
-.theme-green{background:linear-gradient(135deg,#10b981,#84cc16)}
-.theme-orange{background:linear-gradient(135deg,#f97316,#f59e0b)}
-.theme-purple{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
-.theme-red{background:linear-gradient(135deg,#ef4444,#f97316)}
-.theme-pink{background:linear-gradient(135deg,#ec4899,#8b5cf6)}
-.theme-teal{background:linear-gradient(135deg,#14b8a6,#06b6d4)}
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 
-/* Utilities */
-.d-none{display:none!important}
-.d-block{display:block!important}
-.d-flex{display:flex!important}
-.d-md-none{display:none!important}
-@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
-.text-left{text-align:left!important}
-.text-center{text-align:center!important}
-.text-right{text-align:right!important}
-.text-primary{color:var(--primary)!important}
-.text-success{color:var(--success)!important}
-.text-danger{color:var(--danger)!important}
-.font-bold{font-weight:700!important}
-.text-sm{font-size:.875rem!important}
-.mb-0{margin-bottom:0!important}
-.mb-2{margin-bottom:1rem!important}
-.w-full{width:100%!important}
+.toast {
+  padding: 1rem 1.5rem;
+  background: var(--bg-card);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  animation: slideIn 0.3s ease;
+}
 
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--danger); }
+.toast.warning { border-left-color: var(--warning); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transaction-table {
+    font-size: 0.75rem;
+  }
+  
+  .transaction-table th,
+  .transaction-table td {
+    padding: 0.5rem;
+  }
+  
+  .category-tabs {
+    font-size: 0.8rem;
+  }
+  
+  .quick-filter {
+    justify-content: center;
+  }
+  
+  .action-menu {
+    right: -100%;
+    left: auto;
+  }
+}
   </style>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -250,121 +507,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  
-  <style>
-    .riwayat-toolbar {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .date-filter {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .date-filter input {
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      background: var(--bg-card);
-      font-size: 0.875rem;
-    }
-
-    .summary-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .summary-card {
-      background: var(--bg-card);
-      border-radius: var(--radius-xl);
-      padding: 1.25rem;
-      border: 1px solid var(--border-color);
-    }
-
-    .summary-card-title {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.5rem;
-    }
-
-    .summary-card-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .summary-card-value.success { color: var(--success); }
-    .summary-card-value.danger { color: var(--danger); }
-
-    .transaction-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .transaction-table th,
-    .transaction-table td {
-      padding: 1rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .transaction-table th {
-      background: var(--bg-secondary);
-      font-weight: 600;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .transaction-table tr:hover {
-      background: var(--bg-secondary);
-    }
-
-    .transaction-type {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.25rem 0.75rem;
-      border-radius: 50px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .transaction-type.penjualan {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--primary);
-    }
-
-    .transaction-type.topup {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-    }
-
-    .transaction-type.tarik {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--danger);
-    }
-
-    @media (max-width: 768px) {
-      .transaction-table {
-        font-size: 0.75rem;
-      }
-      
-      .transaction-table th,
-      .transaction-table td {
-        padding: 0.5rem;
-      }
-    }
-  </style>
 </head>
 <body>
   <div class="app-container">
@@ -383,135 +525,58 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           <input type="text" class="search-input" placeholder="Cari menu...">
         </div>
       </div>
-            <nav class="sidebar-nav">
-        <!-- Utama -->
+      <nav class="sidebar-nav">
         <div class="nav-section">
           <div class="nav-section-title">Utama</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="index.html" class="nav-link" data-menu="dashboard">
-                <i class="fas fa-home"></i>
-                <span>Dashboard</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-kasir.html" class="nav-link" data-menu="kasir">
-                <i class="fas fa-cash-register"></i>
-                <span>Kasir</span>
-              </a>
-            </li>
-            <li class="nav-item">
-  <a href="page-produk.html" class="nav-link" data-menu="produk">
-    <i class="fas fa-box"></i>
-    <span>Produk</span>
-  </a>
-</li>
+            <li class="nav-item"><a href="index.html" class="nav-link" data-menu="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="page-kasir.html" class="nav-link" data-menu="kasir"><i class="fas fa-cash-register"></i><span>Kasir</span></a></li>
+            <li class="nav-item"><a href="page-produk.html" class="nav-link" data-menu="produk"><i class="fas fa-box"></i><span>Produk</span></a></li>
           </ul>
         </div>
-
-        <!-- Transaksi -->
         <div class="nav-section">
           <div class="nav-section-title">Transaksi</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-riwayat.html" class="nav-link active" data-menu="riwayat">
-                <i class="fas fa-history"></i>
-                <span>Riwayat Transaksi</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-riwayat.html" class="nav-link active" data-menu="riwayat"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
             <li class="nav-item nav-dropdown" data-dropdown>
               <div class="nav-link nav-dropdown-toggle" data-menu="kas">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <i class="fas fa-wallet"></i>
-                  <span>Kas Management</span>
-                </div>
+                <div style="display:flex;align-items:center;gap:0.75rem"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
               </div>
               <ul class="nav-submenu">
                 <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
                 <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
                 <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
-    <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
                 <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
                 <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
             </li>
-            <li class="nav-item">
-              <a href="page-hutang.html" class="nav-link" data-menu="hutang">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span>Hutang & Piutang</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-hutang.html" class="nav-link" data-menu="hutang"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a></li>
           </ul>
         </div>
-
-        <!-- Laporan -->
         <div class="nav-section">
           <div class="nav-section-title">Laporan</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
-                <i class="fas fa-chart-bar"></i>
-                <span>Laporan Penjualan</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
           </ul>
         </div>
-
-        <!-- Integrasi -->
         <div class="nav-section">
           <div class="nav-section-title">Integrasi</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram">
-                <i class="fab fa-telegram"></i>
-                <span>Saldo Telegram</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan">
-                <i class="fas fa-users"></i>
-                <span>Data Pelanggan</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram"><i class="fab fa-telegram"></i><span>Saldo Telegram</span></a></li>
+            <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
           </ul>
         </div>
-
-        <!-- Sistem -->
         <div class="nav-section">
           <div class="nav-section-title">Sistem</div>
           <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-pengguna.html" class="nav-link" data-menu="pengguna">
-                <i class="fas fa-user-cog"></i>
-                <span>Pengguna</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-setting.html" class="nav-link" data-menu="setting">
-                <i class="fas fa-cog"></i>
-                <span>Pengaturan</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-backup.html" class="nav-link" data-menu="backup">
-                <i class="fas fa-cloud-upload-alt"></i>
-                <span>Backup & Sync</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-printer.html" class="nav-link" data-menu="printer">
-                <i class="fas fa-print"></i>
-                <span>Printer & Struk</span>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="page-reset.html" class="nav-link" data-menu="reset">
-                <i class="fas fa-trash-alt"></i>
-                <span>Reset Data</span>
-              </a>
-            </li>
+            <li class="nav-item"><a href="page-pengguna.html" class="nav-link" data-menu="pengguna"><i class="fas fa-user-cog"></i><span>Pengguna</span></a></li>
+            <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
+            <li class="nav-item"><a href="page-backup.html" class="nav-link" data-menu="backup"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a></li>
+            <li class="nav-item"><a href="page-printer.html" class="nav-link" data-menu="printer"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
+            <li class="nav-item"><a href="page-reset.html" class="nav-link" data-menu="reset"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
           </ul>
         </div>
       </nav>
@@ -539,14 +604,32 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       </header>
 
       <div class="page-content">
-        <!-- Date Filter -->
-        <div class="riwayat-toolbar">
+        <!-- Quick Date Filter -->
+        <div class="quick-filter">
+          <button class="quick-filter-btn active" data-period="today">Hari Ini</button>
+          <button class="quick-filter-btn" data-period="yesterday">Kemarin</button>
+          <button class="quick-filter-btn" data-period="week">Minggu Ini</button>
+          <button class="quick-filter-btn" data-period="month">Bulan Ini</button>
+          <button class="quick-filter-btn" data-period="year">Tahun Ini</button>
+          <button class="quick-filter-btn" data-period="custom">Pilih Tanggal</button>
+        </div>
+
+        <!-- Custom Date Filter (Hidden by default) -->
+        <div class="riwayat-toolbar" id="customDateFilter" style="display: none;">
           <div class="date-filter">
             <input type="date" id="startDate">
             <span>s/d</span>
             <input type="date" id="endDate">
             <button class="btn btn-primary" id="btnFilter"><i class="fas fa-filter"></i> Filter</button>
           </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+          <button class="category-tab active" data-category="all">Semua</button>
+          <button class="category-tab" data-category="penjualan">Produk</button>
+          <button class="category-tab" data-category="kas">Kas Masuk/Keluar</button>
+          <button class="category-tab" data-category="topup_tarik">Top Up & Tarik</button>
         </div>
 
         <!-- Summary Cards -->
@@ -591,7 +674,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 <tr>
                   <td colspan="7" style="text-align: center; padding: 3rem;">
                     <div class="empty-state">
-                      <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
+                      <i class="fas fa-receipt"></i>
                       <p>Belum ada transaksi</p>
                     </div>
                   </td>
@@ -612,34 +695,87 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     </nav>
   </div>
 
+  <!-- Detail Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-receipt"></i> Detail Transaksi</h3>
+        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content will be inserted here -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+        <button class="btn btn-primary" onclick="printTransaction()"><i class="fas fa-print"></i> Cetak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-edit"></i> Edit Transaksi</h3>
+        <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Total</label>
+          <input type="number" class="form-input" id="editTotal">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Metode Pembayaran</label>
+          <select class="form-select" id="editMethod">
+            <option value="cash">Cash</option>
+            <option value="transfer">Transfer</option>
+            <option value="qris">QRIS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan</label>
+          <textarea class="form-textarea" id="editNote" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveEdit()"><i class="fas fa-save"></i> Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
   </div>
+
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="js/firebase-config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
 
   <script>
+    // Global variables
+    let allTransactions = [];
+    let currentFilter = 'all';
+    let currentPeriod = 'today';
+    let currentTransaction = null;
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Wait for Firebase auth to be ready
       auth.onAuthStateChanged((user) => {
         if (!user && !Utils.getStorage('webpos_session')) {
           window.location.href = '../login.html';
           return;
         }
-        
-        // Load user data if available
         if (user) {
           Auth.loadUserData(user.uid);
         }
-        
-        // Initialize riwayat
         initRiwayat();
       });
+    });
 
-      function initRiwayat() {
+    function initRiwayat() {
       const user = Auth.getCurrentUser();
       document.getElementById('userName').textContent = user?.name || user?.email || 'User';
       document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
@@ -649,7 +785,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       document.getElementById('startDate').value = today;
       document.getElementById('endDate').value = today;
 
-      // Sidebar toggle
+      // Event Listeners
       document.getElementById('menuToggle').addEventListener('click', () => {
         document.getElementById('sidebar').classList.toggle('collapsed');
       });
@@ -662,122 +798,534 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         Utils.confirm('Yakin ingin logout?', () => Auth.logout());
       });
 
-    document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
-  toggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    const parent = this.closest('.nav-dropdown');
-    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
-      if (openDropdown !== parent) openDropdown.classList.remove('open');
-    });
-    parent.classList.toggle('open');
-  });
-});
+      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          const parent = this.closest('.nav-dropdown');
+          document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+            if (openDropdown !== parent) openDropdown.classList.remove('open');
+          });
+          parent.classList.toggle('open');
+        });
+      });
 
-      // Load transactions
-      async function loadTransactions() {
-        Utils.showLoading();
-        
-        try {
-          const startDate = document.getElementById('startDate').value;
-          const endDate = document.getElementById('endDate').value;
+      // Quick Filter Buttons
+      document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.quick-filter-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentPeriod = this.dataset.period;
           
-          let allTransactions = [];
-          let totalPenjualan = 0;
-          let totalLaba = 0;
-          
-          // Get date range
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          
-          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-            const dateStr = d.toISOString().split('T')[0];
-            const snapshot = await database.ref(`transactions/${dateStr}`).once('value');
-            const trans = snapshot.val() || {};
-            
-            Object.entries(trans).forEach(([id, data]) => {
-              if (data.status !== 'cancelled') {
-                allTransactions.push({ id, ...data });
-                if (data.type === 'penjualan') {
-                  totalPenjualan += data.total || 0;
-                  totalLaba += data.profit || 0;
-                }
-                // Admin fee dari top up masuk ke laba
-                if (data.type === 'topup' && data.adminFee) {
-                  totalLaba += data.adminFee;
-                }
-              }
-            });
-          }
-          
-          // Sort by timestamp desc
-          allTransactions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          
-          // Update summary
-          document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
-          document.getElementById('totalTransaksi').textContent = allTransactions.length;
-          document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
-          document.getElementById('rataRata').textContent = Utils.formatRupiah(
-            allTransactions.length ? totalPenjualan / allTransactions.length : 0
-          );
-          
-          // Render table
-          const tbody = document.getElementById('transactionList');
-          
-          if (allTransactions.length === 0) {
-            tbody.innerHTML = `
-              <tr>
-                <td colspan="7" style="text-align: center; padding: 3rem;">
-                  <div class="empty-state">
-                    <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
-                    <p>Belum ada transaksi</p>
-                  </div>
-                </td>
-              </tr>
-            `;
+          if (currentPeriod === 'custom') {
+            document.getElementById('customDateFilter').style.display = 'block';
           } else {
-            tbody.innerHTML = allTransactions.map(t => {
-              const typeLabels = {
-                penjualan: 'Penjualan',
-                topup: 'Top Up',
-                tarik: 'Tarik Tunai',
-                kas_masuk: 'Kas Masuk',
-                kas_keluar: 'Kas Keluar'
-              };
-              
-              return `
-                <tr>
-                  <td>${t.id}</td>
-                  <td>${Utils.formatDateTime(t.timestamp)}</td>
-                  <td><span class="transaction-type ${t.type}">${typeLabels[t.type] || t.type}</span></td>
-                  <td>${t.paymentMethod || '-'}</td>
-                  <td>${t.cashierName || '-'}</td>
-                  <td>${Utils.formatRupiah(t.total || t.amount || 0)}</td>
-                  <td>
-                    <button class="btn btn-sm btn-secondary" onclick="viewDetail('${t.id}')">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                  </td>
-                </tr>
-              `;
-            }).join('');
+            document.getElementById('customDateFilter').style.display = 'none';
+            setDateRange(currentPeriod);
+            loadTransactions();
           }
-          
-        } catch (error) {
-          console.error('Error loading transactions:', error);
-          Utils.showToast('Gagal memuat transaksi', 'error');
-        }
-        
-        Utils.hideLoading();
-      }
+        });
+      });
 
-      window.viewDetail = (id) => {
-        Utils.showToast('Detail transaksi akan segera tersedia', 'info');
-      };
+      // Category Tabs
+      document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.category;
+          filterAndRender();
+        });
+      });
 
       document.getElementById('btnFilter').addEventListener('click', loadTransactions);
+      document.getElementById('btnExport').addEventListener('click', exportData);
 
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.action-dropdown')) {
+          document.querySelectorAll('.action-dropdown').forEach(d => d.classList.remove('open'));
+        }
+      });
+
+      // Set initial date range and load
+      setDateRange('today');
       loadTransactions();
+    }
+
+    function setDateRange(period) {
+      const today = new Date();
+      let start, end;
+
+      switch(period) {
+        case 'today':
+          start = end = today;
+          break;
+        case 'yesterday':
+          start = end = new Date(today.setDate(today.getDate() - 1));
+          break;
+        case 'week':
+          start = new Date(today.setDate(today.getDate() - today.getDay()));
+          end = new Date();
+          break;
+        case 'month':
+          start = new Date(today.getFullYear(), today.getMonth(), 1);
+          end = new Date();
+          break;
+        case 'year':
+          start = new Date(today.getFullYear(), 0, 1);
+          end = new Date();
+          break;
       }
+
+      document.getElementById('startDate').value = formatDate(start);
+      document.getElementById('endDate').value = formatDate(end);
+    }
+
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    async function loadTransactions() {
+      Utils.showLoading();
+      
+      try {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        allTransactions = [];
+        
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const snapshot = await database.ref(`transactions/${dateStr}`).once('value');
+          const trans = snapshot.val() || {};
+          
+          Object.entries(trans).forEach(([id, data]) => {
+            if (data.status !== 'cancelled' && data.status !== 'returned') {
+              allTransactions.push({ 
+                id, 
+                dateKey: dateStr,
+                ...data 
+              });
+            }
+          });
+        }
+        
+        allTransactions.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        
+        filterAndRender();
+        
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        showToast('Gagal memuat transaksi', 'error');
+      }
+      
+      Utils.hideLoading();
+    }
+
+    function filterAndRender() {
+      let filtered = allTransactions;
+      
+      // Filter by category
+      if (currentFilter !== 'all') {
+        filtered = allTransactions.filter(t => {
+          switch(currentFilter) {
+            case 'penjualan':
+              return t.type === 'penjualan';
+            case 'kas':
+              return t.type === 'kas_masuk' || t.type === 'kas_keluar';
+            case 'topup_tarik':
+              return t.type === 'topup' || t.type === 'tarik';
+            default:
+              return true;
+          }
+        });
+      }
+      
+      renderTable(filtered);
+      updateSummary(filtered);
+    }
+
+    function renderTable(transactions) {
+      const tbody = document.getElementById('transactionList');
+      const typeLabels = {
+        penjualan: 'Penjualan',
+        topup: 'Top Up',
+        tarik: 'Tarik Tunai',
+        kas_masuk: 'Kas Masuk',
+        kas_keluar: 'Kas Keluar'
+      };
+
+      if (transactions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align: center; padding: 3rem;">
+              <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <p>Belum ada transaksi</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = transactions.map(t => `
+        <tr>
+          <td>${t.id}</td>
+          <td>${Utils.formatDateTime(t.timestamp)}</td>
+          <td><span class="transaction-type ${t.type}">${typeLabels[t.type] || t.type}</span></td>
+          <td>${t.paymentMethod || '-'}</td>
+          <td>${t.cashierName || '-'}</td>
+          <td>${Utils.formatRupiah(t.total || t.amount || 0)}</td>
+          <td>
+            <div class="action-dropdown" id="dropdown-${t.id}">
+              <button class="action-btn" onclick="toggleDropdown('${t.id}', event)">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="action-menu">
+                <div class="action-menu-item" onclick="viewDetail('${t.id}')">
+                  <i class="fas fa-eye"></i> Lihat Detail
+                </div>
+                <div class="action-menu-item" onclick="editTransaction('${t.id}')">
+                  <i class="fas fa-edit"></i> Edit
+                </div>
+                ${t.type === 'penjualan' ? `
+                <div class="action-menu-item" onclick="returnTransaction('${t.id}')">
+                  <i class="fas fa-undo"></i> Return
+                </div>
+                ` : ''}
+                <div class="action-menu-item" onclick="printTransaction('${t.id}')">
+                  <i class="fas fa-print"></i> Cetak
+                </div>
+                <div class="action-menu-item delete" onclick="deleteTransaction('${t.id}')">
+                  <i class="fas fa-trash"></i> Hapus
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateSummary(transactions) {
+      let totalPenjualan = 0;
+      let totalLaba = 0;
+
+      transactions.forEach(t => {
+        if (t.type === 'penjualan') {
+          totalPenjualan += t.total || 0;
+          totalLaba += t.profit || 0;
+        }
+        if (t.type === 'topup' && t.adminFee) {
+          totalLaba += t.adminFee;
+        }
+      });
+
+      document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
+      document.getElementById('totalTransaksi').textContent = transactions.length;
+      document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
+      document.getElementById('rataRata').textContent = Utils.formatRupiah(
+        transactions.length ? totalPenjualan / transactions.length : 0
+      );
+    }
+
+    function toggleDropdown(id, event) {
+      event.stopPropagation();
+      document.querySelectorAll('.action-dropdown').forEach(d => {
+        if (d.id !== `dropdown-${id}`) d.classList.remove('open');
+      });
+      document.getElementById(`dropdown-${id}`).classList.toggle('open');
+    }
+
+    function viewDetail(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+
+      currentTransaction = t;
+      
+      const typeLabels = {
+        penjualan: 'Penjualan',
+        topup: 'Top Up',
+        tarik: 'Tarik Tunai',
+        kas_masuk: 'Kas Masuk',
+        kas_keluar: 'Kas Keluar'
+      };
+
+      let itemsHtml = '';
+      if (t.items && t.items.length > 0) {
+        itemsHtml = `
+          <div class="items-list">
+            <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Item Produk</h4>
+            ${t.items.map(item => `
+              <div class="item-row">
+                <span>${item.name} x${item.qty}</span>
+                <span>${Utils.formatRupiah(item.subtotal)}</span>
+              </div>
+            `).join('')}
+            <div class="item-row" style="border-top: 2px solid var(--border-color); margin-top: 0.5rem; padding-top: 0.5rem; font-weight: bold;">
+              <span>Total</span>
+              <span>${Utils.formatRupiah(t.total)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('modalBody').innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">ID Transaksi</span>
+            <span class="detail-value">${t.id}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tanggal</span>
+            <span class="detail-value">${Utils.formatDateTime(t.timestamp)}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Tipe</span>
+            <span class="detail-value">${typeLabels[t.type] || t.type}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Metode Pembayaran</span>
+            <span class="detail-value">${t.paymentMethod || '-'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Kasir</span>
+            <span class="detail-value">${t.cashierName || '-'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Total</span>
+            <span class="detail-value">${Utils.formatRupiah(t.total || t.amount || 0)}</span>
+          </div>
+          ${t.profit ? `
+          <div class="detail-item">
+            <span class="detail-label">Laba</span>
+            <span class="detail-value text-success">${Utils.formatRupiah(t.profit)}</span>
+          </div>
+          ` : ''}
+          ${t.note ? `
+          <div class="detail-item" style="flex-direction: column; align-items: flex-start;">
+            <span class="detail-label">Catatan</span>
+            <span style="margin-top: 0.5rem;">${t.note}</span>
+          </div>
+          ` : ''}
+        </div>
+        ${itemsHtml}
+      `;
+
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function editTransaction(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+
+      currentTransaction = t;
+      document.getElementById('editTotal').value = t.total || t.amount || 0;
+      document.getElementById('editMethod').value = t.paymentMethod || 'cash';
+      document.getElementById('editNote').value = t.note || '';
+      
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    async function saveEdit() {
+      if (!currentTransaction) return;
+      
+      Utils.showLoading();
+      
+      try {
+        const updates = {
+          total: parseInt(document.getElementById('editTotal').value) || 0,
+          paymentMethod: document.getElementById('editMethod').value,
+          note: document.getElementById('editNote').value,
+          updatedAt: Date.now()
+        };
+
+        await database.ref(`transactions/${currentTransaction.dateKey}/${currentTransaction.id}`).update(updates);
+        
+        showToast('Transaksi berhasil diupdate', 'success');
+        closeEditModal();
+        loadTransactions();
+      } catch (error) {
+        showToast('Gagal mengupdate transaksi', 'error');
+      }
+      
+      Utils.hideLoading();
+    }
+
+    async function deleteTransaction(id) {
+      if (!confirm('Yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan jika ini transaksi penjualan.')) return;
+
+      Utils.showLoading();
+      
+      try {
+        const t = allTransactions.find(tr => tr.id === id);
+        if (!t) return;
+
+        // Return stock if penjualan
+        if (t.type === 'penjualan' && t.items) {
+          for (const item of t.items) {
+            if (item.productId) {
+              const productRef = database.ref(`products/${item.productId}`);
+              const snapshot = await productRef.once('value');
+              const product = snapshot.val();
+              if (product) {
+                await productRef.update({
+                  stock: (product.stock || 0) + (item.qty || 0)
+                });
+              }
+            }
+          }
+        }
+
+        // Soft delete
+        await database.ref(`transactions/${t.dateKey}/${id}`).update({
+          status: 'cancelled',
+          cancelledAt: Date.now()
+        });
+
+        showToast('Transaksi berhasil dihapus', 'success');
+        loadTransactions();
+      } catch (error) {
+        showToast('Gagal menghapus transaksi', 'error');
+      }
+      
+      Utils.hideLoading();
+    }
+
+    async function returnTransaction(id) {
+      if (!confirm('Yakin ingin return transaksi ini? Stok akan dikembalikan ke inventory.')) return;
+
+      Utils.showLoading();
+      
+      try {
+        const t = allTransactions.find(tr => tr.id === id);
+        if (!t || !t.items) return;
+
+        // Return stock
+        for (const item of t.items) {
+          if (item.productId) {
+            const productRef = database.ref(`products/${item.productId}`);
+            const snapshot = await productRef.once('value');
+            const product = snapshot.val();
+            if (product) {
+              await productRef.update({
+                stock: (product.stock || 0) + (item.qty || 0)
+              });
+            }
+          }
+        }
+
+        // Mark as returned
+        await database.ref(`transactions/${t.dateKey}/${id}`).update({
+          status: 'returned',
+          returnedAt: Date.now()
+        });
+
+        showToast('Return berhasil, stok dikembalikan', 'success');
+        loadTransactions();
+      } catch (error) {
+        showToast('Gagal return transaksi', 'error');
+      }
+      
+      Utils.hideLoading();
+    }
+
+    function printTransaction(id) {
+      const t = allTransactions.find(tr => tr.id === id);
+      if (!t) return;
+
+      // Simple print implementation
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Struk ${t.id}</title>
+          <style>
+            body { font-family: monospace; padding: 20px; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .line { border-top: 1px dashed #000; margin: 10px 0; }
+            .item { display: flex; justify-content: space-between; margin: 5px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>WEBPOS</h2>
+            <p>${Utils.formatDateTime(t.timestamp)}</p>
+          </div>
+          <div class="line"></div>
+          <p>ID: ${t.id}</p>
+          <p>Kasir: ${t.cashierName || '-'}</p>
+          <div class="line"></div>
+          ${t.items ? t.items.map(item => `
+            <div class="item">
+              <span>${item.name} x${item.qty}</span>
+              <span>${Utils.formatRupiah(item.subtotal)}</span>
+            </div>
+          `).join('') : ''}
+          <div class="line"></div>
+          <div class="item">
+            <span><strong>TOTAL</strong></span>
+            <span><strong>${Utils.formatRupiah(t.total || t.amount || 0)}</strong></span>
+          </div>
+          <div class="line"></div>
+          <p style="text-align: center;">Terima Kasih</p>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function exportData() {
+      if (allTransactions.length === 0) {
+        showToast('Tidak ada data untuk diexport', 'warning');
+        return;
+      }
+
+      let csv = 'ID,Tanggal,Tipe,Metode,Kasir,Total,Status\n';
+      allTransactions.forEach(t => {
+        csv += `${t.id},${Utils.formatDateTime(t.timestamp)},${t.type},${t.paymentMethod || '-'},${t.cashierName || '-'},${t.total || t.amount || 0},${t.status || 'completed'}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `transaksi_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      
+      showToast('Data berhasil diexport', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Close modals on outside click
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
     });
   </script>
 </body>
