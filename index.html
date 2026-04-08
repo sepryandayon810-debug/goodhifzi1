@@ -858,24 +858,37 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 </h3>
               </div>
               <div class="card-body">
-                <div class="quick-actions">
-                  <a href="page-kasir.html" class="quick-action-btn">
-                    <i class="fas fa-cash-register"></i>
-                    <span>Buka Kasir</span>
-                  </a>
-                  <a href="page-produk.html" class="quick-action-btn">
-                    <i class="fas fa-plus"></i>
-                    <span>Tambah Produk</span>
-                  </a>
-                  <a href="page-modal.html" class="quick-action-btn">
-                    <i class="fas fa-coins"></i>
-                    <span>Set Modal</span>
-                  </a>
-                  <button class="quick-action-btn" id="btnToggleShift">
-                    <i class="fas fa-store-slash"></i>
-                    <span id="shiftBtnText">Tutup Shift</span>
-                  </button>
-                </div>
+                <div class="quick-actions" style="grid-template-columns: repeat(3, 1fr);">
+  <!-- Baris 1 -->
+  <a href="page-kasir.html" class="quick-action-btn">
+    <i class="fas fa-cash-register"></i>
+    <span>Buka Kasir</span>
+  </a>
+  <a href="page-produk.html" class="quick-action-btn">
+    <i class="fas fa-plus"></i>
+    <span>Tambah Produk</span>
+  </a>
+  <a href="page-modal.html" class="quick-action-btn">
+    <i class="fas fa-coins"></i>
+    <span>Set Modal</span>
+  </a>
+  
+  <!-- Baris 2 - Tambahan Kas Masuk & Keluar -->
+  <a href="page-kas-masuk.html" class="quick-action-btn" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--success);">
+    <i class="fas fa-arrow-down" style="color: var(--success);"></i>
+    <span>Kas Masuk</span>
+  </a>
+  
+  <a href="page-kas-keluar.html" class="quick-action-btn" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger);">
+    <i class="fas fa-arrow-up" style="color: var(--danger);"></i>
+    <span>Kas Keluar</span>
+  </a>
+  
+  <button class="quick-action-btn" id="btnToggleShift">
+    <i class="fas fa-store-slash"></i>
+    <span id="shiftBtnText">Tutup Shift</span>
+  </button>
+</div>
               </div>
             </div>
           </div>
