@@ -4,25 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366f1">
-  <title>WebPOS - Data Pelanggan (n8n)</title>
+  <title>WebPOS - Hutang/Piutang</title>
 
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
   <style>
-    /* Theme & Base Styles (sama seperti sebelumnya) */
-    :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+    /* Base Styles (same as before) */
+    :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+    [data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
+    [data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
+    [data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
+    [data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
+    [data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
+    [data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
+    [data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+
+    :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+
     [data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
+
     *{margin:0;padding:0;box-sizing:border-box}
     html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
     body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
 
-    /* Layout */
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg-secondary)}
+    ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
+
     .app-container{display:flex;min-height:100vh}
+
+    /* Sidebar Styles (simplified) */
     .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
     .sidebar.collapsed{width:var(--sidebar-collapsed)}
     @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
-    
+
     .sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
     .logo-container{display:flex;align-items:center;gap:.5rem}
     .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
@@ -73,6 +99,7 @@
     .user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
 
+    /* Main Content */
     .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
     .sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
     @media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
@@ -85,13 +112,16 @@
     .page-content{flex:1;padding:1.5rem;overflow-y:auto}
     @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
 
-    /* Buttons & Components */
+    /* Buttons */
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .btn-primary{background:var(--primary);color:white}
     .btn-primary:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
     .btn-success{background:var(--success);color:white}
+    .btn-success:hover:not(:disabled){filter:brightness(0.9)}
     .btn-danger{background:var(--danger);color:white}
+    .btn-danger:hover:not(:disabled){filter:brightness(0.9)}
+    .btn-warning{background:var(--warning);color:white}
     .btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
     .btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
     .btn-sm{padding:.4rem .875rem;font-size:.8rem}
@@ -100,98 +130,13 @@
     .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
     .btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
 
-    .btn-copy{background:var(--success);color:white;border:none;padding:.5rem .75rem;border-radius:.5rem;cursor:pointer;font-size:.75rem;display:inline-flex;align-items:center;gap:.25rem;transition:all .15s}
-    .btn-copy:hover{background:#059669;transform:scale(1.05)}
-    .btn-copy:active{transform:scale(0.95)}
-    .btn-copy.copied{background:var(--info)}
-
     /* Cards */
-    .card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s;margin-bottom:1.5rem}
+    .card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
     .card:hover{box-shadow:var(--shadow-lg)}
-    .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
     .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
     .card-body{padding:1.5rem}
-
-    /* Forms */
-    .form-group{margin-bottom:1.25rem}
-    .form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
-    .form-input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
-    .form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-    .form-input::placeholder{color:var(--text-muted)}
-
-    /* Search & Results */
-    .search-container{position:relative;margin-bottom:1.5rem}
-    .search-box{display:flex;gap:.75rem;align-items:center}
-    .search-input-flex{flex:1;position:relative}
-    .search-input-flex i{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted)}
-    .search-input-flex input{width:100%;padding:.875rem 1rem .875rem 2.5rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-card);font-size:.95rem;transition:all .15s}
-    .search-input-flex input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
-
-    /* Results List */
-    .results-list{display:flex;flex-direction:column;gap:.75rem}
-    .result-item{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--bg-secondary);border-radius:.75rem;border:1px solid var(--border-color);transition:all .15s}
-    .result-item:hover{border-color:var(--primary);box-shadow:var(--shadow-sm)}
-    
-    .result-info{display:flex;align-items:center;gap:1rem}
-    .result-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:1.125rem}
-    .result-details{display:flex;flex-direction:column;gap:.25rem}
-    .result-name{font-weight:600;color:var(--text-primary);font-size:1rem}
-    .result-number{font-size:.875rem;color:var(--text-secondary);font-family:monospace;background:var(--bg-card);padding:.25rem .5rem;border-radius:.375rem;border:1px solid var(--border-color)}
-    
-    .result-actions{display:flex;gap:.5rem;align-items:center}
-    
-    /* Config Panel */
-    .config-panel{background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(236,72,153,.05));border:2px dashed var(--border-color);border-radius:1rem;padding:1.5rem;margin-bottom:1.5rem}
-    .config-title{font-weight:700;margin-bottom:1rem;color:var(--primary);display:flex;align-items:center;gap:.5rem}
-    .config-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-bottom:1rem}
-    
-    /* Stats */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
-    .stat-card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);padding:1.25rem;display:flex;align-items:center;gap:1rem}
-    .stat-icon{width:48px;height:48px;border-radius:.75rem;display:flex;align-items:center;justify-content:center;font-size:1.25rem;color:white}
-    .stat-icon.blue{background:linear-gradient(135deg,#3b82f6,#2563eb)}
-    .stat-icon.green{background:linear-gradient(135deg,#10b981,#059669)}
-    .stat-icon.orange{background:linear-gradient(135deg,#f59e0b,#d97706)}
-    .stat-content{flex:1}
-    .stat-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase}
-    .stat-value{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-
-    /* Toast */
-    .toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
-    .toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
-    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-    .toast.success{border-left-color:var(--success)}
-    .toast.error{border-left-color:var(--danger)}
-    .toast.warning{border-left-color:var(--warning)}
-
-    /* Loading */
-    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
-    .loading-overlay.active{opacity:1;visibility:visible}
-    .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* Mobile Nav */
-    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
-    .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
-    .mobile-nav-item i{font-size:1.25rem}
-    .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
-    @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
-
-    /* Modal */
-    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
-    .modal-overlay.active{opacity:1;visibility:visible}
-    .modal-content{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
-    .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
-    .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
-    .modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-    .modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-    .modal-close:hover{background:var(--danger);color:white}
-    .modal-body{padding:1.5rem}
-    .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
-
-    /* Empty State */
-    .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
-    .empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
+    .card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
 
     /* Toggle Switch */
     .toggle-switch{position:relative;width:50px;height:26px}
@@ -201,23 +146,740 @@
     input:checked+.toggle-slider{background:var(--primary);border-color:var(--primary)}
     input:checked+.toggle-slider:before{transform:translateX(24px)}
 
-    .d-none{display:none!important}
-    .text-center{text-align:center!important}
-    .mb-0{margin-bottom:0!important}
-    .mt-1{margin-top:.5rem!important}
+    /* Custom Toggle for Status */
+    .status-toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-secondary);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+    }
+
+    .status-toggle-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .status-toggle-label.active {
+      color: var(--primary);
+    }
+
+    /* Hutang Container */
+    .hutang-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .hutang-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Customer List Section */
+    .customer-section {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .customer-header {
+      padding: 1rem 1.25rem;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .customer-header:hover {
+      background: var(--bg-primary);
+    }
+
+    .customer-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .customer-toggle-icon {
+      transition: transform 0.3s;
+      color: var(--text-muted);
+    }
+
+    .customer-section.expanded .customer-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .customer-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .customer-section.expanded .customer-body {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .customer-list {
+      padding: 0.5rem;
+    }
+
+    .customer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 0.25rem;
+      transition: all 0.2s;
+    }
+
+    .customer-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .customer-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .customer-avatar-small {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+    }
+
+    .customer-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .customer-actions {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .btn-icon-xs {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .btn-icon-xs:hover {
+      transform: scale(1.1);
+    }
+
+    .btn-add-customer {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      background: transparent;
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-add-customer:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(99, 102, 241, 0.05);
+    }
+
+    /* Summary Cards */
+    .summary-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+    }
+
+    .summary-card.hutang {
+      border-left: 4px solid var(--danger);
+    }
+
+    .summary-card.piutang {
+      border-left: 4px solid var(--warning);
+    }
+
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .summary-card.hutang .summary-icon {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .summary-card.piutang .summary-icon {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .summary-title {
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .summary-amount {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .summary-card.hutang .summary-amount {
+      color: var(--danger);
+    }
+
+    .summary-card.piutang .summary-amount {
+      color: var(--warning);
+    }
+
+    .btn-add {
+      width: 100%;
+      padding: 1rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .btn-add:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    /* Import Export Buttons */
+    .import-export-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .hutang-list-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .filter-tab {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .hutang-list {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .hutang-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.2s;
+    }
+
+    .hutang-item:hover {
+      background: var(--bg-secondary);
+    }
+
+    .hutang-item:last-child {
+      border-bottom: none;
+    }
+
+    .hutang-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .hutang-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: var(--text-muted);
+    }
+
+    .hutang-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .hutang-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .hutang-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .hutang-amount-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+    }
+
+    .hutang-amount {
+      font-size: 1.125rem;
+      font-weight: 700;
+    }
+
+    .hutang-amount.hutang {
+      color: var(--danger);
+    }
+
+    .hutang-amount.piutang {
+      color: var(--warning);
+    }
+
+    .hutang-amount.paid {
+      color: var(--success);
+      text-decoration: line-through;
+      opacity: 0.7;
+    }
+
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .status-badge.active {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-badge.inactive {
+      background: rgba(100, 116, 139, 0.1);
+      color: var(--text-muted);
+    }
+
+    .hutang-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-icon-sm {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: white;
+    }
+
+    .btn-pay {
+      background: var(--success);
+    }
+
+    .btn-pay:hover {
+      background: #059669;
+    }
+
+    .btn-edit {
+      background: var(--info);
+    }
+
+    .btn-edit:hover {
+      background: #2563eb;
+    }
+
+    .btn-delete {
+      background: var(--danger);
+    }
+
+    .btn-delete:hover {
+      background: #dc2626;
+    }
+
+    .btn-restore {
+      background: var(--warning);
+    }
+
+    .btn-restore:hover {
+      background: #d97706;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: transform 0.25s;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .input-prefix {
+      position: relative;
+    }
+
+    .input-prefix .prefix {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .input-prefix input {
+      padding-left: 3rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+    }
+
+    /* Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s;
+    }
+
+    .loading-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 400px;
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow-lg);
+      border-left: 4px solid;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--warning); }
+    .toast.info { border-left-color: var(--info); }
+
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--bottom-nav-height);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      z-index: 999;
+      padding: 0 1rem;
+    }
+
+    .mobile-nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.7rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      padding: 0.5rem;
+    }
+
+    .mobile-nav-item i {
+      font-size: 1.25rem;
+    }
+
+    .mobile-nav-item.active,
+    .mobile-nav-item:hover {
+      color: var(--primary);
+    }
+
+    @media(max-width:768px) {
+      .mobile-nav { display: flex; }
+      .page-content { padding-bottom: calc(var(--bottom-nav-height) + 1rem); }
+      .import-export-group { flex-direction: column; }
+    }
+
+    .d-none { display: none !important; }
+    .d-md-none { display: none !important; }
+    @media(max-width:768px) {
+      .d-md-none { display: none !important; }
+      .d-sm-none { display: none !important; }
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Sidebar (sama struktur) -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-container">
-          <div class="logo-icon"><i class="fas fa-cash-register"></i></div>
+          <div class="logo-icon">
+            <i class="fas fa-cash-register"></i>
+          </div>
           <span class="logo-text">WebPOS</span>
         </div>
       </div>
-      <button class="menu-toggle" id="menuToggle"><i class="fas fa-chevron-left"></i></button>
+      
+      <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-chevron-left"></i>
+      </button>
       
       <div class="sidebar-search">
         <div class="search-input-wrapper">
@@ -227,42 +889,146 @@
       </div>
       
       <nav class="sidebar-nav">
+        <!-- Utama -->
         <div class="nav-section">
           <div class="nav-section-title">Utama</div>
           <ul class="nav-menu">
-            <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
-            <li class="nav-item"><a href="page-kasir.html" class="nav-link"><i class="fas fa-cash-register"></i><span>Kasir</span></a></li>
-            <li class="nav-item"><a href="page-produk.html" class="nav-link"><i class="fas fa-box"></i><span>Produk</span></a></li>
-          </ul>
-        </div>
-        <div class="nav-section">
-          <div class="nav-section-title">Transaksi</div>
-          <ul class="nav-menu">
-            <li class="nav-item"><a href="page-riwayat.html" class="nav-link"><i class="fas fa-history"></i><span>Riwayat</span></a></li>
-            <li class="nav-item nav-dropdown" data-dropdown>
-              <div class="nav-link nav-dropdown-toggle"><div style="display:flex;align-items:center;gap:.75rem;"><i class="fas fa-wallet"></i><span>Kas</span></div><i class="fas fa-chevron-down dropdown-arrow"></i></div>
-              <ul class="nav-submenu">
-                <li><a href="page-kas.html" class="nav-link"><span>Ringkasan</span></a></li>
-                <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
-              </ul>
+            <li class="nav-item">
+              <a href="index.html" class="nav-link" data-menu="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-kasir.html" class="nav-link" data-menu="kasir">
+                <i class="fas fa-cash-register"></i>
+                <span>Kasir</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-produk.html" class="nav-link" data-menu="produk">
+                <i class="fas fa-box"></i>
+                <span>Produk</span>
+              </a>
             </li>
           </ul>
         </div>
+
+        <!-- Transaksi -->
+        <div class="nav-section">
+          <div class="nav-section-title">Transaksi</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-riwayat.html" class="nav-link" data-menu="riwayat">
+                <i class="fas fa-history"></i>
+                <span>Riwayat Transaksi</span>
+              </a>
+            </li>
+            <li class="nav-item nav-dropdown" data-dropdown>
+              <div class="nav-link nav-dropdown-toggle" data-menu="kas">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <i class="fas fa-wallet"></i>
+                  <span>Kas Management</span>
+                </div>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+              </div>
+              <ul class="nav-submenu">
+                <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
+                <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
+                <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
+                <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
+                <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
+                <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="page-hutang.html" class="nav-link active" data-menu="hutang">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>Hutang & Piutang</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Laporan -->
+        <div class="nav-section">
+          <div class="nav-section-title">Laporan</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
+                <i class="fas fa-chart-bar"></i>
+                <span>Laporan Penjualan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Integrasi -->
         <div class="nav-section">
           <div class="nav-section-title">Integrasi</div>
           <ul class="nav-menu">
-            <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link active"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
-            <li class="nav-item"><a href="page-saldo-telegram.html" class="nav-link"><i class="fab fa-telegram"></i><span>Telegram</span></a></li>
+            <li class="nav-item">
+              <a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram">
+                <i class="fab fa-telegram"></i>
+                <span>Saldo Telegram</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan">
+                <i class="fas fa-users"></i>
+                <span>Data Pelanggan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Sistem -->
+        <div class="nav-section">
+          <div class="nav-section-title">Sistem</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-pengguna.html" class="nav-link" data-menu="pengguna">
+                <i class="fas fa-user-cog"></i>
+                <span>Pengguna</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-setting.html" class="nav-link" data-menu="setting">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-backup.html" class="nav-link" data-menu="backup">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Backup & Sync</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-printer.html" class="nav-link" data-menu="printer">
+                <i class="fas fa-print"></i>
+                <span>Printer & Struk</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-reset.html" class="nav-link" data-menu="reset">
+                <i class="fas fa-trash-alt"></i>
+                <span>Reset Data</span>
+              </a>
+            </li>
           </ul>
         </div>
       </nav>
       
       <div class="sidebar-footer">
         <div class="user-profile" id="userProfile">
-          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          <div class="user-avatar" id="userAvatar">
+            <i class="fas fa-user"></i>
+          </div>
           <div class="user-info">
-            <div class="user-name" id="userName">Admin</div>
-            <div class="user-role">Operator</div>
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">-</div>
           </div>
         </div>
       </div>
@@ -270,89 +1036,135 @@
 
     <!-- Main Content -->
     <main class="main-content">
+      <!-- Header -->
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
-          <h1 class="header-title">Data Pelanggan (n8n)</h1>
+          <button class="btn-icon d-md-none" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="header-title">Hutang/Piutang</h1>
         </div>
+        
         <div class="header-actions">
-          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="btn-icon" id="btnLogout" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
         </div>
       </header>
 
+      <!-- Page Content -->
       <div class="page-content">
-        <!-- Config Panel -->
-        <div class="config-panel">
-          <div class="config-title"><i class="fas fa-plug"></i> Konfigurasi n8n Webhook</div>
-          <div class="config-grid">
-            <div class="form-group mb-0">
-              <label class="form-label">n8n Webhook URL (Cari/Tambah/Edit/Hapus)</label>
-              <input type="text" class="form-input" id="n8nWebhookUrl" placeholder="https://n8n.yourdomain.com/webhook/...">
-            </div>
-            <div class="form-group mb-0">
-              <label class="form-label">Google Sheet ID</label>
-              <input type="text" class="form-input" id="sheetId" placeholder="1cPolj_xpBztq6RU3XVi_CZm1j_Kqo...">
-            </div>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="saveConfig()"><i class="fas fa-save"></i> Simpan Konfigurasi</button>
-          <button class="btn btn-outline btn-sm" onclick="testConnection()" style="margin-left:.5rem"><i class="fas fa-plug"></i> Test Koneksi</button>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-            <div class="stat-content">
-              <div class="stat-label">Total Pelanggan</div>
-              <div class="stat-value" id="totalPelanggan">0</div>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon green"><i class="fas fa-search"></i></div>
-            <div class="stat-content">
-              <div class="stat-label">Hasil Pencarian</div>
-              <div class="stat-value" id="totalSearch">0</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Search Section (Cari) -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><i class="fas fa-search"></i> Cari Pelanggan</div>
-          </div>
-          <div class="card-body">
-            <div class="search-container">
-              <div class="search-box">
-                <div class="search-input-flex">
-                  <i class="fas fa-search"></i>
-                  <input type="text" id="searchInput" placeholder="Ketik nama pelanggan..." onkeyup="handleSearch(event)">
+        <div class="hutang-container">
+          <!-- Left Column: Summary & Customer List -->
+          <div class="summary-cards">
+            <!-- Customer List Section (Collapsible) -->
+            <div class="customer-section" id="customerSection">
+              <div class="customer-header" id="customerHeader">
+                <div class="customer-title">
+                  <div class="customer-avatar-small">
+                    <i class="fas fa-users"></i>
+                  </div>
+                  <span>Daftar Pelanggan</span>
+                  <span class="badge badge-primary" id="customerCount" style="margin-left: 0.5rem; background: rgba(99,102,241,0.1); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 9999px; font-size: 0.75rem;">0</span>
                 </div>
-                <button class="btn btn-primary" onclick="cariPelanggan()"><i class="fas fa-search"></i> Cari</button>
-                <button class="btn btn-success" onclick="openModal('tambah')"><i class="fas fa-plus"></i> Tambah</button>
+                <i class="fas fa-chevron-down customer-toggle-icon"></i>
+              </div>
+              <div class="customer-body">
+                <div class="customer-list" id="customerListContainer">
+                  <!-- Customer items will be rendered here -->
+                </div>
+                <button class="btn-add-customer" id="btnAddCustomer">
+                  <i class="fas fa-plus"></i>
+                  Tambah Pelanggan
+                </button>
               </div>
             </div>
-            
-            <div id="searchResults">
-              <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <p>Masukkan kata kunci untuk mencari pelanggan</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <!-- All Data Section -->
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><i class="fas fa-list"></i> Semua Data</div>
-            <button class="btn btn-outline btn-sm" onclick="loadAllData()"><i class="fas fa-sync"></i> Refresh</button>
+            <!-- Summary Cards -->
+            <div class="summary-card hutang">
+              <div class="summary-header">
+                <div class="summary-icon">
+                  <i class="fas fa-arrow-down"></i>
+                </div>
+                <span class="summary-title">Total Hutang Aktif</span>
+              </div>
+              <div class="summary-amount" id="totalHutang">Rp 0</div>
+            </div>
+
+            <div class="summary-card piutang">
+              <div class="summary-header">
+                <div class="summary-icon">
+                  <i class="fas fa-arrow-up"></i>
+                </div>
+                <span class="summary-title">Total Piutang Aktif</span>
+              </div>
+              <div class="summary-amount" id="totalPiutang">Rp 0</div>
+            </div>
+
+            <div class="summary-card" style="border-left: 4px solid var(--success);">
+              <div class="summary-header">
+                <div class="summary-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+                <span class="summary-title">Total Lunas</span>
+              </div>
+              <div class="summary-amount" id="totalLunas" style="color: var(--success);">Rp 0</div>
+            </div>
+
+            <button class="btn-add" id="btnAddHutang">
+              <i class="fas fa-plus"></i>
+              Tambah Hutang/Piutang
+            </button>
           </div>
-          <div class="card-body">
-            <div id="allDataList">
+
+          <!-- Right Column: List -->
+          <div class="hutang-list-card">
+            <div class="card-header">
+              <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <h3 class="card-title">
+                  <i class="fas fa-list"></i>
+                  Daftar Hutang/Piutang
+                </h3>
+                
+                <!-- Status Toggle -->
+                <div class="status-toggle-container">
+                  <span class="status-toggle-label" id="labelAktif">Aktif</span>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="statusToggle">
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="status-toggle-label" id="labelInactive">Lunas</span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                  <button class="filter-tab active" data-filter="all">Semua</button>
+                  <button class="filter-tab" data-filter="hutang">Hutang</button>
+                  <button class="filter-tab" data-filter="piutang">Piutang</button>
+                </div>
+
+                <!-- Import Export -->
+                <div class="import-export-group">
+                  <button class="btn btn-outline btn-sm" id="btnImport">
+                    <i class="fas fa-file-import"></i>
+                    Import
+                  </button>
+                  <button class="btn btn-outline btn-sm" id="btnExport">
+                    <i class="fas fa-file-export"></i>
+                    Export
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="hutang-list" id="hutangList">
               <div class="empty-state">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Memuat data...</p>
+                <i class="fas fa-handshake"></i>
+                <p>Belum ada data hutang/piutang</p>
               </div>
             </div>
           </div>
@@ -360,540 +1172,929 @@
       </div>
     </main>
 
-    <!-- Mobile Nav -->
+    <!-- Mobile Bottom Navigation -->
     <nav class="mobile-nav">
-      <a href="index.html" class="mobile-nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
-      <a href="page-kasir.html" class="mobile-nav-item"><i class="fas fa-cash-register"></i><span>Kasir</span></a>
-      <a href="page-produk.html" class="mobile-nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
-      <a href="page-data-pelanggan.html" class="mobile-nav-item active"><i class="fas fa-users"></i><span>Pelanggan</span></a>
-      <a href="page-setting.html" class="mobile-nav-item"><i class="fas fa-cog"></i><span>Setting</span></a>
+      <a href="index.html" class="mobile-nav-item">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="page-kasir.html" class="mobile-nav-item">
+        <i class="fas fa-cash-register"></i>
+        <span>Kasir</span>
+      </a>
+      <a href="page-produk.html" class="mobile-nav-item">
+        <i class="fas fa-box"></i>
+        <span>Produk</span>
+      </a>
+      <a href="page-riwayat.html" class="mobile-nav-item">
+        <i class="fas fa-history"></i>
+        <span>Riwayat</span>
+      </a>
+      <a href="page-setting.html" class="mobile-nav-item">
+        <i class="fas fa-cog"></i>
+        <span>Setting</span>
+      </a>
     </nav>
   </div>
 
-  <!-- Modal Tambah/Edit -->
-  <div class="modal-overlay" id="modalForm">
+  <!-- Add/Edit Hutang Modal -->
+  <div class="modal-overlay" id="hutangModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Tambah Pelanggan</h3>
-        <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <h3 class="modal-title" id="modalTitle">Tambah Hutang/Piutang</h3>
+        <button class="modal-close" id="btnCloseModal">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="modal-body">
-        <form id="pelangganForm">
-          <input type="hidden" id="rowNumber">
-          <input type="hidden" id="oldNama">
+        <form id="hutangForm">
+          <input type="hidden" id="hutangId">
           
           <div class="form-group">
-            <label class="form-label">Nama Pelanggan <span style="color:var(--danger)">*</span></label>
-            <input type="text" class="form-input" id="inputNama" placeholder="NAMA LENGKAP" required oninput="this.value = this.value.toUpperCase()">
+            <label class="form-label">Tipe</label>
+            <select class="form-select" id="hutangType" required>
+              <option value="hutang">Hutang (Saya Berhutang)</option>
+              <option value="piutang">Piutang (Orang Berhutang ke Saya)</option>
+            </select>
           </div>
           
           <div class="form-group">
-            <label class="form-label">Nomor Telepon/WhatsApp <span style="color:var(--danger)">*</span></label>
-            <input type="text" class="form-input" id="inputNomor" placeholder="08xxxxxxxxxx" required>
+            <label class="form-label">Nama Pelanggan</label>
+            <select class="form-select" id="hutangCustomerSelect" style="margin-bottom: 0.5rem;">
+              <option value="">-- Pilih dari Daftar --</option>
+            </select>
+            <input type="text" class="form-input" id="hutangName" placeholder="Atau ketik nama baru" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Jumlah</label>
+            <div class="input-prefix">
+              <span class="prefix">Rp</span>
+              <input type="text" class="form-input" id="hutangAmount" placeholder="0" required>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Tanggal Jatuh Tempo</label>
+            <input type="date" class="form-input" id="hutangDueDate">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Catatan</label>
+            <textarea class="form-textarea" id="hutangNote" placeholder="Catatan tambahan..."></textarea>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal()">Batal</button>
-        <button class="btn btn-primary" id="btnSave" onclick="simpanPelanggan()"><i class="fas fa-save"></i> Simpan</button>
+        <button class="btn btn-outline" id="btnCancel">Batal</button>
+        <button class="btn btn-primary" id="btnSave">
+          <i class="fas fa-save"></i>
+          Simpan
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Loading -->
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Bayar Hutang/Piutang</h3>
+        <button class="modal-close" id="btnClosePaymentModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Sisa Hutang/Piutang</label>
+          <div class="form-input" id="remainingAmount" style="font-weight: 700; font-size: 1.25rem;">Rp 0</div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Jumlah Pembayaran</label>
+          <div class="input-prefix">
+            <span class="prefix">Rp</span>
+            <input type="text" class="form-input" id="paymentAmount" placeholder="0" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Catatan</label>
+          <input type="text" class="form-input" id="paymentNote" placeholder="Catatan pembayaran...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelPayment">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmPayment">
+          <i class="fas fa-check"></i>
+          Bayar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Modal -->
+  <div class="modal-overlay" id="customerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="customerModalTitle">Tambah Pelanggan</h3>
+        <button class="modal-close" id="btnCloseCustomerModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="customerForm">
+          <input type="hidden" id="customerId">
+          <div class="form-group">
+            <label class="form-label">Nama Pelanggan</label>
+            <input type="text" class="form-input" id="customerNameInput" placeholder="Masukkan nama pelanggan" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">No. Telepon (Opsional)</label>
+            <input type="tel" class="form-input" id="customerPhoneInput" placeholder="08123456789">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelCustomer">Batal</button>
+        <button class="btn btn-primary" id="btnSaveCustomer">
+          <i class="fas fa-save"></i>
+          Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Import Data</h3>
+        <button class="modal-close" id="btnCloseImportModal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Pilih File (JSON atau CSV)</label>
+          <input type="file" class="form-input" id="importFile" accept=".json,.csv" style="padding: 0.5rem;">
+          <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
+            Format JSON: [{name, type, amount, dueDate, note, status}]<br>
+            Format CSV: name,type,amount,dueDate,note,status
+          </small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opsi Import</label>
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="importOverwrite" style="width: auto;">
+            <span style="font-size: 0.875rem;">Timpa data yang sudah ada (overwrite)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnCancelImport">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmImport">
+          <i class="fas fa-file-import"></i>
+          Import
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <p style="margin-top:1rem;color:var(--text-secondary)">Loading...</p>
+    <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
   </div>
 
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script>
-    // ==========================================
-    // KONFIGURASI & UTILS
-    // ==========================================
-    const CONFIG = {
-      n8nWebhookUrl: localStorage.getItem('n8n_webhook_url') || '',
-      sheetId: localStorage.getItem('gsheet_id') || ''
-    };
+  <!-- Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
 
-    // Load config saat startup
+  <script>
+    // Utils fallback if external files not loaded
+    if (typeof Utils === 'undefined') {
+      window.Utils = {
+        formatRupiah: (num) => 'Rp ' + (num || 0).toLocaleString('id-ID'),
+        formatNumberInput: (val) => {
+          val = val.replace(/\D/g, '');
+          return val ? parseInt(val).toLocaleString('id-ID') : '';
+        },
+        showLoading: () => document.getElementById('loadingOverlay').classList.add('active'),
+        hideLoading: () => document.getElementById('loadingOverlay').classList.remove('active'),
+        showToast: (msg, type = 'info') => {
+          const container = document.getElementById('toastContainer');
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i><span>${msg}</span>`;
+          container.appendChild(toast);
+          setTimeout(() => toast.remove(), 3000);
+        },
+        confirm: (msg, callback) => {
+          if (confirm(msg)) callback();
+        },
+        getStorage: (key) => localStorage.getItem(key),
+        setStorage: (key, val) => localStorage.setItem(key, val)
+      };
+    }
+
+    if (typeof Auth === 'undefined') {
+      window.Auth = {
+        getCurrentUser: () => ({ uid: 'local_user', name: 'User', email: 'user@local.com' }),
+        logout: () => { localStorage.removeItem('webpos_session'); window.location.href = 'login.html'; },
+        loadUserData: (uid) => {
+          document.getElementById('userName').textContent = 'Admin';
+          document.getElementById('userRole').textContent = 'Administrator';
+        }
+      };
+    }
+
+    if (typeof database === 'undefined') {
+      window.database = {
+        ref: (path) => ({
+          once: async () => ({ val: () => ({}) }),
+          set: async () => {},
+          update: async () => {},
+          push: () => ({ key: 'mock_' + Date.now() })
+        })
+      };
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('n8nWebhookUrl').value = CONFIG.n8nWebhookUrl;
-      document.getElementById('sheetId').value = CONFIG.sheetId;
+      // Auth check
+      const checkAuth = () => {
+        if (typeof auth !== 'undefined') {
+          auth.onAuthStateChanged((user) => {
+            if (!user && !Utils.getStorage('webpos_session')) {
+              window.location.href = 'login.html';
+              return;
+            }
+            if (user && typeof Auth !== 'undefined') Auth.loadUserData(user.uid);
+            initHutang();
+          });
+        } else {
+          initHutang();
+        }
+      };
       
-      if (CONFIG.n8nWebhookUrl && CONFIG.sheetId) {
+      checkAuth();
+
+      function initHutang() {
+        let currentFilter = 'all';
+        let currentStatus = 'active'; // 'active' or 'inactive'
+        let currentPaymentId = null;
+        let hutangData = {};
+        let customerData = {};
+
+        // Format currency inputs
+        document.getElementById('hutangAmount').addEventListener('input', (e) => {
+          e.target.value = Utils.formatNumberInput(e.target.value);
+        });
+        
+        document.getElementById('paymentAmount').addEventListener('input', (e) => {
+          e.target.value = Utils.formatNumberInput(e.target.value);
+        });
+
+        // Load data
         loadAllData();
-      }
-      
-      // Event listeners
-      document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-      });
-      
-      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('mobile-open');
-      });
-      
-      document.getElementById('btnTheme').addEventListener('click', toggleTheme);
-      
-      // Dropdown
-      document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
-        const toggle = dropdown.querySelector('.nav-dropdown-toggle');
-        if (toggle) {
-          toggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            dropdown.classList.toggle('open');
+
+        // Customer section toggle
+        document.getElementById('customerHeader').addEventListener('click', () => {
+          document.getElementById('customerSection').classList.toggle('expanded');
+        });
+
+        // Status toggle
+        document.getElementById('statusToggle').addEventListener('change', (e) => {
+          currentStatus = e.target.checked ? 'inactive' : 'active';
+          document.getElementById('labelAktif').classList.toggle('active', !e.target.checked);
+          document.getElementById('labelInactive').classList.toggle('active', e.target.checked);
+          renderHutangList();
+        });
+
+        // Filter tabs
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderHutangList();
+          });
+        });
+
+        // Add buttons
+        document.getElementById('btnAddHutang').addEventListener('click', () => {
+          document.getElementById('modalTitle').textContent = 'Tambah Hutang/Piutang';
+          document.getElementById('hutangForm').reset();
+          document.getElementById('hutangId').value = '';
+          updateCustomerSelect();
+          document.getElementById('hutangModal').classList.add('active');
+        });
+
+        document.getElementById('btnAddCustomer').addEventListener('click', () => {
+          document.getElementById('customerModalTitle').textContent = 'Tambah Pelanggan';
+          document.getElementById('customerForm').reset();
+          document.getElementById('customerId').value = '';
+          document.getElementById('customerModal').classList.add('active');
+        });
+
+        // Close modals
+        document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+        document.getElementById('btnCancel').addEventListener('click', closeModal);
+        document.getElementById('btnClosePaymentModal').addEventListener('click', closePaymentModal);
+        document.getElementById('btnCancelPayment').addEventListener('click', closePaymentModal);
+        document.getElementById('btnCloseCustomerModal').addEventListener('click', closeCustomerModal);
+        document.getElementById('btnCancelCustomer').addEventListener('click', closeCustomerModal);
+        document.getElementById('btnCloseImportModal').addEventListener('click', closeImportModal);
+        document.getElementById('btnCancelImport').addEventListener('click', closeImportModal);
+
+        // Save handlers
+        document.getElementById('btnSave').addEventListener('click', saveHutang);
+        document.getElementById('btnSaveCustomer').addEventListener('click', saveCustomer);
+        document.getElementById('btnConfirmPayment').addEventListener('click', processPayment);
+
+        // Import Export
+        document.getElementById('btnImport').addEventListener('click', () => {
+          document.getElementById('importModal').classList.add('active');
+        });
+        document.getElementById('btnExport').addEventListener('click', exportData);
+        document.getElementById('btnConfirmImport').addEventListener('click', importData);
+
+        // Customer select change
+        document.getElementById('hutangCustomerSelect').addEventListener('change', (e) => {
+          if (e.target.value) {
+            document.getElementById('hutangName').value = e.target.value;
+          }
+        });
+
+        // Sidebar toggle
+        document.getElementById('menuToggle').addEventListener('click', () => {
+          document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+
+        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+          document.getElementById('sidebar').classList.toggle('mobile-open');
+        });
+
+        // Dropdown menus
+        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+          const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+          if (toggle) {
+            toggle.addEventListener('click', (e) => {
+              e.preventDefault();
+              dropdown.classList.toggle('open');
+            });
+          }
+        });
+
+        // Theme toggle
+        const savedTheme = localStorage.getItem('dark_mode') === 'true';
+        if (savedTheme) document.documentElement.setAttribute('data-theme', 'dark');
+        
+        document.getElementById('btnTheme').addEventListener('click', () => {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+          localStorage.setItem('dark_mode', !isDark);
+        });
+
+        // Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+          Utils.confirm('Apakah Anda yakin ingin logout?', () => {
+            Auth.logout();
+          });
+        });
+
+        function closeModal() {
+          document.getElementById('hutangModal').classList.remove('active');
+        }
+
+        function closePaymentModal() {
+          document.getElementById('paymentModal').classList.remove('active');
+          currentPaymentId = null;
+        }
+
+        function closeCustomerModal() {
+          document.getElementById('customerModal').classList.remove('active');
+        }
+
+        function closeImportModal() {
+          document.getElementById('importModal').classList.remove('active');
+          document.getElementById('importFile').value = '';
+        }
+
+        async function loadAllData() {
+          Utils.showLoading();
+          
+          try {
+            // Load hutang data
+            const hutangSnapshot = await database.ref('debts').once('value');
+            hutangData = hutangSnapshot.val() || {};
+            
+            // Load customer data
+            const customerSnapshot = await database.ref('customers').once('value');
+            customerData = customerSnapshot.val() || {};
+            
+            updateSummary();
+            renderCustomerList();
+            renderHutangList();
+          } catch (error) {
+            console.error('Error loading data:', error);
+            Utils.showToast('Gagal memuat data', 'error');
+          }
+          
+          Utils.hideLoading();
+        }
+
+        function updateSummary() {
+          let totalHutang = 0;
+          let totalPiutang = 0;
+          let totalLunas = 0;
+          
+          Object.values(hutangData).forEach(item => {
+            if (item.status === 'active') {
+              if (item.type === 'hutang') {
+                totalHutang += item.remaining || item.amount || 0;
+              } else {
+                totalPiutang += item.remaining || item.amount || 0;
+              }
+            } else if (item.status === 'paid' || item.status === 'inactive') {
+              totalLunas += item.amount || 0;
+            }
+          });
+          
+          document.getElementById('totalHutang').textContent = Utils.formatRupiah(totalHutang);
+          document.getElementById('totalPiutang').textContent = Utils.formatRupiah(totalPiutang);
+          document.getElementById('totalLunas').textContent = Utils.formatRupiah(totalLunas);
+        }
+
+        function updateCustomerSelect() {
+          const select = document.getElementById('hutangCustomerSelect');
+          select.innerHTML = '<option value="">-- Pilih dari Daftar --</option>';
+          
+          Object.entries(customerData).forEach(([id, customer]) => {
+            const option = document.createElement('option');
+            option.value = customer.name;
+            option.textContent = customer.name + (customer.phone ? ` (${customer.phone})` : '');
+            select.appendChild(option);
           });
         }
-      });
-    });
 
-    function saveConfig() {
-      CONFIG.n8nWebhookUrl = document.getElementById('n8nWebhookUrl').value.trim();
-      CONFIG.sheetId = document.getElementById('sheetId').value.trim();
-      
-      localStorage.setItem('n8n_webhook_url', CONFIG.n8nWebhookUrl);
-      localStorage.setItem('gsheet_id', CONFIG.sheetId);
-      
-      showToast('Konfigurasi berhasil disimpan', 'success');
-    }
-
-    function toggleTheme() {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('dark_mode', !isDark);
-    }
-
-    // ==========================================
-    // API FUNCTIONS (Integrasi n8n)
-    // ==========================================
-    
-    async function testConnection() {
-      if (!validateConfig()) return;
-      
-      showLoading();
-      try {
-        // Test dengan action getData
-        const url = new URL(CONFIG.n8nWebhookUrl);
-        url.searchParams.append('action', 'test');
-        url.searchParams.append('sheetId', CONFIG.sheetId);
-        
-        const response = await fetch(url.toString(), {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success || data[0]?.success) {
-          showToast('✅ Koneksi ke n8n & Google Sheets berhasil!', 'success');
-        } else {
-          throw new Error(data.error || 'Koneksi gagal');
+        function renderCustomerList() {
+          const container = document.getElementById('customerListContainer');
+          document.getElementById('customerCount').textContent = Object.keys(customerData).length;
+          
+          let html = '';
+          
+          if (Object.keys(customerData).length === 0) {
+            html = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">Belum ada pelanggan</div>';
+          } else {
+            Object.entries(customerData).forEach(([id, customer]) => {
+              html += `
+                <div class="customer-item">
+                  <div class="customer-info">
+                    <div class="customer-avatar-small">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                      <div class="customer-name">${customer.name}</div>
+                      ${customer.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${customer.phone}</div>` : ''}
+                    </div>
+                  </div>
+                  <div class="customer-actions">
+                    <button class="btn-icon-xs btn-edit" onclick="window.editCustomer('${id}')" title="Edit">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon-xs btn-delete" onclick="window.deleteCustomer('${id}')" title="Hapus">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          container.innerHTML = html;
         }
-      } catch (error) {
-        showToast('❌ Error: ' + error.message, 'error');
-      }
-      hideLoading();
-    }
 
-    async function cariPelanggan() {
-      if (!validateConfig()) return;
-      
-      const keyword = document.getElementById('searchInput').value.trim().toUpperCase();
-      if (!keyword) {
-        showToast('Masukkan kata kunci pencarian', 'warning');
-        return;
-      }
-      
-      showLoading();
-      try {
-        // Gunakan n8n untuk mencari (simulasi dengan getData lalu filter)
-        const url = new URL(CONFIG.n8nWebhookUrl);
-        url.searchParams.append('action', 'getData');
-        url.searchParams.append('sheetId', CONFIG.sheetId);
-        
-        const response = await fetch(url.toString());
-        const result = await response.json();
-        
-        // Handle n8n response structure (array atau object)
-        const data = Array.isArray(result) ? result[0] : result;
-        
-        if (!data.success) throw new Error(data.error || 'Gagal mengambil data');
-        
-        // Filter berdasarkan keyword (multiple words support)
-        const keywords = keyword.split(/\s+/).filter(k => k);
-        const filtered = data.data.filter(row => {
-          const nama = (row.nama || '').toUpperCase();
-          return keywords.every(k => nama.includes(k));
-        });
-        
-        displaySearchResults(filtered);
-        document.getElementById('totalSearch').textContent = filtered.length;
-        
-      } catch (error) {
-        showToast('Error mencari: ' + error.message, 'error');
-      }
-      hideLoading();
-    }
+        function renderHutangList() {
+          const list = document.getElementById('hutangList');
+          let html = '';
+          
+          const items = Object.entries(hutangData)
+            .map(([id, data]) => ({ id, ...data }))
+            .filter(item => {
+              if (currentStatus === 'active') return item.status === 'active';
+              return item.status === 'paid' || item.status === 'inactive' || item.status === 'deleted';
+            })
+            .filter(item => currentFilter === 'all' || item.type === currentFilter)
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          
+          if (items.length === 0) {
+            const message = currentStatus === 'active' ? 'Belum ada data hutang/piutang aktif' : 'Belum ada data yang lunas';
+            html = `
+              <div class="empty-state">
+                <i class="fas fa-${currentStatus === 'active' ? 'handshake' : 'check-circle'}"></i>
+                <p>${message}</p>
+              </div>
+            `;
+          } else {
+            items.forEach(item => {
+              const isHutang = item.type === 'hutang';
+              const dueDate = item.dueDate ? new Date(item.dueDate).toLocaleDateString('id-ID') : '-';
+              const remaining = item.remaining || item.amount || 0;
+              const isPaid = item.status === 'paid' || item.status === 'inactive';
+              
+              html += `
+                <div class="hutang-item">
+                  <div class="hutang-info">
+                    <div class="hutang-avatar">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div class="hutang-details">
+                      <span class="hutang-name">${item.name}</span>
+                      <span class="hutang-meta">
+                        ${isHutang ? 'Hutang' : 'Piutang'} • Jatuh tempo: ${dueDate}
+                      </span>
+                      ${item.note ? `<span class="hutang-meta">${item.note}</span>` : ''}
+                      <span class="status-badge ${isPaid ? 'inactive' : 'active'}">
+                        ${isPaid ? 'Lunas' : 'Aktif'}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="hutang-amount-section">
+                    <span class="hutang-amount ${item.type} ${isPaid ? 'paid' : ''}">${Utils.formatRupiah(remaining)}</span>
+                    <div class="hutang-actions">
+                      ${!isPaid ? `
+                        <button class="btn-icon-sm btn-pay" onclick="window.openPayment('${item.id}')" title="Bayar">
+                          <i class="fas fa-money-bill-wave"></i>
+                        </button>
+                      ` : `
+                        <button class="btn-icon-sm btn-restore" onclick="window.restoreHutang('${item.id}')" title="Restore">
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      `}
+                      <button class="btn-icon-sm btn-edit" onclick="window.editHutang('${item.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn-icon-sm btn-delete" onclick="window.deleteHutang('${item.id}')" title="Hapus">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          list.innerHTML = html;
+        }
 
-    async function loadAllData() {
-      if (!validateConfig()) return;
-      
-      showLoading();
-      try {
-        const url = new URL(CONFIG.n8nWebhookUrl);
-        url.searchParams.append('action', 'getData');
-        url.searchParams.append('sheetId', CONFIG.sheetId);
-        
-        const response = await fetch(url.toString());
-        const result = await response.json();
-        const data = Array.isArray(result) ? result[0] : result;
-        
-        if (!data.success) throw new Error(data.error || 'Gagal memuat data');
-        
-        displayAllData(data.data);
-        document.getElementById('totalPelanggan').textContent = data.data.length;
-        
-      } catch (error) {
-        showToast('Error memuat data: ' + error.message, 'error');
-      }
-      hideLoading();
-    }
+        async function saveHutang() {
+          const id = document.getElementById('hutangId').value;
+          const type = document.getElementById('hutangType').value;
+          const name = document.getElementById('hutangName').value;
+          const amount = parseInt(document.getElementById('hutangAmount').value.replace(/\./g, '')) || 0;
+          const dueDate = document.getElementById('hutangDueDate').value;
+          const note = document.getElementById('hutangNote').value;
+          
+          if (!name || amount <= 0) {
+            Utils.showToast('Nama dan jumlah harus diisi', 'error');
+            return;
+          }
+          
+          Utils.showLoading();
+          
+          try {
+            const hutangId = id || 'debt_' + Date.now();
+            const user = Auth.getCurrentUser();
+            
+            await database.ref('debts/' + hutangId).set({
+              id: hutangId,
+              type,
+              name,
+              amount,
+              remaining: amount,
+              dueDate: dueDate || null,
+              note,
+              status: 'active',
+              userId: user.uid,
+              userName: user.name || user.email,
+              createdAt: id ? (hutangData[id]?.createdAt || Date.now()) : Date.now(),
+              updatedAt: Date.now()
+            });
+            
+            Utils.showToast('Data berhasil disimpan', 'success');
+            closeModal();
+            loadAllData();
+          } catch (error) {
+            console.error('Error saving hutang:', error);
+            Utils.showToast('Gagal menyimpan data', 'error');
+          }
+          
+          Utils.hideLoading();
+        }
 
-    async function simpanPelanggan() {
-      const nama = document.getElementById('inputNama').value.trim();
-      const nomor = document.getElementById('inputNomor').value.trim();
-      const rowNumber = document.getElementById('rowNumber').value;
-      const oldNama = document.getElementById('oldNama').value;
-      
-      if (!nama || !nomor) {
-        showToast('Nama dan Nomor wajib diisi', 'error');
-        return;
-      }
-      
-      showLoading();
-      try {
-        let action = rowNumber ? 'editData' : 'addData';
-        let body = {
-          action: action,
-          sheetId: CONFIG.sheetId,
-          nama: nama,
-          nomor: nomor
+        async function saveCustomer() {
+          const id = document.getElementById('customerId').value;
+          const name = document.getElementById('customerNameInput').value.trim();
+          const phone = document.getElementById('customerPhoneInput').value.trim();
+          
+          if (!name) {
+            Utils.showToast('Nama pelanggan harus diisi', 'error');
+            return;
+          }
+          
+          Utils.showLoading();
+          
+          try {
+            const customerId = id || 'cust_' + Date.now();
+            const user = Auth.getCurrentUser();
+            
+            await database.ref('customers/' + customerId).set({
+              id: customerId,
+              name,
+              phone: phone || null,
+              userId: user.uid,
+              createdAt: id ? (customerData[id]?.createdAt || Date.now()) : Date.now(),
+              updatedAt: Date.now()
+            });
+            
+            Utils.showToast('Pelanggan berhasil disimpan', 'success');
+            closeCustomerModal();
+            loadAllData();
+          } catch (error) {
+            console.error('Error saving customer:', error);
+            Utils.showToast('Gagal menyimpan pelanggan', 'error');
+          }
+          
+          Utils.hideLoading();
+        }
+
+        window.editCustomer = (id) => {
+          const customer = customerData[id];
+          if (!customer) return;
+          
+          document.getElementById('customerModalTitle').textContent = 'Edit Pelanggan';
+          document.getElementById('customerId').value = id;
+          document.getElementById('customerNameInput').value = customer.name;
+          document.getElementById('customerPhoneInput').value = customer.phone || '';
+          document.getElementById('customerModal').classList.add('active');
         };
-        
-        if (rowNumber) {
-          body.row = rowNumber;
-        }
-        
-        // Kirim ke n8n via POST
-        const response = await fetch(CONFIG.n8nWebhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        
-        const result = await response.json();
-        const data = Array.isArray(result) ? result[0] : result;
-        
-        if (data.success) {
-          showToast(rowNumber ? 'Data berhasil diupdate' : 'Data berhasil ditambahkan', 'success');
-          closeModal();
-          loadAllData();
-          document.getElementById('searchInput').value = '';
-          document.getElementById('searchResults').innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-search"></i>
-              <p>Masukkan kata kunci untuk mencari pelanggan</p>
-            </div>
-          `;
-        } else {
-          throw new Error(data.error || 'Gagal menyimpan');
-        }
-        
-      } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-      }
-      hideLoading();
-    }
 
-    async function hapusPelanggan(row, nama) {
-      if (!confirm(`Yakin ingin menghapus ${nama}?`)) return;
-      
-      showLoading();
-      try {
-        const response = await fetch(CONFIG.n8nWebhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'deleteData',
-            sheetId: CONFIG.sheetId,
-            row: row
-          })
-        });
-        
-        const result = await response.json();
-        const data = Array.isArray(result) ? result[0] : result;
-        
-        if (data.success) {
-          showToast('Data berhasil dihapus', 'success');
-          loadAllData();
-          // Clear search if showing deleted item
-          document.getElementById('searchInput').value = '';
-          document.getElementById('searchResults').innerHTML = `
-            <div class="empty-state">
-              <i class="fas fa-search"></i>
-              <p>Masukkan kata kunci untuk mencari pelanggan</p>
-            </div>
-          `;
-          document.getElementById('totalSearch').textContent = '0';
-        } else {
-          throw new Error(data.error || 'Gagal menghapus');
-        }
-        
-      } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-      }
-      hideLoading();
-    }
+        window.deleteCustomer = (id) => {
+          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', async () => {
+            Utils.showLoading();
+            
+            try {
+              await database.ref('customers/' + id).remove();
+              Utils.showToast('Pelanggan berhasil dihapus', 'success');
+              loadAllData();
+            } catch (error) {
+              console.error('Error deleting customer:', error);
+              Utils.showToast('Gagal menghapus pelanggan', 'error');
+            }
+            
+            Utils.hideLoading();
+          });
+        };
 
-    // ==========================================
-    // UI FUNCTIONS
-    // ==========================================
-    
-    function displaySearchResults(data) {
-      const container = document.getElementById('searchResults');
-      
-      if (data.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>Tidak ditemukan data dengan kata kunci tersebut</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = `
-        <div class="results-list">
-          ${data.map((item, index) => `
-            <div class="result-item">
-              <div class="result-info">
-                <div class="result-avatar">${(item.nama || '?').substring(0,2)}</div>
-                <div class="result-details">
-                  <span class="result-name">${item.nama}</span>
-                  <div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem">
-                    <span class="result-number" id="nomor-${index}">${item.nomor}</span>
-                    <button class="btn-copy" onclick="copyNomor('${item.nomor}', this)" title="Copy nomor">
-                      <i class="fas fa-copy"></i> Copy
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="result-actions">
-                <button class="btn-icon-sm btn-edit" onclick="editPelanggan('${item.row}', '${item.nama}', '${item.nomor}')" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-icon-sm btn-delete" onclick="hapusPelanggan('${item.row}', '${item.nama}')" title="Hapus">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
-    function displayAllData(data) {
-      const container = document.getElementById('allDataList');
-      
-      if (data.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>Belum ada data pelanggan</p>
-          </div>
-        `;
-        return;
-      }
-      
-      // Ambil 10 data terakhir saja untuk performa
-      const recentData = data.slice(-10).reverse();
-      
-      container.innerHTML = `
-        <div class="results-list">
-          ${recentData.map((item, index) => `
-            <div class="result-item">
-              <div class="result-info">
-                <div class="result-avatar">${(item.nama || '?').substring(0,2)}</div>
-                <div class="result-details">
-                  <span class="result-name">${item.nama}</span>
-                  <div style="display:flex;align-items:center;gap:.5rem;margin-top:.25rem">
-                    <span class="result-number">${item.nomor}</span>
-                    <button class="btn-copy" onclick="copyNomor('${item.nomor}', this)">
-                      <i class="fas fa-copy"></i> Copy
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div class="result-actions">
-                <button class="btn-icon-sm btn-edit" onclick="editPelanggan('${item.row}', '${item.nama}', '${item.nomor}')" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-icon-sm btn-delete" onclick="hapusPelanggan('${item.row}', '${item.nama}')" title="Hapus">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-        ${data.length > 10 ? `<p class="text-center mt-1" style="color:var(--text-muted);font-size:.875rem">Menampilkan 10 dari ${data.length} data. Gunakan pencarian untuk menemukan data spesifik.</p>` : ''}
-      `;
-    }
-
-    // ==========================================
-    // FITUR COPY NOMOR (Baru)
-    // ==========================================
-    
-    async function copyNomor(nomor, btnElement) {
-      try {
-        // Coba menggunakan Clipboard API modern
-        if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(nomor);
-        } else {
-          // Fallback untuk HTTP atau browser lama
-          const textArea = document.createElement("textarea");
-          textArea.value = nomor;
-          textArea.style.position = "fixed";
-          textArea.style.left = "-999999px";
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
+        window.openPayment = (id) => {
+          const item = hutangData[id];
+          if (!item) return;
           
-          const successful = document.execCommand('copy');
-          document.body.removeChild(textArea);
+          currentPaymentId = id;
+          const remaining = item.remaining || item.amount || 0;
+          document.getElementById('remainingAmount').textContent = Utils.formatRupiah(remaining);
+          document.getElementById('paymentAmount').value = '';
+          document.getElementById('paymentNote').value = '';
+          document.getElementById('paymentModal').classList.add('active');
+        };
+
+        window.editHutang = (id) => {
+          const item = hutangData[id];
+          if (!item) return;
           
-          if (!successful) throw new Error('execCommand failed');
+          document.getElementById('modalTitle').textContent = 'Edit Hutang/Piutang';
+          document.getElementById('hutangId').value = id;
+          document.getElementById('hutangType').value = item.type;
+          document.getElementById('hutangName').value = item.name;
+          document.getElementById('hutangAmount').value = Utils.formatNumberInput(item.amount.toString());
+          document.getElementById('hutangDueDate').value = item.dueDate || '';
+          document.getElementById('hutangNote').value = item.note || '';
+          updateCustomerSelect();
+          document.getElementById('hutangModal').classList.add('active');
+        };
+
+        window.deleteHutang = (id) => {
+          Utils.confirm('Apakah Anda yakin ingin menghapus data ini?', async () => {
+            Utils.showLoading();
+            
+            try {
+              await database.ref('debts/' + id).update({
+                status: 'deleted',
+                deletedAt: Date.now()
+              });
+              
+              Utils.showToast('Data berhasil dihapus', 'success');
+              loadAllData();
+            } catch (error) {
+              console.error('Error deleting hutang:', error);
+              Utils.showToast('Gagal menghapus data', 'error');
+            }
+            
+            Utils.hideLoading();
+          });
+        };
+
+        window.restoreHutang = (id) => {
+          Utils.confirm('Restore data ini ke status aktif?', async () => {
+            Utils.showLoading();
+            
+            try {
+              await database.ref('debts/' + id).update({
+                status: 'active',
+                remaining: hutangData[id].amount,
+                restoredAt: Date.now()
+              });
+              
+              Utils.showToast('Data berhasil direstore', 'success');
+              loadAllData();
+            } catch (error) {
+              console.error('Error restoring hutang:', error);
+              Utils.showToast('Gagal restore data', 'error');
+            }
+            
+            Utils.hideLoading();
+          });
+        };
+
+        async function processPayment() {
+          if (!currentPaymentId) return;
+          
+          const paymentAmount = parseInt(document.getElementById('paymentAmount').value.replace(/\./g, '')) || 0;
+          const note = document.getElementById('paymentNote').value;
+          
+          if (paymentAmount <= 0) {
+            Utils.showToast('Jumlah pembayaran harus lebih dari 0', 'error');
+            return;
+          }
+          
+          const item = hutangData[currentPaymentId];
+          const remaining = item.remaining || item.amount || 0;
+          
+          if (paymentAmount > remaining) {
+            Utils.showToast('Jumlah pembayaran melebihi sisa hutang/piutang', 'error');
+            return;
+          }
+          
+          Utils.showLoading();
+          
+          try {
+            const newRemaining = remaining - paymentAmount;
+            const user = Auth.getCurrentUser();
+            
+            // Update debt
+            await database.ref('debts/' + currentPaymentId).update({
+              remaining: newRemaining,
+              status: newRemaining <= 0 ? 'paid' : 'active',
+              paidAt: newRemaining <= 0 ? Date.now() : null,
+              updatedAt: Date.now()
+            });
+            
+            // Add payment record
+            await database.ref('debt_payments/' + currentPaymentId + '/' + Date.now()).set({
+              amount: paymentAmount,
+              note,
+              userId: user.uid,
+              userName: user.name || user.email,
+              timestamp: Date.now()
+            });
+            
+            Utils.showToast('Pembayaran berhasil', 'success');
+            closePaymentModal();
+            loadAllData();
+          } catch (error) {
+            console.error('Error processing payment:', error);
+            Utils.showToast('Gagal memproses pembayaran', 'error');
+          }
+          
+          Utils.hideLoading();
         }
-        
-        // Visual feedback
-        const originalHTML = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fas fa-check"></i> Tersalin!';
-        btnElement.classList.add('copied');
-        
-        showToast(`Nomor ${nomor} berhasil disalin!`, 'success');
-        
-        // Reset button after 2 seconds
-        setTimeout(() => {
-          btnElement.innerHTML = originalHTML;
-          btnElement.classList.remove('copied');
-        }, 2000);
-        
-      } catch (err) {
-        showToast('Gagal menyalin nomor. Silakan salin manual.', 'error');
-        console.error('Copy failed:', err);
+
+        // Export Data
+        function exportData() {
+          const dataToExport = Object.values(hutangData).map(item => ({
+            name: item.name,
+            type: item.type,
+            amount: item.amount,
+            remaining: item.remaining,
+            dueDate: item.dueDate || '',
+            note: item.note || '',
+            status: item.status,
+            createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : ''
+          }));
+
+          const jsonStr = JSON.stringify(dataToExport, null, 2);
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `hutang_export_${new Date().toISOString().split('T')[0]}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          Utils.showToast('Data berhasil diexport', 'success');
+        }
+
+        // Import Data
+        function importData() {
+          const fileInput = document.getElementById('importFile');
+          const overwrite = document.getElementById('importOverwrite').checked;
+          
+          if (!fileInput.files.length) {
+            Utils.showToast('Pilih file terlebih dahulu', 'error');
+            return;
+          }
+
+          const file = fileInput.files[0];
+          const reader = new FileReader();
+          
+          reader.onload = async (e) => {
+            Utils.showLoading();
+            
+            try {
+              let importedData = [];
+              
+              if (file.name.endsWith('.csv')) {
+                // Parse CSV
+                const lines = e.target.result.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                for (let i = 1; i < lines.length; i++) {
+                  if (!lines[i].trim()) continue;
+                  const values = lines[i].split(',').map(v => v.trim());
+                  const obj = {};
+                  headers.forEach((h, idx) => {
+                    obj[h] = values[idx] || '';
+                  });
+                  importedData.push(obj);
+                }
+              } else {
+                // Parse JSON
+                importedData = JSON.parse(e.target.result);
+              }
+              
+              if (!Array.isArray(importedData)) {
+                throw new Error('Format data tidak valid');
+              }
+              
+              const user = Auth.getCurrentUser();
+              let count = 0;
+              
+              for (const item of importedData) {
+                if (!item.name || !item.type || !item.amount) continue;
+                
+                const hutangId = 'debt_' + Date.now() + '_' + count;
+                
+                await database.ref('debts/' + hutangId).set({
+                  id: hutangId,
+                  name: item.name,
+                  type: item.type,
+                  amount: parseInt(item.amount) || 0,
+                  remaining: parseInt(item.remaining) || parseInt(item.amount) || 0,
+                  dueDate: item.dueDate || null,
+                  note: item.note || '',
+                  status: item.status || 'active',
+                  userId: user.uid,
+                  userName: user.name || user.email,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
+                  imported: true
+                });
+                
+                count++;
+              }
+              
+              Utils.showToast(`${count} data berhasil diimport`, 'success');
+              closeImportModal();
+              loadAllData();
+            } catch (error) {
+              console.error('Error importing:', error);
+              Utils.showToast('Gagal import data: ' + error.message, 'error');
+            }
+            
+            Utils.hideLoading();
+          };
+          
+          reader.readAsText(file);
+        }
       }
-    }
-
-    // ==========================================
-    // MODAL & FORM FUNCTIONS
-    // ==========================================
-    
-    function openModal(mode) {
-      const modal = document.getElementById('modalForm');
-      const title = document.getElementById('modalTitle');
-      const form = document.getElementById('pelangganForm');
-      
-      form.reset();
-      document.getElementById('rowNumber').value = '';
-      document.getElementById('oldNama').value = '';
-      
-      if (mode === 'tambah') {
-        title.textContent = 'Tambah Pelanggan Baru';
-      }
-      
-      modal.classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('modalForm').classList.remove('active');
-    }
-
-    function editPelanggan(row, nama, nomor) {
-      document.getElementById('modalTitle').textContent = 'Edit Pelanggan';
-      document.getElementById('rowNumber').value = row;
-      document.getElementById('oldNama').value = nama;
-      document.getElementById('inputNama').value = nama;
-      document.getElementById('inputNomor').value = nomor;
-      document.getElementById('modalForm').classList.add('active');
-    }
-
-    function handleSearch(e) {
-      if (e.key === 'Enter') {
-        cariPelanggan();
-      }
-    }
-
-    // ==========================================
-    // UTILS
-    // ==========================================
-    
-    function validateConfig() {
-      if (!CONFIG.n8nWebhookUrl || !CONFIG.sheetId) {
-        showToast('Silakan isi konfigurasi n8n Webhook URL dan Sheet ID terlebih dahulu', 'error');
-        document.getElementById('n8nWebhookUrl').focus();
-        return false;
-      }
-      return true;
-    }
-
-    function showLoading() {
-      document.getElementById('loadingOverlay').classList.add('active');
-    }
-
-    function hideLoading() {
-      document.getElementById('loadingOverlay').classList.remove('active');
-    }
-
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      
-      const icon = type === 'success' ? 'check-circle' : 
-                   type === 'error' ? 'exclamation-circle' : 
-                   type === 'warning' ? 'exclamation-triangle' : 'info-circle';
-      
-      toast.innerHTML = `
-        <i class="fas fa-${icon}"></i>
-        <span>${message}</span>
-      `;
-      
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
-
-    // Close modal on outside click
-    document.getElementById('modalForm').addEventListener('click', (e) => {
-      if (e.target.id === 'modalForm') closeModal();
     });
-
-    // Styles untuk button actions
-    const style = document.createElement('style');
-    style.textContent = `
-      .btn-icon-sm { width:36px; height:36px; border:none; border-radius:.5rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s; }
-      .btn-edit { background:var(--info); color:white; }
-      .btn-edit:hover { background:#2563eb; }
-      .btn-delete { background:var(--danger); color:white; }
-      .btn-delete:hover { background:#dc2626; }
-    `;
-    document.head.appendChild(style);
   </script>
 </body>
 </html>
