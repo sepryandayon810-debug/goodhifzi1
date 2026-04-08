@@ -812,25 +812,28 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       setupEventListeners();
     }
 
-        // ── Dark Mode (sinkron dengan halaman lain via webpos_dark_mode) ──
+         // ============================================================
+    // DARK MODE (Sinkron dengan halaman lain)
+    // ============================================================
     function applyTheme(){
-  var savedTheme = localStorage.getItem('webpos_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
-  var btn = document.getElementById('btnTheme');
-  if(btn) btn.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' : '<i class="fas fa-moon"></i>';
-}
-applyTheme();
-window.addEventListener('storage', function(e){ if(e.key === 'webpos_theme') applyTheme(); });
+      var savedTheme = localStorage.getItem('webpos_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      var btn = document.getElementById('btnTheme');
+      if(btn) {
+        btn.innerHTML = savedTheme === 'dark' 
+          ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' 
+          : '<i class="fas fa-moon"></i>';
+      }
+    }
     
-    if(btnTheme){
-  btnTheme.addEventListener("click", function(){
-    var current = document.documentElement.getAttribute('data-theme');
-    var next = current === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('webpos_theme', next);
+    // Terapkan tema saat halaman load
     applyTheme();
-  });
-}
-
+    
+    // Sinkronisasi antar tab
+    window.addEventListener('storage', function(e){ 
+      if(e.key === 'webpos_theme') applyTheme(); 
+    });
+    
     // ============================================================
     // DATA LOADING
     // ============================================================
@@ -1154,6 +1157,16 @@ window.addEventListener('storage', function(e){ if(e.key === 'webpos_theme') app
       document.getElementById("btnImport").addEventListener("click", openImportModal);
       document.getElementById("btnExport").addEventListener("click", exportProducts);
       document.getElementById("btnAddProduk").addEventListener("click", openAddProdukModal);
+      // Dark Mode Toggle
+      var btnTheme = document.getElementById("btnTheme");
+      if(btnTheme){
+        btnTheme.addEventListener("click", function(){
+          var current = document.documentElement.getAttribute('data-theme') || 'light';
+          var next = current === 'dark' ? 'light' : 'dark';
+          localStorage.setItem('webpos_theme', next);
+          applyTheme();
+        });
+      }
     }
 
     // ============================================================
