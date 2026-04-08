@@ -239,6 +239,64 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .mb-0{margin-bottom:0!important}
 .mb-2{margin-bottom:1rem!important}
 .w-full{width:100%!important}
+  .d-none{display:none!important}
+.d-block{display:block!important}
+.d-flex{display:flex!important}
+.d-md-none{display:none!important}
+@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
+.d-md-inline{display:none}
+@media(min-width:768px){.d-md-inline{display:inline}}
+.text-left{text-align:left!important}
+.text-center{text-align:center!important}
+.text-right{text-align:right!important}
+.text-primary{color:var(--primary)!important}
+.text-success{color:var(--success)!important}
+.text-danger{color:var(--danger)!important}
+.font-bold{font-weight:700!important}
+.text-sm{font-size:.875rem!important}
+.mb-0{margin-bottom:0!important}
+.mb-2{margin-bottom:1rem!important}
+.w-full{width:100%!important}
+
+/* ============================================
+   TAMBAHKAN CSS INI DI SINI
+   ============================================ */
+.quick-filter-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tab-nav {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.tab-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  color: white;
+}
 
   </style>
   
@@ -539,14 +597,31 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       </header>
 
       <div class="page-content">
-        <!-- Date Filter -->
+        <!-- Filter Section -->
         <div class="riwayat-toolbar">
+          <!-- Quick Filter Buttons -->
+          <div class="quick-filter-group">
+            <button class="btn btn-sm btn-outline active" data-range="today">Hari Ini</button>
+            <button class="btn btn-sm btn-outline" data-range="yesterday">Kemarin</button>
+            <button class="btn btn-sm btn-outline" data-range="week">Minggu Ini</button>
+            <button class="btn btn-sm btn-outline" data-range="month">Bulan Ini</button>
+            <button class="btn btn-sm btn-outline" data-range="year">Tahun Ini</button>
+          </div>
+          
           <div class="date-filter">
             <input type="date" id="startDate">
             <span>s/d</span>
             <input type="date" id="endDate">
             <button class="btn btn-primary" id="btnFilter"><i class="fas fa-filter"></i> Filter</button>
           </div>
+        </div>
+
+        <!-- Tab Filter Kategori -->
+        <div class="tab-nav" style="margin-bottom: 1.5rem;">
+          <button class="tab-btn active" data-filter="all"><i class="fas fa-list"></i> Semua</button>
+          <button class="tab-btn" data-filter="penjualan"><i class="fas fa-shopping-cart"></i> Produk</button>
+          <button class="tab-btn" data-filter="topup-tarik"><i class="fas fa-exchange-alt"></i> Top Up & Tarik</button>
+          <button class="tab-btn" data-filter="kas"><i class="fas fa-wallet"></i> Kas Masuk & Keluar</button>
         </div>
 
         <!-- Summary Cards -->
@@ -639,15 +714,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         initRiwayat();
       });
 
-      function initRiwayat() {
-      const user = Auth.getCurrentUser();
-      document.getElementById('userName').textContent = user?.name || user?.email || 'User';
-      document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
-
-      // Set default dates
-      const today = Utils.getTodayString();
-      document.getElementById('startDate').value = today;
-      document.getElementById('endDate').value = today;
+      setDateRange('today'); // Set hari ini sebagai default
 
       // Sidebar toggle
       document.getElementById('menuToggle').addEventListener('click', () => {
@@ -770,15 +837,510 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         Utils.hideLoading();
       }
 
-      window.viewDetail = (id) => {
-        Utils.showToast('Detail transaksi akan segera tersedia', 'info');
+      // Global variables untuk filter
+      let currentFilter = 'all';
+      let currentRange = 'today';
+      let allTransactionsData = [];
+      let currentDetailTransaction = null;
+
+      // Quick Filter Logic
+      document.querySelectorAll('[data-range]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('[data-range]').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentRange = this.dataset.range;
+          setDateRange(currentRange);
+          loadTransactions();
+        });
+      });
+
+      // Tab Filter Logic
+      document.querySelectorAll('.tab-btn[data-filter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.tab-btn[data-filter]').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          currentFilter = this.dataset.filter;
+          renderTransactionTable();
+        });
+      });
+
+      function setDateRange(range) {
+        const today = new Date();
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        
+        switch(range) {
+          case 'today':
+            startDate.value = formatDate(today);
+            endDate.value = formatDate(today);
+            break;
+          case 'yesterday':
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            startDate.value = formatDate(yesterday);
+            endDate.value = formatDate(yesterday);
+            break;
+          case 'week':
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            startDate.value = formatDate(weekStart);
+            endDate.value = formatDate(today);
+            break;
+          case 'month':
+            const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+            startDate.value = formatDate(monthStart);
+            endDate.value = formatDate(today);
+            break;
+          case 'year':
+            const yearStart = new Date(today.getFullYear(), 0, 1);
+            startDate.value = formatDate(yearStart);
+            endDate.value = formatDate(today);
+            break;
+        }
+      }
+
+      function formatDate(date) {
+        return date.toISOString().split('T')[0];
+      }
+
+      // Filter transactions berdasarkan tab yang aktif
+      function filterTransactionsByType(transactions) {
+        if (currentFilter === 'all') return transactions;
+        
+        return transactions.filter(t => {
+          switch(currentFilter) {
+            case 'penjualan':
+              return t.type === 'penjualan';
+            case 'topup-tarik':
+              return t.type === 'topup' || t.type === 'tarik';
+            case 'kas':
+              return t.type === 'kas_masuk' || t.type === 'kas_keluar';
+            default:
+              return true;
+          }
+        });
+      }
+
+      // Render ulang tabel dengan filter yang aktif
+      function renderTransactionTable() {
+        const filtered = filterTransactionsByType(allTransactionsData);
+        
+        // Hitung ulang summary dari data yang difilter
+        let totalPenjualan = 0;
+        let totalLaba = 0;
+        
+        filtered.forEach(t => {
+          if (t.status !== 'cancelled') {
+            if (t.type === 'penjualan') {
+              totalPenjualan += t.total || 0;
+              totalLaba += t.profit || 0;
+            }
+            if (t.type === 'topup' && t.adminFee) {
+              totalLaba += t.adminFee;
+            }
+          }
+        });
+        
+        document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
+        document.getElementById('totalTransaksi').textContent = filtered.length;
+        document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
+        document.getElementById('rataRata').textContent = Utils.formatRupiah(
+          filtered.length ? totalPenjualan / filtered.length : 0
+        );
+        
+        // Render tbody
+        const tbody = document.getElementById('transactionList');
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 3rem;">
+                <div class="empty-state">
+                  <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
+                  <p>Tidak ada transaksi untuk filter ini</p>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = filtered.map(t => {
+            const typeLabels = {
+              penjualan: 'Penjualan',
+              topup: 'Top Up',
+              tarik: 'Tarik Tunai',
+              kas_masuk: 'Kas Masuk',
+              kas_keluar: 'Kas Keluar'
+            };
+            
+            return `
+              <tr>
+                <td>${t.id}</td>
+                <td>${Utils.formatDateTime(t.timestamp)}</td>
+                <td><span class="transaction-type ${t.type}">${typeLabels[t.type] || t.type}</span></td>
+                <td>${t.paymentMethod || '-'}</td>
+                <td>${t.cashierName || '-'}</td>
+                <td>${Utils.formatRupiah(t.total || t.amount || 0)}</td>
+                <td>
+                  <button class="btn btn-sm btn-secondary" onclick="viewDetail('${t.id}', '${t.dateKey || ''}')">
+                    <i class="fas fa-eye"></i> Detail
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // View Detail dengan Modal
+      window.viewDetail = async (id, dateKey) => {
+        try {
+          // Cari transaksi dari data yang sudah ada
+          let transaction = allTransactionsData.find(t => t.id === id);
+          
+          // Jika tidak ada atau perlu refresh, ambil dari database
+          if (!transaction && dateKey) {
+            const snapshot = await database.ref(`transactions/${dateKey}/${id}`).once('value');
+            transaction = snapshot.val();
+            if (transaction) transaction.id = id;
+          }
+          
+          if (!transaction) {
+            Utils.showToast('Transaksi tidak ditemukan', 'error');
+            return;
+          }
+          
+          currentDetailTransaction = transaction;
+          showDetailModal(transaction);
+        } catch (error) {
+          console.error('Error loading detail:', error);
+          Utils.showToast('Gagal memuat detail', 'error');
+        }
       };
+
+      function showDetailModal(transaction) {
+        const modal = document.getElementById('detailModal');
+        const content = document.getElementById('detailContent');
+        const typeLabels = {
+          penjualan: 'Penjualan',
+          topup: 'Top Up',
+          tarik: 'Tarik Tunai',
+          kas_masuk: 'Kas Masuk',
+          kas_keluar: 'Kas Keluar'
+        };
+        
+        // Generate content berdasarkan tipe
+        let itemsHtml = '';
+        if (transaction.items && transaction.items.length > 0) {
+          itemsHtml = `
+            <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-lg);">
+              <h4 style="margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-muted);">ITEM PRODUK</h4>
+              ${transaction.items.map(item => `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                  <div>
+                    <div style="font-weight: 600;">${item.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${item.qty} x ${Utils.formatRupiah(item.price)}</div>
+                  </div>
+                  <div style="font-weight: 600;">${Utils.formatRupiah(item.qty * item.price)}</div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+        
+        content.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">ID Transaksi</div>
+              <div style="font-weight: 600; font-family: monospace;">${transaction.id}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Tanggal</div>
+              <div style="font-weight: 600;">${Utils.formatDateTime(transaction.timestamp)}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Tipe</div>
+              <div><span class="transaction-type ${transaction.type}">${typeLabels[transaction.type] || transaction.type}</span></div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Kasir</div>
+              <div style="font-weight: 600;">${transaction.cashierName || '-'}</div>
+            </div>
+            ${transaction.paymentMethod ? `
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Metode Pembayaran</div>
+              <div style="font-weight: 600;">${transaction.paymentMethod}</div>
+            </div>
+            ` : ''}
+            ${transaction.customerName ? `
+            <div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">Pelanggan</div>
+              <div style="font-weight: 600;">${transaction.customerName}</div>
+            </div>
+            ` : ''}
+          </div>
+          
+          ${itemsHtml}
+          
+          <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span>Subtotal</span>
+              <span style="font-weight: 600;">${Utils.formatRupiah(transaction.subtotal || transaction.total || 0)}</span>
+            </div>
+            ${transaction.discount ? `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--danger);">
+              <span>Diskon</span>
+              <span>-${Utils.formatRupiah(transaction.discount)}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+              <span>TOTAL</span>
+              <span>${Utils.formatRupiah(transaction.total || transaction.amount || 0)}</span>
+            </div>
+          </div>
+          
+          ${transaction.notes ? `
+          <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-md); font-size: 0.875rem;">
+            <strong>Catatan:</strong> ${transaction.notes}
+          </div>
+          ` : ''}
+        `;
+        
+        // Show/hide return button hanya untuk penjualan
+        const btnReturn = document.getElementById('btnReturn');
+        if (transaction.type === 'penjualan') {
+          btnReturn.style.display = 'block';
+        } else {
+          btnReturn.style.display = 'none';
+        }
+        
+        // Setup button actions
+        setupDetailActions(transaction);
+        
+        modal.style.display = 'flex';
+      }
+
+      function setupDetailActions(transaction) {
+        // Print
+        document.getElementById('btnPrint').onclick = () => {
+          printTransaction(transaction);
+        };
+        
+        // Edit
+        document.getElementById('btnEdit').onclick = () => {
+          editTransaction(transaction);
+        };
+        
+        // Return (kembalikan stok)
+        document.getElementById('btnReturn').onclick = () => {
+          returnTransaction(transaction);
+        };
+        
+        // Delete
+        document.getElementById('btnDelete').onclick = () => {
+          deleteTransaction(transaction);
+        };
+      }
+
+      function closeDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+        currentDetailTransaction = null;
+      }
+
+      // Close modal when click outside
+      document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetailModal();
+      });
+
+      async function printTransaction(transaction) {
+        Utils.showToast('Mencetak struk...', 'info');
+        // Implementasi cetak sesuai printer yang sudah ada
+        if (window.printReceipt) {
+          window.printReceipt(transaction);
+        } else {
+          // Fallback: print window
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(generateReceiptHTML(transaction));
+          printWindow.document.close();
+          printWindow.print();
+        }
+      }
+
+      function generateReceiptHTML(transaction) {
+        // Generate HTML sederhana untuk print
+        return `
+          <html>
+            <head><title>Struk ${transaction.id}</title></head>
+            <body style="font-family: monospace; padding: 20px; max-width: 300px;">
+              <h2 style="text-align: center;">STRUK TRANSAKSI</h2>
+              <p>ID: ${transaction.id}</p>
+              <p>Tgl: ${new Date(transaction.timestamp).toLocaleString('id-ID')}</p>
+              <hr>
+              ${transaction.items ? transaction.items.map(i => `
+                <p>${i.name} ${i.qty}x ${Utils.formatRupiah(i.price)}</p>
+              `).join('') : ''}
+              <hr>
+              <p style="text-align: right; font-weight: bold;">TOTAL: ${Utils.formatRupiah(transaction.total || 0)}</p>
+            </body>
+          </html>
+        `;
+      }
+
+      function editTransaction(transaction) {
+        Utils.showToast('Fitur edit akan segera tersedia', 'info');
+        // Redirect ke halaman edit sesuai tipe
+        // window.location.href = `edit-transaksi.html?id=${transaction.id}&type=${transaction.type}`;
+      }
+
+      async function returnTransaction(transaction) {
+        if (transaction.type !== 'penjualan' || !transaction.items) {
+          Utils.showToast('Return hanya untuk transaksi produk', 'error');
+          return;
+        }
+        
+        Utils.confirm('Kembalikan stok produk ke inventory? Transaksi akan ditandai sebagai returned.', async () => {
+          try {
+            Utils.showLoading();
+            
+            // Kembalikan stok setiap produk
+            const updates = {};
+            for (const item of transaction.items) {
+              if (item.productId) {
+                const productRef = database.ref(`products/${item.productId}/stock`);
+                const snapshot = await productRef.once('value');
+                const currentStock = snapshot.val() || 0;
+                updates[`products/${item.productId}/stock`] = currentStock + item.qty;
+              }
+            }
+            
+            // Update status transaksi
+            const dateStr = new Date(transaction.timestamp).toISOString().split('T')[0];
+            updates[`transactions/${dateStr}/${transaction.id}/status`] = 'returned';
+            updates[`transactions/${dateStr}/${transaction.id}/returnedAt`] = Date.now();
+            
+            await database.ref().update(updates);
+            
+            Utils.hideLoading();
+            Utils.showToast('Stok berhasil dikembalikan', 'success');
+            closeDetailModal();
+            loadTransactions(); // Refresh data
+          } catch (error) {
+            Utils.hideLoading();
+            console.error('Error return:', error);
+            Utils.showToast('Gagal mengembalikan stok', 'error');
+          }
+        });
+      }
+
+      async function deleteTransaction(transaction) {
+        Utils.confirm('Yakin ingin menghapus transaksi ini? ' + 
+          (transaction.type === 'penjualan' ? 'Stok produk akan dikembalikan.' : ''), 
+          async () => {
+            try {
+              Utils.showLoading();
+              
+              const updates = {};
+              
+              // Jika penjualan, kembalikan stok
+              if (transaction.type === 'penjualan' && transaction.items) {
+                for (const item of transaction.items) {
+                  if (item.productId) {
+                    const productRef = database.ref(`products/${item.productId}/stock`);
+                    const snapshot = await productRef.once('value');
+                    const currentStock = snapshot.val() || 0;
+                    updates[`products/${item.productId}/stock`] = currentStock + item.qty;
+                  }
+                }
+              }
+              
+              // Hapus transaksi
+              const dateStr = new Date(transaction.timestamp).toISOString().split('T')[0];
+              updates[`transactions/${dateStr}/${transaction.id}`] = null;
+              
+              await database.ref().update(updates);
+              
+              Utils.hideLoading();
+              Utils.showToast('Transaksi berhasil dihapus', 'success');
+              closeDetailModal();
+              loadTransactions();
+            } catch (error) {
+              Utils.hideLoading();
+              console.error('Error delete:', error);
+              Utils.showToast('Gagal menghapus transaksi', 'error');
+            }
+          }
+        );
+      }
+
+      // Update fungsi loadTransactions untuk menyimpan data global
+      async function loadTransactions() {
+        Utils.showLoading();
+        allTransactionsData = []; // Reset
+        
+        try {
+          const startDate = document.getElementById('startDate').value;
+          const endDate = document.getElementById('endDate').value;
+          
+          let totalPenjualan = 0;
+          let totalLaba = 0;
+          
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          
+          for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            const snapshot = await database.ref(`transactions/${dateStr}`).once('value');
+            const trans = snapshot.val() || {};
+            
+            Object.entries(trans).forEach(([id, data]) => {
+              if (data.status !== 'cancelled' && data.status !== 'returned') {
+                data.id = id;
+                data.dateKey = dateStr; // Simpan untuk referensi
+                allTransactionsData.push(data);
+              }
+            });
+          }
+          
+          // Sort by timestamp desc
+          allTransactionsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          renderTransactionTable();
+          
+        } catch (error) {
+          console.error('Error loading transactions:', error);
+          Utils.showToast('Gagal memuat transaksi', 'error');
+        }
+        
+        Utils.hideLoading();
+      }
 
       document.getElementById('btnFilter').addEventListener('click', loadTransactions);
 
       loadTransactions();
       }
     });
+
+      <!-- Modal Detail Transaksi -->
+  <div class="modal-overlay" id="detailModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="modal-content" style="background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="modal-title">Detail Transaksi</h3>
+        <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <div id="detailContent">
+          <!-- Content akan diisi via JS -->
+        </div>
+        
+        <!-- Aksi Buttons -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+          <button class="btn btn-primary" id="btnPrint"><i class="fas fa-print"></i> Cetak Struk</button>
+          <button class="btn btn-secondary" id="btnEdit"><i class="fas fa-edit"></i> Edit</button>
+          <button class="btn btn-warning" id="btnReturn" style="display:none;"><i class="fas fa-undo"></i> Return (Stok)</button>
+          <button class="btn btn-danger" id="btnDelete"><i class="fas fa-trash"></i> Hapus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+    
   </script>
 </body>
 </html>
