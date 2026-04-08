@@ -480,6 +480,36 @@
 
 <!-- ===== SCRIPT ===== -->
 <script>
+  <script>
+  /* =====================================================
+   THEME & COLOR RESTORATION - Langsung saat load
+   ===================================================== */
+  (function initTheme() {
+    // Dark mode
+    if (localStorage.getItem('dark_mode') === 'true') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    
+    // Theme color (cari semua kemungkinan key yang dipakai WebPOS)
+    const themeColor = localStorage.getItem('theme_color') || 
+                       localStorage.getItem('webpos_theme') || 
+                       localStorage.getItem('primaryColor') || 'indigo';
+    if (themeColor) {
+      document.documentElement.setAttribute('data-theme-color', themeColor);
+    }
+  })();
+
+  /* =====================================================
+     KONFIGURASI
+     ===================================================== */
+  const GAS_URL_KEY = 'gas_url';
+  const GAS_SHEET_ID_KEY = 'gas_sheet_id';
+  
+  /* =====================================================
+     STATE
+     ===================================================== */
+  let allData = [];
+  // ... lanjutkan kode Anda yang sudah ada
   /* =====================================================
      KONFIGURASI
      ===================================================== */
@@ -910,7 +940,7 @@
     } else {
       setTimeout(openGasModal, 400);
     }
-  })();
-  
+   })();
+</script>
 </body>
 </html>
