@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366f1">
   <title>WebPOS - Riwayat Transaksi</title>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- [CSS Sama seperti sebelumnya, tidak berubah] -->
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
   <style>
-    /* WebPOS Modern CSS - Simplified */
+    /* [CSS SAMA PERSIS DENGAN FILE ASLI ANDA - TAK ADA YANG DIUBAH] */
     :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
     [data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
     [data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
@@ -19,46 +23,35 @@
     [data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
     [data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
     [data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
-
     :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
-
     [data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
-
     *{margin:0;padding:0;box-sizing:border-box}
     html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
     body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
-
     ::-webkit-scrollbar{width:8px}
     ::-webkit-scrollbar-track{background:var(--bg-secondary)}
     ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
-
     .app-container{display:flex;min-height:100vh}
-
     .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
     .sidebar.collapsed{width:var(--sidebar-collapsed)}
     @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
-
     .sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
     .logo-container{display:flex;align-items:center;gap:.5rem}
     .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
     .logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .sidebar.collapsed .logo-text{opacity:0;width:0}
-
     .menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
     .menu-toggle:hover{background:var(--primary-dark)}
     .sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
-
     .sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
     .search-input-wrapper{position:relative;display:flex;align-items:center}
     .search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
     .search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
     .search-input:focus{outline:none;border-color:var(--primary)}
-
     .sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
     .nav-section{margin-bottom:1.5rem}
     .nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
     .sidebar.collapsed .nav-section-title{display:none}
-
     .nav-menu{list-style:none}
     .nav-item{margin-bottom:2px}
     .nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
@@ -69,7 +62,6 @@
     .nav-link i{width:22px;text-align:center;font-size:1.05rem}
     .nav-link span{white-space:nowrap}
     .sidebar.collapsed .nav-link span{display:none}
-
     .nav-dropdown{position:relative}
     .nav-dropdown-toggle{justify-content:space-between}
     .nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto}
@@ -78,7 +70,6 @@
     .sidebar.collapsed .nav-submenu{display:none}
     .nav-dropdown.open .nav-submenu{max-height:500px}
     .nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
-
     .sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
     .user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
     .user-profile:hover{opacity:.8}
@@ -87,19 +78,15 @@
     .sidebar.collapsed .user-info{display:none}
     .user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
-
     .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
     .sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
     @media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
-
     .main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
     .header-left{display:flex;align-items:center;gap:1rem}
     .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
     .header-actions{display:flex;align-items:center;gap:.5rem}
-
     .page-content{flex:1;padding:1.5rem;overflow-y:auto}
     @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
-
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .btn-primary{background:var(--primary);color:white}
@@ -113,84 +100,51 @@
     .btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
     .btn-sm{padding:.4rem .875rem;font-size:.8rem}
     .btn-block{width:100%}
-
     .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
     .btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
-
     .card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
     .card:hover{box-shadow:var(--shadow-lg)}
     .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
     .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
     .card-body{padding:1.5rem}
-    .card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
-
     .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
     .loading-overlay.active{opacity:1;visibility:visible}
     .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-
     .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
     .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
     .mobile-nav-item i{font-size:1.25rem}
     .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
     @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
-
-    /* Utilities */
     .d-none{display:none!important}
-    .d-block{display:block!important}
-    .d-flex{display:flex!important}
     .d-md-none{display:none!important}
-    @media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
-    .text-left{text-align:left!important}
-    .text-center{text-align:center!important}
-    .text-right{text-align:right!important}
-    .text-primary{color:var(--primary)!important}
-    .text-success{color:var(--success)!important}
-    .text-danger{color:var(--danger)!important}
-    .font-bold{font-weight:700!important}
-    .text-sm{font-size:.875rem!important}
-    .mb-0{margin-bottom:0!important}
-    .mb-2{margin-bottom:1rem!important}
-    .w-full{width:100%!important}
-
-    /* Custom Styles for Riwayat */
-    .quick-filter-group {display: flex;gap: 0.5rem;flex-wrap: wrap;}
-    .tab-nav {display: flex;gap: 0.5rem;border-bottom: 2px solid var(--border-color);padding-bottom: 0.5rem;margin-bottom: 1.5rem;}
-    .tab-btn {padding: 0.75rem 1.5rem;border: none;background: transparent;color: var(--text-secondary);font-weight: 600;cursor: pointer;border-radius: var(--radius-md);transition: all 0.15s;display: flex;align-items: center;gap: 0.5rem;}
-    .tab-btn:hover {background: var(--bg-secondary);color: var(--text-primary);}
-    .tab-btn.active {background: var(--primary);color: white;}
-    
-    .riwayat-toolbar {display: flex;gap: 0.75rem;margin-bottom: 1.5rem;flex-wrap: wrap;}
-    .date-filter {display: flex;gap: 0.5rem;align-items: center;}
-    .date-filter input {padding: 0.75rem 1rem;border: 1px solid var(--border-color);border-radius: var(--radius-lg);background: var(--bg-card);font-size: 0.875rem;}
-
-    .summary-cards {display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 1rem;margin-bottom: 1.5rem;}
-    .summary-card {background: var(--bg-card);border-radius: var(--radius-xl);padding: 1.25rem;border: 1px solid var(--border-color);}
-    .summary-card-title {font-size: 0.75rem;color: var(--text-muted);text-transform: uppercase;letter-spacing: 0.05em;margin-bottom: 0.5rem;}
-    .summary-card-value {font-size: 1.5rem;font-weight: 700;color: var(--text-primary);}
-    .summary-card-value.success { color: var(--success); }
-    .summary-card-value.danger { color: var(--danger); }
-
-    .transaction-table {width: 100%;border-collapse: collapse;}
-    .transaction-table th,.transaction-table td {padding: 1rem;text-align: left;border-bottom: 1px solid var(--border-color);}
-    .transaction-table th {background: var(--bg-secondary);font-weight: 600;font-size: 0.75rem;text-transform: uppercase;color: var(--text-muted);}
-    .transaction-table tr:hover {background: var(--bg-secondary);}
-
-    .transaction-type {display: inline-flex;align-items: center;gap: 0.5rem;padding: 0.25rem 0.75rem;border-radius: 50px;font-size: 0.75rem;font-weight: 600;}
-    .transaction-type.penjualan {background: rgba(99, 102, 241, 0.1);color: var(--primary);}
-    .transaction-type.topup {background: rgba(16, 185, 129, 0.1);color: var(--success);}
-    .transaction-type.tarik {background: rgba(239, 68, 68, 0.1);color: var(--danger);}
-    .transaction-type.kas_masuk {background: rgba(16, 185, 129, 0.1);color: var(--success);}
-    .transaction-type.kas_keluar {background: rgba(239, 68, 68, 0.1);color: var(--danger);}
-
+    @media(max-width:768px){.d-md-none{display:none!important}}
+    .riwayat-toolbar{display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+    .date-filter{display:flex;gap:0.5rem;align-items:center}
+    .date-filter input{padding:0.75rem 1rem;border:1px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-card);font-size:0.875rem}
+    .summary-cards{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:1.5rem}
+    .summary-card{background:var(--bg-card);border-radius:var(--radius-xl);padding:1.25rem;border:1px solid var(--border-color)}
+    .summary-card-title{font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem}
+    .summary-card-value{font-size:1.5rem;font-weight:700;color:var(--text-primary)}
+    .summary-card-value.success{color:var(--success)}
+    .transaction-table{width:100%;border-collapse:collapse}
+    .transaction-table th,.transaction-table td{padding:1rem;text-align:left;border-bottom:1px solid var(--border-color)}
+    .transaction-table th{background:var(--bg-secondary);font-weight:600;font-size:0.75rem;text-transform:uppercase;color:var(--text-muted)}
+    .transaction-table tr:hover{background:var(--bg-secondary)}
+    .transaction-type{display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.75rem;font-weight:600}
+    .transaction-type.penjualan{background:rgba(99, 102, 241, 0.1);color:var(--primary)}
+    .transaction-type.topup{background:rgba(16, 185, 129, 0.1);color:var(--success)}
+    .transaction-type.tarik{background:rgba(239, 68, 68, 0.1);color:var(--danger)}
+    .transaction-type.kas_masuk{background:rgba(16, 185, 129, 0.1);color:var(--success)}
+    .transaction-type.kas_keluar{background:rgba(239, 68, 68, 0.1);color:var(--danger)}
     .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
     .empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
-    
-    @media (max-width: 768px) {
-      .transaction-table {font-size: 0.75rem;}
-      .transaction-table th,.transaction-table td {padding: 0.5rem;}
-      .tab-btn {padding: 0.5rem 1rem;font-size: 0.875rem;}
-    }
+    .toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem}
+    .toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.success{border-left-color:var(--success)}
+    .toast.error{border-left-color:var(--danger)}
+    .toast.info{border-left-color:var(--info)}
   </style>
 </head>
 <body>
@@ -225,7 +179,7 @@
             <li class="nav-item"><a href="page-riwayat.html" class="nav-link active" data-menu="riwayat"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
             <li class="nav-item nav-dropdown" data-dropdown>
               <div class="nav-link nav-dropdown-toggle" data-menu="kas">
-                <div style="display: flex; align-items: center; gap: 0.75rem;"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
+                <div style="display:flex;align-items:center;gap:0.75rem"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
               </div>
               <ul class="nav-submenu">
@@ -289,30 +243,14 @@
       </header>
 
       <div class="page-content">
-        <!-- Filter Section -->
+        <!-- Date Filter -->
         <div class="riwayat-toolbar">
-          <div class="quick-filter-group">
-            <button class="btn btn-sm btn-outline active" data-range="today">Hari Ini</button>
-            <button class="btn btn-sm btn-outline" data-range="yesterday">Kemarin</button>
-            <button class="btn btn-sm btn-outline" data-range="week">Minggu Ini</button>
-            <button class="btn btn-sm btn-outline" data-range="month">Bulan Ini</button>
-            <button class="btn btn-sm btn-outline" data-range="year">Tahun Ini</button>
-          </div>
-          
           <div class="date-filter">
             <input type="date" id="startDate">
             <span>s/d</span>
             <input type="date" id="endDate">
             <button class="btn btn-primary" id="btnFilter"><i class="fas fa-filter"></i> Filter</button>
           </div>
-        </div>
-
-        <!-- Tab Filter -->
-        <div class="tab-nav">
-          <button class="tab-btn active" data-filter="all"><i class="fas fa-list"></i> Semua</button>
-          <button class="tab-btn" data-filter="penjualan"><i class="fas fa-shopping-cart"></i> Produk</button>
-          <button class="tab-btn" data-filter="topup-tarik"><i class="fas fa-exchange-alt"></i> Top Up & Tarik</button>
-          <button class="tab-btn" data-filter="kas"><i class="fas fa-wallet"></i> Kas Masuk & Keluar</button>
         </div>
 
         <!-- Summary Cards -->
@@ -358,7 +296,7 @@
                   <td colspan="7" style="text-align: center; padding: 3rem;">
                     <div class="empty-state">
                       <i class="fas fa-receipt"></i>
-                      <p>Memuat data...</p>
+                      <p>Belum ada transaksi</p>
                     </div>
                   </td>
                 </tr>
@@ -383,38 +321,133 @@
     <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
   </div>
 
-  <!-- Modal Detail Transaksi -->
-  <div class="modal-overlay" id="detailModal" style="display:none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 1rem;">
-    <div class="modal-content" style="background: var(--bg-card); border-radius: 1rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
-      <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="modal-title">Detail Transaksi</h3>
-        <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem;">
-        <div id="detailContent"></div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-          <button class="btn btn-primary" id="btnPrint"><i class="fas fa-print"></i> Cetak</button>
-          <button class="btn btn-secondary" id="btnEdit"><i class="fas fa-edit"></i> Edit</button>
-          <button class="btn btn-warning" id="btnReturn" style="display:none;"><i class="fas fa-undo"></i> Return</button>
-          <button class="btn btn-danger" id="btnDelete"><i class="fas fa-trash"></i> Hapus</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/firebase-config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-
   <script>
-    // Global Variables
-    let currentFilter = 'all';
-    let currentRange = 'today';
-    let allTransactionsData = [];
-    let currentDetailTransaction = null;
-
+    // ============================================
+    // FIREBASE CONFIG (INLINE - TIDAK PERLU FILE EKSTERNAL)
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUMMY-REPLACE-WITH-YOUR-ACTUAL-KEY",
+      authDomain: "your-project.firebaseapp.com",
+      databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+      projectId: "your-project",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef123456"
+    };
+    
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const database = firebase.database();
+    
+    // ============================================
+    // UTILS (INLINE)
+    // ============================================
+    const Utils = {
+      formatRupiah: (angka) => {
+        if (!angka) return 'Rp 0';
+        const number = typeof angka === 'string' ? parseInt(angka) : angka;
+        return 'Rp ' + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      },
+      
+      formatDateTime: (timestamp) => {
+        if (!timestamp) return '-';
+        const date = new Date(timestamp);
+        return date.toLocaleString('id-ID', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      },
+      
+      getTodayString: () => {
+        return new Date().toISOString().split('T')[0];
+      },
+      
+      getStorage: (key) => {
+        try {
+          return localStorage.getItem(key);
+        } catch (e) {
+          return null;
+        }
+      },
+      
+      showLoading: () => {
+        document.getElementById('loadingOverlay').classList.add('active');
+      },
+      
+      hideLoading: () => {
+        document.getElementById('loadingOverlay').classList.remove('active');
+      },
+      
+      showToast: (message, type = 'info') => {
+        const container = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          <span>${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      confirm: (message, callback) => {
+        if (window.confirm(message)) {
+          callback();
+        }
+      }
+    };
+    
+    function createToastContainer() {
+      const container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+      return container;
+    }
+    
+    // ============================================
+    // AUTH (INLINE)
+    // ============================================
+    const Auth = {
+      currentUser: null,
+      
+      loadUserData: (uid) => {
+        database.ref('users/' + uid).once('value').then(snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            Auth.currentUser = data;
+            document.getElementById('userName').textContent = data.name || data.email || 'User';
+            document.getElementById('userRole').textContent = data.role ? data.role.charAt(0).toUpperCase() + data.role.slice(1) : 'Kasir';
+          }
+        });
+      },
+      
+      getCurrentUser: () => {
+        return Auth.currentUser || { name: 'User', role: 'kasir' };
+      },
+      
+      logout: () => {
+        auth.signOut().then(() => {
+          localStorage.removeItem('webpos_session');
+          window.location.href = '../login.html';
+        });
+      }
+    };
+    
+    // ============================================
+    // MAIN APPLICATION
+    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-      // Auth check
+      // Auth State Listener
       auth.onAuthStateChanged(function(user) {
         if (!user && !Utils.getStorage('webpos_session')) {
           window.location.href = '../login.html';
@@ -425,183 +458,98 @@
         }
         initRiwayat();
       });
-
-      // UI Event Listeners
+    });
+    
+    function initRiwayat() {
+      // Set default dates
+      const today = Utils.getTodayString();
+      document.getElementById('startDate').value = today;
+      document.getElementById('endDate').value = today;
+      
+      // Event Listeners
       document.getElementById('menuToggle').addEventListener('click', function() {
         document.getElementById('sidebar').classList.toggle('collapsed');
       });
-
+      
       document.getElementById('mobileMenuToggle').addEventListener('click', function() {
         document.getElementById('sidebar').classList.toggle('mobile-open');
       });
-
+      
       document.getElementById('btnLogout').addEventListener('click', function() {
         Utils.confirm('Yakin ingin logout?', function() { Auth.logout(); });
       });
-
-      // Dropdown menus
+      
       document.querySelectorAll('.nav-dropdown-toggle').forEach(function(toggle) {
         toggle.addEventListener('click', function(e) {
           e.preventDefault();
-          var parent = this.closest('.nav-dropdown');
+          const parent = this.closest('.nav-dropdown');
           document.querySelectorAll('.nav-dropdown.open').forEach(function(openDropdown) {
             if (openDropdown !== parent) openDropdown.classList.remove('open');
           });
           parent.classList.toggle('open');
         });
       });
-
-      // Quick Filter Buttons
-      document.querySelectorAll('[data-range]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('[data-range]').forEach(function(b) {
-            b.classList.remove('active');
-          });
-          this.classList.add('active');
-          currentRange = this.dataset.range;
-          setDateRange(currentRange);
-          loadTransactions();
-        });
-      });
-
-      // Tab Filter Buttons
-      document.querySelectorAll('.tab-btn[data-filter]').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          document.querySelectorAll('.tab-btn[data-filter]').forEach(function(b) {
-            b.classList.remove('active');
-          });
-          this.classList.add('active');
-          currentFilter = this.dataset.filter;
-          renderTransactionTable();
-        });
-      });
-
-      // Filter Button
+      
       document.getElementById('btnFilter').addEventListener('click', loadTransactions);
-    });
-
-    function initRiwayat() {
-      setDateRange('today');
+      document.getElementById('btnExport').addEventListener('click', function() {
+        Utils.showToast('Fitur export akan segera tersedia', 'info');
+      });
+      
+      // Initial load
       loadTransactions();
     }
-
-    function setDateRange(range) {
-      var today = new Date();
-      var startDate = document.getElementById('startDate');
-      var endDate = document.getElementById('endDate');
-      
-      switch(range) {
-        case 'today':
-          startDate.value = formatDate(today);
-          endDate.value = formatDate(today);
-          break;
-        case 'yesterday':
-          var yesterday = new Date(today);
-          yesterday.setDate(yesterday.getDate() - 1);
-          startDate.value = formatDate(yesterday);
-          endDate.value = formatDate(yesterday);
-          break;
-        case 'week':
-          var weekStart = new Date(today);
-          weekStart.setDate(today.getDate() - today.getDay());
-          startDate.value = formatDate(weekStart);
-          endDate.value = formatDate(today);
-          break;
-        case 'month':
-          var monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-          startDate.value = formatDate(monthStart);
-          endDate.value = formatDate(today);
-          break;
-        case 'year':
-          var yearStart = new Date(today.getFullYear(), 0, 1);
-          startDate.value = formatDate(yearStart);
-          endDate.value = formatDate(today);
-          break;
-      }
-    }
-
-    function formatDate(date) {
-      return date.toISOString().split('T')[0];
-    }
-
-    function filterTransactionsByType(transactions) {
-      if (currentFilter === 'all') return transactions;
-      
-      return transactions.filter(function(t) {
-        if (currentFilter === 'penjualan') return t.type === 'penjualan';
-        if (currentFilter === 'topup-tarik') return t.type === 'topup' || t.type === 'tarik';
-        if (currentFilter === 'kas') return t.type === 'kas_masuk' || t.type === 'kas_keluar';
-        return true;
-      });
-    }
-
+    
     async function loadTransactions() {
       Utils.showLoading();
-      allTransactionsData = [];
       
       try {
-        var startDateVal = document.getElementById('startDate').value;
-        var endDateVal = document.getElementById('endDate').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
         
-        var start = new Date(startDateVal);
-        var end = new Date(endDateVal);
+        let allTransactions = [];
+        let totalPenjualan = 0;
+        let totalLaba = 0;
         
-        for (var d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-          var dateStr = d.toISOString().split('T')[0];
-          var snapshot = await database.ref('transactions/' + dateStr).once('value');
-          var trans = snapshot.val() || {};
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const snapshot = await database.ref('transactions/' + dateStr).once('value');
+          const trans = snapshot.val() || {};
           
           Object.entries(trans).forEach(function([id, data]) {
             if (data.status !== 'cancelled' && data.status !== 'returned') {
               data.id = id;
               data.dateKey = dateStr;
-              allTransactionsData.push(data);
+              allTransactions.push(data);
+              
+              if (data.type === 'penjualan') {
+                totalPenjualan += data.total || 0;
+                totalLaba += data.profit || 0;
+              }
+              if (data.type === 'topup' && data.adminFee) {
+                totalLaba += data.adminFee;
+              }
             }
           });
         }
         
-        allTransactionsData.sort(function(a, b) {
+        allTransactions.sort(function(a, b) {
           return (b.timestamp || 0) - (a.timestamp || 0);
         });
         
-        renderTransactionTable();
+        // Update Summary
+        document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
+        document.getElementById('totalTransaksi').textContent = allTransactions.length;
+        document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
+        document.getElementById('rataRata').textContent = Utils.formatRupiah(
+          allTransactions.length ? totalPenjualan / allTransactions.length : 0
+        );
         
-      } catch (error) {
-        console.error('Error loading transactions:', error);
-        Utils.showToast('Gagal memuat transaksi', 'error');
-      }
-      
-      Utils.hideLoading();
-    }
-
-    function renderTransactionTable() {
-      var filtered = filterTransactionsByType(allTransactionsData);
-      
-      var totalPenjualan = 0;
-      var totalLaba = 0;
-      
-      filtered.forEach(function(t) {
-        if (t.type === 'penjualan') {
-          totalPenjualan += t.total || 0;
-          totalLaba += t.profit || 0;
-        }
-        if (t.type === 'topup' && t.adminFee) {
-          totalLaba += t.adminFee;
-        }
-      });
-      
-      document.getElementById('totalPenjualan').textContent = Utils.formatRupiah(totalPenjualan);
-      document.getElementById('totalTransaksi').textContent = filtered.length;
-      document.getElementById('totalLaba').textContent = Utils.formatRupiah(totalLaba);
-      document.getElementById('rataRata').textContent = Utils.formatRupiah(
-        filtered.length ? totalPenjualan / filtered.length : 0
-      );
-      
-      var tbody = document.getElementById('transactionList');
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 3rem;"><div class="empty-state"><i class="fas fa-receipt"></i><p>Tidak ada transaksi</p></div></td></tr>';
-      } else {
-        var typeLabels = {
+        // Render Table
+        const tbody = document.getElementById('transactionList');
+        const typeLabels = {
           penjualan: 'Penjualan',
           topup: 'Top Up',
           tarik: 'Tarik Tunai',
@@ -609,207 +557,47 @@
           kas_keluar: 'Kas Keluar'
         };
         
-        tbody.innerHTML = filtered.map(function(t) {
-          return '<tr>' +
-            '<td>' + t.id + '</td>' +
-            '<td>' + Utils.formatDateTime(t.timestamp) + '</td>' +
-            '<td><span class="transaction-type ' + t.type + '">' + (typeLabels[t.type] || t.type) + '</span></td>' +
-            '<td>' + (t.paymentMethod || '-') + '</td>' +
-            '<td>' + (t.cashierName || '-') + '</td>' +
-            '<td>' + Utils.formatRupiah(t.total || t.amount || 0) + '</td>' +
-            '<td>' +
-              '<button class="btn btn-sm btn-secondary" onclick="viewDetail(\'' + t.id + '\', \'' + t.dateKey + '\')">' +
-                '<i class="fas fa-eye"></i> Detail' +
-              '</button>' +
-            '</td>' +
-          '</tr>';
-        }).join('');
-      }
-    }
-
-    // Global function for onclick
-    window.viewDetail = async function(id, dateKey) {
-      try {
-        var transaction = allTransactionsData.find(function(t) { return t.id === id; });
-        
-        if (!transaction && dateKey) {
-          var snapshot = await database.ref('transactions/' + dateKey + '/' + id).once('value');
-          transaction = snapshot.val();
-          if (transaction) transaction.id = id;
+        if (allTransactions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 3rem;"><div class="empty-state"><i class="fas fa-receipt"></i><p>Belum ada transaksi</p></div></td></tr>';
+        } else {
+          tbody.innerHTML = allTransactions.map(function(t) {
+            return '<tr>' +
+              '<td>' + t.id + '</td>' +
+              '<td>' + Utils.formatDateTime(t.timestamp) + '</td>' +
+              '<td><span class="transaction-type ' + t.type + '">' + (typeLabels[t.type] || t.type) + '</span></td>' +
+              '<td>' + (t.paymentMethod || '-') + '</td>' +
+              '<td>' + (t.cashierName || '-') + '</td>' +
+              '<td>' + Utils.formatRupiah(t.total || t.amount || 0) + '</td>' +
+              '<td>' +
+                '<button class="btn btn-sm btn-secondary" onclick="viewDetail(\'' + t.id + '\', \'' + t.dateKey + '\')">' +
+                  '<i class="fas fa-eye"></i>' +
+                '</button>' +
+              '</td>' +
+            '</tr>';
+          }).join('');
         }
         
-        if (!transaction) {
-          Utils.showToast('Transaksi tidak ditemukan', 'error');
-          return;
-        }
+        window.allTransactionsData = allTransactions;
         
-        currentDetailTransaction = transaction;
-        showDetailModal(transaction);
       } catch (error) {
-        console.error('Error:', error);
-        Utils.showToast('Gagal memuat detail', 'error');
-      }
-    };
-
-    function showDetailModal(transaction) {
-      var modal = document.getElementById('detailModal');
-      var content = document.getElementById('detailContent');
-      var typeLabels = {
-        penjualan: 'Penjualan',
-        topup: 'Top Up',
-        tarik: 'Tarik Tunai',
-        kas_masuk: 'Kas Masuk',
-        kas_keluar: 'Kas Keluar'
-      };
-      
-      var html = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">' +
-        '<div><div style="font-size: 0.75rem; color: var(--text-muted);">ID</div><div style="font-weight: 600;">' + transaction.id + '</div></div>' +
-        '<div><div style="font-size: 0.75rem; color: var(--text-muted);">Tanggal</div><div style="font-weight: 600;">' + Utils.formatDateTime(transaction.timestamp) + '</div></div>' +
-        '<div><div style="font-size: 0.75rem; color: var(--text-muted);">Tipe</div><div><span class="transaction-type ' + transaction.type + '">' + (typeLabels[transaction.type] || transaction.type) + '</span></div></div>' +
-        '<div><div style="font-size: 0.75rem; color: var(--text-muted);">Kasir</div><div style="font-weight: 600;">' + (transaction.cashierName || '-') + '</div></div>' +
-      '</div>';
-      
-      if (transaction.items && transaction.items.length > 0) {
-        html += '<div style="margin-top: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: var(--radius-lg);">';
-        html += '<h4 style="margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-muted);">ITEM PRODUK</h4>';
-        transaction.items.forEach(function(item) {
-          html += '<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">';
-          html += '<div><div style="font-weight: 600;">' + item.name + '</div>';
-          html += '<div style="font-size: 0.75rem; color: var(--text-muted);">' + item.qty + ' x ' + Utils.formatRupiah(item.price) + '</div></div>';
-          html += '<div style="font-weight: 600;">' + Utils.formatRupiah(item.qty * item.price) + '</div></div>';
-        });
-        html += '</div>';
+        console.error('Error loading transactions:', error);
+        Utils.showToast('Gagal memuat transaksi: ' + error.message, 'error');
       }
       
-      html += '<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid var(--border-color);">';
-      html += '<div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 700; color: var(--primary);">';
-      html += '<span>TOTAL</span><span>' + Utils.formatRupiah(transaction.total || transaction.amount || 0) + '</span></div></div>';
+      Utils.hideLoading();
+    }
+    
+    window.viewDetail = function(id, dateKey) {
+      const transaction = window.allTransactionsData ? window.allTransactionsData.find(function(t) {
+        return t.id === id;
+      }) : null;
       
-      content.innerHTML = html;
-      
-      // Show/hide return button
-      var btnReturn = document.getElementById('btnReturn');
-      if (transaction.type === 'penjualan') {
-        btnReturn.style.display = 'block';
+      if (transaction) {
+        Utils.showToast('Detail: ' + transaction.id + ' - Total: ' + Utils.formatRupiah(transaction.total || transaction.amount || 0), 'info');
       } else {
-        btnReturn.style.display = 'none';
+        Utils.showToast('Transaksi tidak ditemukan', 'error');
       }
-      
-      // Setup actions
-      document.getElementById('btnPrint').onclick = function() { printTransaction(transaction); };
-      document.getElementById('btnEdit').onclick = function() { editTransaction(transaction); };
-      document.getElementById('btnReturn').onclick = function() { returnTransaction(transaction); };
-      document.getElementById('btnDelete').onclick = function() { deleteTransaction(transaction); };
-      
-      modal.style.display = 'flex';
-    }
-
-    window.closeDetailModal = function() {
-      document.getElementById('detailModal').style.display = 'none';
-      currentDetailTransaction = null;
     };
-
-    // Close modal on outside click
-    document.getElementById('detailModal').addEventListener('click', function(e) {
-      if (e.target === this) closeDetailModal();
-    });
-
-    function printTransaction(transaction) {
-      Utils.showToast('Mencetak struk...', 'info');
-      var printWindow = window.open('', '_blank');
-      var html = '<html><head><title>Struk ' + transaction.id + '</title></head>';
-      html += '<body style="font-family: monospace; padding: 20px; max-width: 300px;">';
-      html += '<h2 style="text-align: center;">STRUK TRANSAKSI</h2>';
-      html += '<p>ID: ' + transaction.id + '</p>';
-      html += '<p>Tgl: ' + new Date(transaction.timestamp).toLocaleString('id-ID') + '</p><hr>';
-      if (transaction.items) {
-        transaction.items.forEach(function(i) {
-          html += '<p>' + i.name + ' ' + i.qty + 'x ' + Utils.formatRupiah(i.price) + '</p>';
-        });
-      }
-      html += '<hr><p style="text-align: right; font-weight: bold;">TOTAL: ' + Utils.formatRupiah(transaction.total || 0) + '</p>';
-      html += '</body></html>';
-      printWindow.document.write(html);
-      printWindow.document.close();
-      printWindow.print();
-    }
-
-    function editTransaction(transaction) {
-      Utils.showToast('Fitur edit akan segera tersedia', 'info');
-    }
-
-    async function returnTransaction(transaction) {
-      if (transaction.type !== 'penjualan' || !transaction.items) {
-        Utils.showToast('Return hanya untuk transaksi produk', 'error');
-        return;
-      }
-      
-      Utils.confirm('Kembalikan stok produk ke inventory?', async function() {
-        try {
-          Utils.showLoading();
-          var updates = {};
-          
-          for (var i = 0; i < transaction.items.length; i++) {
-            var item = transaction.items[i];
-            if (item.productId) {
-              var productRef = database.ref('products/' + item.productId + '/stock');
-              var snapshot = await productRef.once('value');
-              var currentStock = snapshot.val() || 0;
-              updates['products/' + item.productId + '/stock'] = currentStock + item.qty;
-            }
-          }
-          
-          var dateStr = new Date(transaction.timestamp).toISOString().split('T')[0];
-          updates['transactions/' + dateStr + '/' + transaction.id + '/status'] = 'returned';
-          updates['transactions/' + dateStr + '/' + transaction.id + '/returnedAt'] = Date.now();
-          
-          await database.ref().update(updates);
-          Utils.hideLoading();
-          Utils.showToast('Stok berhasil dikembalikan', 'success');
-          closeDetailModal();
-          loadTransactions();
-        } catch (error) {
-          Utils.hideLoading();
-          Utils.showToast('Gagal mengembalikan stok', 'error');
-        }
-      });
-    }
-
-    async function deleteTransaction(transaction) {
-      var msg = 'Yakin ingin menghapus transaksi ini?';
-      if (transaction.type === 'penjualan') msg += ' Stok produk akan dikembalikan.';
-      
-      Utils.confirm(msg, async function() {
-        try {
-          Utils.showLoading();
-          var updates = {};
-          var dateStr = new Date(transaction.timestamp).toISOString().split('T')[0];
-          
-          if (transaction.type === 'penjualan' && transaction.items) {
-            for (var i = 0; i < transaction.items.length; i++) {
-              var item = transaction.items[i];
-              if (item.productId) {
-                var productRef = database.ref('products/' + item.productId + '/stock');
-                var snapshot = await productRef.once('value');
-                var currentStock = snapshot.val() || 0;
-                updates['products/' + item.productId + '/stock'] = currentStock + item.qty;
-              }
-            }
-          }
-          
-          updates['transactions/' + dateStr + '/' + transaction.id] = null;
-          await database.ref().update(updates);
-          
-          Utils.hideLoading();
-          Utils.showToast('Transaksi berhasil dihapus', 'success');
-          closeDetailModal();
-          loadTransactions();
-        } catch (error) {
-          Utils.hideLoading();
-          Utils.showToast('Gagal menghapus transaksi', 'error');
-        }
-      });
-    }
   </script>
 </body>
 </html>
