@@ -1927,6 +1927,7 @@
           const dueDate = document.getElementById('hutangDueDate').value;
           const note = document.getElementById('hutangNote').value;
           const affectKas = document.getElementById('hutangAffectKas').checked;
+          console.log('💾 Simpan hutang:', { type, name, amount, affectKas });
           
           if (!name || amount <= 0) {
             Utils.showToast('Nama dan jumlah harus diisi', 'error');
@@ -1959,6 +1960,7 @@
             
             // If affectKas is checked, record to kas
             if (affectKas && !id) { // Only for new records
+              console.log('🔄 Mencatat ke kas...');
               await recordToKas(type === 'hutang' ? 'keluar' : 'masuk', amount, 
                 `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
             }
@@ -2193,46 +2195,73 @@
         }
 
         // Helper function to record to kas
-        async function recordToKas(type, amount, description, user) {
-          try {
-            const kasId = 'kas_' + Date.now();
-            const kasData = {
-              id: kasId,
-              type: type, // 'masuk' or 'keluar'
-              amount: amount,
-              description: description,
-              category: type === 'masuk' ? 'Pemasukan' : 'Pengeluaran',
-              source: 'hutang_piutang',
-              userId: user.uid,
-              userName: user.name || user.email,
-              timestamp: Date.now(),
-              date: new Date().toISOString().split('T')[0]
-            };
-            
-            await database.ref('cash_flow/' + kasId).set(kasData);
-            
-            // Update daily cash summary if needed
-            const today = new Date().toISOString().split('T')[0];
-            const summaryRef = database.ref('cash_summary/' + today);
-            const summarySnap = await summaryRef.once('value');
-            const summary = summarySnap.val() || { masuk: 0, keluar: 0, saldo: 0 };
-            
-            if (type === 'masuk') {
-              summary.masuk = (summary.masuk || 0) + amount;
-              summary.saldo = (summary.saldo || 0) + amount;
-            } else {
-              summary.keluar = (summary.keluar || 0) + amount;
-              summary.saldo = (summary.saldo || 0) - amount;
-            }
-            
-            await summaryRef.set(summary);
-            
-          } catch (error) {
-            console.error('Error recording to kas:', error);
-            throw error;
-          }
-        }
+        // Helper function to record to kas - FIXED VERSION
+async function recordToKas(type, amount, description, user) {
+  console.log('📝 Mencatat ke kas:', { type, amount, description });
+  
+  try {
+    const kasId = 'kas_' + Date.now();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const kasData = {
+      id: kasId,
+      type: type, // 'masuk' or 'keluar'
+      amount: parseInt(amount),
+      description: description,
+      category: 'Hutang/Piutang',
+      source: 'hutang_piutang',
+      userId: user.uid,
+      userName: user.name || user.email,
+      timestamp: Date.now(),
+      date: today,
+      createdAt: Date.now()
+    };
 
+    // Opsi 1: Coba simpan ke cash_flow (path baru)
+    try {
+      await database.ref('cash_flow/' + kasId).set(kasData);
+      console.log('✅ Tersimpan di cash_flow');
+    } catch (err1) {
+      console.warn('⚠️ cash_flow error, mencoba transactions:', err1.message);
+      
+      // Opsi 2: Fallback ke transactions (path yang sudah ada)
+      await database.ref('transactions/' + kasId).set({
+        ...kasData,
+        transactionType: type === 'masuk' ? 'income' : 'expense',
+        status: 'completed'
+      });
+      console.log('✅ Tersimpan di transactions');
+    }
+    
+    // Update ringkasan kas harian (cash_summary)
+    try {
+      const summaryRef = database.ref('cash_summary/' + today);
+      const summarySnap = await summaryRef.once('value');
+      const summary = summarySnap.val() || { masuk: 0, keluar: 0, saldo: 0 };
+      
+      if (type === 'masuk') {
+        summary.masuk = (summary.masuk || 0) + parseInt(amount);
+        summary.saldo = (summary.saldo || 0) + parseInt(amount);
+      } else {
+        summary.keluar = (summary.keluar || 0) + parseInt(amount);
+        summary.saldo = (summary.saldo || 0) - parseInt(amount);
+      }
+      
+      await summaryRef.set(summary);
+      console.log('✅ Ringkasan kas updated:', summary);
+    } catch (err2) {
+      console.warn('⚠️ Tidak bisa update cash_summary:', err2.message);
+    }
+    
+    Utils.showToast(`Berhasil dicatat di Kas ${type === 'masuk' ? 'Masuk' : 'Keluar'}`, 'success');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Gagal mencatat ke kas:', error);
+    Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
+    throw error;
+  }
+}
         // Export Data
         function exportData() {
           const dataToExport = Object.values(hutangData).map(item => ({
