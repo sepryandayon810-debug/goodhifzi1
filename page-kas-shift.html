@@ -914,38 +914,11 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="js/auth.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-  auth.onAuthStateChanged(async (user) => {
-    if (!user && !Utils.getStorage('webpos_session')) {
-      window.location.href = 'login.html';
-      return;
-    }
     
-    if (user) {
-      // Load data user dari database
-      try {
-        const userSnap = await database.ref('users/' + user.uid).once('value');
-        const userData = userSnap.val() || {};
-        
-        // Update sidebar
-        document.getElementById('userName').textContent = userData.name || user.email || 'User';
-        document.getElementById('userRole').textContent = userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : 'Kasir';
-        if (userData.name) {
-          const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-          document.getElementById('userAvatar').textContent = initials;
-        }
-      } catch (e) {
-        console.error('Error load user:', e);
-      }
-      
-      initKasShift();
-    }
-  });
-});
-          // ============================================
-    // 1. DEFINISI FUNGSI initKasShift (DI LUAR event listener)
-    // ============================================
     function initKasShift() {
+      database.ref('shifts').once('value')
+    .then(() => console.log('✅ Shifts: access granted'))
+    .catch(err => console.error('❌ Shifts Error:', err.code, err.message));
       let isShiftOpen = false;
       let currentShiftId = null;
 
