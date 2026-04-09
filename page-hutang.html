@@ -1581,15 +1581,19 @@
             if (user && typeof Auth !== 'undefined') {
               Auth.loadUserData(user.uid);
               setTimeout(() => {
-                const roleEl = document.getElementById('userRole');
-                if (roleEl && (!roleEl.textContent || roleEl.textContent.trim() === '-')) {
+                const currentUser = Auth.getCurrentUser();
+                if (currentUser) {
                   const nameEl = document.getElementById('userName');
-                  if (nameEl && (!nameEl.textContent || nameEl.textContent === 'Loading...')) {
-                    nameEl.textContent = user.displayName || user.email || 'Admin';
+                  const roleEl = document.getElementById('userRole');
+                  if (nameEl && currentUser.name) {
+                    nameEl.textContent = currentUser.name;
                   }
-                  roleEl.textContent = 'Administrator';
+                  if (roleEl && currentUser.role) {
+                    const role = currentUser.role;
+                    roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                  }
                 }
-              }, 2000);
+              }, 1500);
             }
             initHutang();
           });
