@@ -1342,7 +1342,7 @@
               </span>
             </div>
             <label class="checkbox-group">
-              <input type="checkbox" id="hutangAffectKas" checked>
+              <input type="checkbox" id="hutangAffectKas">
               <div>
                 <span class="checkbox-label">Catat ke Kas Keluar</span>
                 <span class="checkbox-sublabel">Otomatis mengurangi saldo kas saat menyimpan</span>
@@ -2052,7 +2052,7 @@
           const subLabelText = document.getElementById('kasSubLabelText');
           const checkbox = document.getElementById('affectKas');
           
-          checkbox.checked = true; // Default checked
+          checkbox.checked = false; // Default tidak dicentang
           
           if (item.type === 'hutang') {
             // Bayar hutang = uang keluar dari kas (kita bayar utang)
