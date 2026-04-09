@@ -374,6 +374,21 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           user = authUser;
           document.getElementById('userName').textContent = authUser.displayName || authUser.email || 'User';
           document.getElementById('userRole').textContent = 'Kasir';
+          if (typeof Auth !== 'undefined') {
+            Auth.loadUserData(authUser.uid);
+            setTimeout(() => {
+              const currentUser = Auth.getCurrentUser();
+              if (currentUser) {
+                const nameEl = document.getElementById('userName');
+                const roleEl = document.getElementById('userRole');
+                if (nameEl && currentUser.name) nameEl.textContent = currentUser.name;
+                if (roleEl && currentUser.role) {
+                  const role = currentUser.role;
+                  roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                }
+              }
+            }, 1500);
+          }
           loadCurrentKas();
         }
       });
