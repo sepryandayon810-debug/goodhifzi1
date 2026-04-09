@@ -675,200 +675,108 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
     }
 
-    // Parse Receipt Text
-     // Parse Receipt Text - Versi Improved untuk BRI dan bank lainnya
+        // Parse Receipt Text - Versi Fixed (tanpa matchAll error)
     function parseReceiptText(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       const fullText = text.toLowerCase();
       
-      // Deteksi jenis bank dengan lebih akurat dari seluruh text
+      // Deteksi bank
       let detectedBank = '';
-      
-      // Cek pattern BRI (Transfer via BRI, BRImo, atau icon BRI)
-      if (fullText.includes('bri') || fullText.includes('brimo') || fullText.includes('bank bri')) {
-        detectedBank = 'BRI';
-      }
-      // Cek pattern BCA
-      else if (fullText.includes('bca') || fullText.includes('bank central asia') || fullText.includes('mybca')) {
-        detectedBank = 'BCA';
-      }
-      // Cek pattern BNI
-      else if (fullText.includes('bni') || fullText.includes('bank negara indonesia')) {
-        detectedBank = 'BNI';
-      }
-      // Cek pattern Mandiri
-      else if (fullText.includes('mandiri') || fullText.includes('livin')) {
-        detectedBank = 'MANDIRI';
-      }
-      // E-wallet
-      else if (fullText.includes('dana')) {
-        detectedBank = 'DANA';
-      }
-      else if (fullText.includes('gopay')) {
-        detectedBank = 'GOPAY';
-      }
-      else if (fullText.includes('ovo')) {
-        detectedBank = 'OVO';
-      }
-      else if (fullText.includes('shopeepay')) {
-        detectedBank = 'SHOPEEPAY';
-      }
-      else if (fullText.includes('linkaja')) {
-        detectedBank = 'LINKAJA';
-      }
+      if (fullText.includes('bri') || fullText.includes('brimo')) detectedBank = 'BRI';
+      else if (fullText.includes('bca')) detectedBank = 'BCA';
+      else if (fullText.includes('bni')) detectedBank = 'BNI';
+      else if (fullText.includes('mandiri') || fullText.includes('livin')) detectedBank = 'MANDIRI';
+      else if (fullText.includes('dana')) detectedBank = 'DANA';
+      else if (fullText.includes('gopay')) detectedBank = 'GOPAY';
+      else if (fullText.includes('ovo')) detectedBank = 'OVO';
+      else if (fullText.includes('shopeepay')) detectedBank = 'SHOPEEPAY';
+      else if (fullText.includes('linkaja')) detectedBank = 'LINKAJA';
 
-      // Deteksi apakah ini top-up atau transfer
+      // Deteksi type
       let type = 'transfer';
-      if (fullText.includes('top up') || fullText.includes('topup') || fullText.includes('isi ulang') || fullText.includes('isi saldo')) {
+      if (fullText.includes('top up') || fullText.includes('topup') || fullText.includes('isi ulang')) {
         type = 'top_up';
       }
-      else if (fullText.includes('tarik tunai') || fullText.includes('withdrawal') || fullText.includes('penarikan')) {
-        type = 'tarik_tunai';
-      }
 
-      // Parse tanggal
+      // Parse tanggal dan waktu
       let date = new Date().toISOString().split('T')[0];
       let time = new Date().toTimeString().slice(0, 5);
       
-      // Coba cari tanggal dalam format Indonesia
-      const datePatterns = [
-        /(\d{1,2})[\/\-\s](\d{1,2})[\/\-\s](\d{4})/,  // DD/MM/YYYY
-        /(\d{4})[\/\-\s](\d{1,2})[\/\-\s](\d{1,2})/,  // YYYY/MM/DD
-      ];
-      
-      for (const pattern of datePatterns) {
-        const match = text.match(pattern);
-        if (match) {
-          if (match[3].length === 4) {
-            date = `${match[3]}-${match[2].padStart(2,'0')}-${match[1].padStart(2,'0')}`;
-          } else if (match[1].length === 4) {
-            date = `${match[1]}-${match[2].padStart(2,'0')}-${match[3].padStart(2,'0')}`;
-          }
-          break;
-        }
+      const dateMatch = text.match(/(\d{1,2})[\/\-\s](\d{1,2})[\/\-\s](\d{4})/);
+      if (dateMatch && dateMatch[3].length === 4) {
+        date = `${dateMatch[3]}-${dateMatch[2].padStart(2,'0')}-${dateMatch[1].padStart(2,'0')}`;
       }
-
+      
       const timeMatch = text.match(/(\d{1,2})[:.](\d{2})/);
       if (timeMatch) {
         time = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
       }
 
-      // Parse nominal/amount
+      // Parse nominal
       let nominal = 0;
       let admin = 0;
       let total = 0;
 
-      const rpPatterns = [
-        /rp[\s\.]?([\d\.,]+)/gi,
-        /nominal[\s:]*([\d\.,]+)/gi,
-        /total[\s:]*([\d\.,]+)/gi,
-        /transfer[\s:]*([\d\.,]+)/gi,
-        /jumlah[\s:]*([\d\.,]+)/gi,
-      ];
+      // Cari dengan match (bukan matchAll) untuk regex non-global
+      const rpMatch = text.match(/rp[\s\.]?([\d\.,]+)/i);
+      if (rpMatch && rpMatch[1]) {
+        const cleanNum = rpMatch[1].replace(/[\.,]/g, '');
+        const num = parseInt(cleanNum);
+        if (num > 1000) {
+          total = num;
+          nominal = num;
+        }
+      }
 
-      const amounts = [];
+      // Cari angka besar lainnya
+      const allNumbers = [...text.matchAll(/\b\d{5,10}\b/g)].map(m => parseInt(m[0])).filter(n => n > 10000);
+      allNumbers.sort((a,b) => b-a);
       
-      for (const pattern of rpPatterns) {
-        const matches = [...text.matchAll(pattern)];
-        for (const match of matches) {
-          if (match[1]) {
-            const cleanNum = match[1].replace(/[\.,]/g, '');
-            const num = parseInt(cleanNum);
-            if (num > 1000 && num < 10000000000 && !amounts.includes(num)) {
-              amounts.push(num);
-            }
-          }
-        }
-      }
-
-      // Juga cari angka besar langsung
-      const bigNumbers = [...text.matchAll(/\b(\d{6,10})\b/g)];
-      for (const match of bigNumbers) {
-        const num = parseInt(match[1]);
-        if (num > 10000 && !amounts.includes(num)) {
-          amounts.push(num);
-        }
-      }
-
-      amounts.sort((a,b) => b-a);
-      if (amounts.length > 0) {
-        total = amounts[0];
+      if (allNumbers.length > 0 && total === 0) {
+        total = allNumbers[0];
         nominal = total;
-        for (let i = 1; i < amounts.length; i++) {
-          if (amounts[i] <= 50000) {
-            admin = amounts[i];
-            nominal = total - admin;
-            break;
-          }
+      }
+
+      // Cari admin (angka lebih kecil)
+      for (const num of allNumbers) {
+        if (num <= 50000 && num > 0) {
+          admin = num;
+          nominal = total - admin;
+          break;
         }
       }
 
-      // Parse nama dan rekening pengirim dan penerima
+      // Parse nama pengirim dan penerima
       let senderName = '';
       let senderAccount = '';
-      let senderBank = detectedBank;
       let receiverName = '';
       let receiverAccount = '';
-      let receiverBank = detectedBank;
 
-      // Pattern untuk pengirim
-      const senderPatterns = [
-        /(?:dari|pengirim|sumber|debet dari|transfer dari|from)[\s:]+([^\n]+)/i,
-        /(?:nama pengirim)[\s:]+([^\n]+)/i,
-        /(?:sumber dana)[\s:]+([^\n]+)/i,
-      ];
-
-      // Pattern untuk penerima
-      const receiverPatterns = [
-        /(?:ke|penerima|tujuan|kredit ke|transfer ke|to)[\s:]+([^\n]+)/i,
-        /(?:nama penerima)[\s:]+([^\n]+)/i,
-        /(?:rekening tujuan)[\s:]+([^\n]+)/i,
-      ];
-
-      // Cari rekening (10-16 digit)
-      const accountPatterns = [
-        /(?:no[\s\.]?rekening|rekening|norek|account)[\s:]+(\d{10,16})/i,
-        /(?:no[\s\.]?rek)[\s:]+(\d{10,16})/i,
-        /(\d{15})/, // 15 digit untuk BRI
-        /(\d{10})/, // 10 digit untuk BCA
-      ];
-
-      // Ekstrak sender name
-      for (const pattern of senderPatterns) {
-        const match = text.match(pattern);
-        if (match && match[1]) {
-          senderName = match[1].trim().substring(0, 30);
-          break;
+      // Cari baris dengan keyword
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].toLowerCase();
+        const nextLine = lines[i+1] || '';
+        
+        // Pengirim
+        if ((line.includes('dari') || line.includes('pengirim') || line.includes('sumber')) && nextLine && !senderName) {
+          senderName = nextLine.trim().substring(0, 30);
+        }
+        
+        // Penerima
+        if ((line.includes('ke') || line.includes('penerima') || line.includes('tujuan')) && nextLine && !receiverName) {
+          receiverName = nextLine.trim().substring(0, 30);
         }
       }
 
-      // Ekstrak receiver name
-      for (const pattern of receiverPatterns) {
-        const match = text.match(pattern);
-        if (match && match[1]) {
-          receiverName = match[1].trim().substring(0, 30);
-          break;
-        }
-      }
-
-      // Cari nomor rekening dalam text
-      const allAccounts = [];
-      for (const pattern of accountPatterns) {
-        const matches = [...text.matchAll(pattern)];
-        for (const match of matches) {
-          const acc = match[1] || match[0];
-          if (acc && acc.length >= 10) {
-            allAccounts.push(acc);
-          }
-        }
-      }
-
-      // Jika ada 2 rekening, yang pertama pengirim, kedua penerima
-      if (allAccounts.length >= 2) {
-        senderAccount = maskAccount(allAccounts[0]);
-        receiverAccount = maskAccount(allAccounts[1]);
-      } else if (allAccounts.length === 1) {
-        receiverAccount = maskAccount(allAccounts[0]);
+      // Cari rekening (angka 10-16 digit)
+      const accountMatches = [...text.matchAll(/\b\d{10,16}\b/g)];
+      const accounts = accountMatches.map(m => m[0]).filter((v, i, a) => a.indexOf(v) === i); // unique
+      
+      if (accounts.length >= 2) {
+        senderAccount = maskAccount(accounts[0]);
+        receiverAccount = maskAccount(accounts[1]);
+      } else if (accounts.length === 1) {
+        receiverAccount = maskAccount(accounts[0]);
       }
 
       // Cari nomor HP untuk e-wallet
@@ -876,8 +784,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         const phoneMatch = text.match(/\b(08\d{8,13})\b/);
         if (phoneMatch) {
           if (!receiverAccount) receiverAccount = phoneMatch[1];
-          if (!senderAccount && type === 'top_up') senderAccount = phoneMatch[1];
         }
+      }
+
+      // Default values untuk BRI
+      if (detectedBank === 'BRI') {
+        if (!senderName) senderName = 'Nasabah BRI';
+        if (!receiverName) receiverName = 'Penerima BRI';
       }
 
       return {
@@ -890,18 +803,23 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           date, time,
           senderName: senderName || 'Nama Pengirim',
           senderAccount: senderAccount || '****XXXX',
-          senderBank: senderBank,
+          senderBank: detectedBank,
           receiverName: receiverName || 'Nama Penerima',
           receiverAccount: receiverAccount || '****XXXX',
-          receiverBank: receiverBank,
+          receiverBank: detectedBank,
           nominal,
           admin,
           total: total || nominal
-        },
-        rawText: text
+        }
       };
     }
 
+    function maskAccount(account) {
+      if (!account || account.length < 4) return account;
+      const clean = account.replace(/\D/g, '');
+      if (clean.length < 4) return account;
+      return `****${clean.slice(-4)}`;
+    }
     function maskAccount(account) {
       if (!account || account.length < 4) return account;
       const clean = account.replace(/\D/g, '');
