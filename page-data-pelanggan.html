@@ -457,6 +457,29 @@
     opacity: 1 !important;
   }
 }
+
+/* 2. CSS - Tambahkan di bagian paling bawah */
+#mobileMenuToggle {
+  display: none; /* Desktop: sembunyi */
+}
+
+@media (max-width: 768px) {
+  #mobileMenuToggle {
+    display: flex !important; /* Mobile: muncul */
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Biar judul "Dashboard" tidak jadi "D..." */
+  .header-title {
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
     
   </style>
 </head>
@@ -560,9 +583,12 @@
     <!-- Header -->
     <header class="main-header">
       <div class="header-left">
-        <button class="btn-icon" id="mobileMenuToggle" style="display:flex;">
-        <h1 class="header-title">Data Pelanggan</h1>
-      </div>
+       <button class="btn-icon" id="mobileMenuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+          <h1 class="header-title">Data Pelanggan</h1>
+  </div>
+        
       <div class="header-actions">
         <button class="btn-icon" id="btnGasSettings" title="Pengaturan Koneksi Google Sheets">
           <i class="fas fa-bolt" id="gasIcon"></i>
