@@ -1056,16 +1056,15 @@
       if (e.key === 'Enter') saveForm();
     });
 
-    // Toggle Collapse Table
+        // Toggle Collapse Table - LENGKAP dengan Auto Expand/Collapse
     const btnToggleTable = document.getElementById('btnToggleTable');
     const tableContainer = document.getElementById('tableContainer');
+    const searchInput = document.getElementById('searchInput'); // Ambil reference search
 
-    btnToggleTable.addEventListener('click', () => {
-      tableContainer.classList.toggle('collapsed');
-      btnToggleTable.classList.toggle('collapsed');
-      
+    // Fungsi update icon
+    function updateToggleIcon(isCollapsed) {
       const icon = btnToggleTable.querySelector('i');
-      if (tableContainer.classList.contains('collapsed')) {
+      if (isCollapsed) {
         icon.classList.remove('fa-chevron-up');
         icon.classList.add('fa-chevron-down');
         btnToggleTable.title = 'Tampilkan Tabel';
@@ -1074,9 +1073,38 @@
         icon.classList.add('fa-chevron-up');
         btnToggleTable.title = 'Sembunyikan Tabel';
       }
+    }
+
+    // Klik toggle manual
+    btnToggleTable.addEventListener('click', () => {
+      const isCollapsed = tableContainer.classList.toggle('collapsed');
+      btnToggleTable.classList.toggle('collapsed', isCollapsed);
+      updateToggleIcon(isCollapsed);
     });
 
-    // Load user from Firebase Auth
+    // Auto expand/collapse saat pencarian (GANTI yang lama)
+    searchInput.addEventListener('input', () => {
+      const hasValue = searchInput.value.trim().length > 0;
+      
+      if (hasValue) {
+        // Ada pencarian -> Expand tabel
+        tableContainer.classList.remove('collapsed');
+        btnToggleTable.classList.remove('collapsed');
+        updateToggleIcon(false);
+      } else {
+        // Kosong -> Collapse tabel
+        tableContainer.classList.add('collapsed');
+        btnToggleTable.classList.add('collapsed');
+        updateToggleIcon(true);
+      }
+      
+      renderTable(getFiltered());
+    });
+
+    // Set initial state: collapsed saat pertama kali load
+    tableContainer.classList.add('collapsed');
+    btnToggleTable.classList.add('collapsed');
+    updateToggleIcon(true);
 
     // Load user from Firebase Auth
     try {
