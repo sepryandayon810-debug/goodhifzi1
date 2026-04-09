@@ -2201,59 +2201,30 @@ async function recordToKas(type, amount, description, user) {
   try {
     const kasId = 'kas_' + Date.now();
     const today = new Date().toISOString().split('T')[0];
-    const now = Date.now();
     
-    // Data untuk transactions (sesuai struktur page-kas-masuk.html)
     const transactionData = {
-      id: kasId,
       type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
       amount: parseInt(amount),
       note: description,
       date: today,
-      timestamp: firebase.database.ServerValue.TIMESTAMP || now,
+      timestamp: Date.now(),
       userId: user.uid,
       userName: user.displayName || user.name || user.email || 'User',
-      status: 'completed',
-      source: 'hutang_piutang',
-      category: type === 'masuk' ? 'Piutang' : 'Hutang'
+      status: 'completed'
     };
 
-    // Simpan ke transactions/${today} agar terbaca di Ringkasan Kas
+    console.log('📤 Simpan ke:', `transactions/${today}/${kasId}`);
+    
+    // Simpan ke transactions (path yang dibaca dashboard)
     await database.ref(`transactions/${today}/${kasId}`).set(transactionData);
-    console.log('✅ Tersimpan di transactions/' + today);
-
-    // Backup ke kas_masuk/kas_keluar (opsional, untuk kompatibilitas)
-    if (type === 'masuk') {
-      await database.ref('kas_masuk/' + kasId).set(transactionData);
-    } else {
-      await database.ref('kas_keluar/' + kasId).set(transactionData);
-    }
+    console.log('✅ Sukses!');
     
-    // Update summary kas harian
-    try {
-      const summaryRef = database.ref('kas_summary/' + today);
-      const summarySnap = await summaryRef.once('value');
-      const summary = summarySnap.val() || { masuk: 0, keluar: 0, saldo: 0 };
-      
-      if (type === 'masuk') {
-        summary.masuk = (summary.masuk || 0) + parseInt(amount);
-        summary.saldo = (summary.saldo || 0) + parseInt(amount);
-      } else {
-        summary.keluar = (summary.keluar || 0) + parseInt(amount);
-        summary.saldo = (summary.saldo || 0) - parseInt(amount);
-      }
-      
-      await summaryRef.set({ ...summary, lastUpdate: now });
-    } catch (err) {
-      console.warn('⚠️ Skip update summary:', err.message);
-    }
-    
-    Utils.showToast(`✅ Tercatat di Kas ${type === 'masuk' ? 'Masuk' : 'Keluar'}`, 'success');
+    Utils.showToast(`✅ Masuk ke Kas ${type === 'masuk' ? 'Masuk' : 'Keluar'}`, 'success');
     return true;
     
   } catch (error) {
-    console.error('❌ Gagal mencatat ke kas:', error);
-    Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
+    console.error('❌ Gagal:', error);
+    Utils.showToast('Gagal mencatat ke kas', 'error');
     throw error;
   }
 }
