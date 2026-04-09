@@ -1211,18 +1211,20 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               }
               
               html += `
-                <div class="shift-item">
-                  <div class="shift-info">
-                    <span class="shift-date">${formattedDate}</span>
-                    <span class="shift-time">${openTime} - ${closeTime}</span>
-                    <span class="shift-user">${shift.userName || 'Unknown'}</span>
-                  </div>
-                  <div class="shift-status">
-                    <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
-                    <span class="shift-duration">${duration}</span>
-                  </div>
-                </div>
-              `;
+               html += `
+  <div class="shift-item">
+    <div class="shift-info">
+      <span class="shift-date">${formattedDate}</span>
+      <span class="shift-time">${openTime} - ${closeTime}</span>
+      <span class="shift-user">${shift.userName || 'Unknown'}</span>
+      ${shift.status === 'closed' && shift.kasAkhir ? `<span style="color: var(--success); font-size: 0.8rem; margin-top: 4px;">Kas Akhir: ${Utils.formatRupiah(shift.kasAkhir)}</span>` : ''}
+    </div>
+    <div class="shift-status">
+      <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
+      <span class="shift-duration">${duration}</span>
+    </div>
+  </div>
+`;
             });
           }
           
