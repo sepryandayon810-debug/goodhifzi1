@@ -722,10 +722,36 @@
     setTimeout(() => { el.remove(); }, 3000);
   }
 
-  function getGasUrl() { return localStorage.getItem(GAS_URL_KEY) || ''; }
-  function setGasUrl(url) { localStorage.setItem(GAS_URL_KEY, url); }
-  function getSheetId() { return localStorage.getItem(GAS_SHEET_ID_KEY) || ''; }
-  function setSheetId(id) { localStorage.setItem(GAS_SHEET_ID_KEY, id); }
+  // Variable sementara (akan di-load dari Firebase saat init)
+let currentGasUrl = '';
+let currentSheetId = '';
+
+function getGasUrl() { return currentGasUrl; }
+function setGasUrl(url) { currentGasUrl = url; }
+function getSheetId() { return currentSheetId; }
+function setSheetId(id) { currentSheetId = id; }
+
+// Load dari Firebase saat login
+async function loadGasConfigFromFirebase() {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  try {
+    const snapshot = await database.ref('users/' + user.uid + '/gas_config').once('value');
+    const config = snapshot.val();
+    
+    if (config) {
+      currentGasUrl = config.url || '';
+      currentSheetId = config.sheetId || '';
+      
+      // Update UI input fields
+      document.getElementById('gasUrlInput').value = currentGasUrl;
+      document.getElementById('gasSheetIdInput').value = currentSheetId;
+    }
+  } catch(e) {
+    console.error('Error load GAS config:', e);
+  }
+}
 
   /* =====================================================
      GAS API
@@ -955,25 +981,45 @@
   }
 
   async function saveGas() {
-    const url = document.getElementById('gasUrlInput').value.trim();
-    const sheetId = document.getElementById('gasSheetIdInput').value.trim();
-    if (!url || !sheetId) { showToast('URL dan Sheet ID wajib diisi', 'warning'); return; }
-    
-    showLoading();
-    try {
-      setGasUrl(url);
-      setSheetId(sheetId);
-      await apiGetData();
-      showToast('Koneksi berhasil!', 'success');
-      closeGasModal();
-      loadData();
-    } catch (e) {
-      showToast('Koneksi gagal: ' + e.message, 'error');
-    } finally {
-      hideLoading();
-    }
+  const url = document.getElementById('gasUrlInput').value.trim();
+  const sheetId = document.getElementById('gasSheetIdInput').value.trim();
+  
+  if (!url || !sheetId) { 
+    showToast('URL dan Sheet ID wajib diisi', 'warning'); 
+    return; 
   }
-
+  
+  showLoading();
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      showToast('Silakan login terlebih dahulu', 'error');
+      hideLoading();
+      return;
+    }
+    
+    // Simpan ke Firebase (bukan localStorage!)
+    await database.ref('users/' + user.uid + '/gas_config').set({
+      url: url,
+      sheetId: sheetId,
+      updatedAt: Date.now()
+    });
+    
+    // Update variable lokal
+    currentGasUrl = url;
+    currentSheetId = sheetId;
+    
+    showToast('Koneksi berhasil disimpan!', 'success');
+    closeGasModal();
+    loadData();
+    
+  } catch (e) {
+    showToast('Gagal menyimpan: ' + e.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+    
   function updateGasIcon(connected) {
     const icon = document.getElementById('gasIcon');
     if (connected) {
@@ -1207,17 +1253,24 @@ function exportToCSV() {
   showToast('File CSV berhasil di-download', 'success');
 }
 
-    // Init
-    const hasUrl = !!getGasUrl();
+        // Init
+    const hasUrl = !!getGasUrl();  // Cek dari variable, bukan localStorage
     const hasSheetId = !!getSheetId();
     const ready = hasUrl && hasSheetId;
     updateGasIcon(ready);
+    
     if (ready) {
       loadData();
     } else {
-      setTimeout(openGasModal, 400);
+      // Coba load dari Firebase dulu, kalau masih kosong baru buka modal
+      loadGasConfigFromFirebase().then(() => {
+        if (!getGasUrl() || !getSheetId()) {
+          setTimeout(openGasModal, 400);
+        } else {
+          loadData();
+        }
+      });
     }
-  });
     
 </script>
 </body>
