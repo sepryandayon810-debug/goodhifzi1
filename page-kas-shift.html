@@ -1130,6 +1130,7 @@ let statusSelisih = 'pas';
 if (selisih > 0) statusSelisih = 'lebih';
 if (selisih < 0) statusSelisih = 'kurang';
 
+await database.ref('shifts/' + today + '/' + user.uid).update({
   status: 'closed',
   closeTime: Date.now(),
   kasAkhir,
