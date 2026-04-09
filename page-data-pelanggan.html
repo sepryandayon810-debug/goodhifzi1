@@ -214,6 +214,44 @@
     /* Confirm dialog */
     .confirm-text{color:var(--text-secondary);font-size:.95rem;line-height:1.6}
     .confirm-name{font-weight:700;color:var(--text-primary)}
+    
+    /* ===== TELEGRAM BOT TOKEN SECTION ===== */
+    .telegram-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .telegram-section-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .telegram-section-title i {
+      color: #0088cc;
+    }
+    
+    .token-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    
+    .token-status.connected {
+      color: var(--success);
+    }
+    
+    .token-status.disconnected {
+      color: var(--text-muted);
+    }
+    
     /* ===== TOGGLE DROPDOWN RESPONSIVE ===== */
 .dropdown-wrapper {
   position: relative;
@@ -592,28 +630,52 @@
 
 </div>
 
-<!-- ===== MODAL: Pengaturan Koneksi GAS ===== -->
+<!-- ===== MODAL: Pengaturan Koneksi GAS & Telegram ===== -->
 <div class="modal-overlay" id="gasModal">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width: 520px;">
     <div class="modal-header">
-      <h3 class="modal-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:.5rem"></i>Pengaturan Koneksi</h3>
+      <h3 class="modal-title"><i class="fas fa-cog" style="color:var(--primary);margin-right:.5rem"></i>Pengaturan Integrasi</h3>
       <button class="modal-close" id="closeGasModal"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
+      <!-- Google Sheets Section -->
       <div class="form-group">
-        <label class="form-label">URL Google Apps Script Web App</label>
-        <input type="url" class="form-input" id="gasUrlInput" placeholder="https://.google.com/macros/s/.../exec">
-<p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">Deploy GAS sebagai Web App, lalu paste URL-nya di sini.</p>
+        <label class="form-label"><i class="fas fa-bolt" style="color:var(--warning);margin-right:.3rem"></i>URL Google Apps Script Web App</label>
+        <input type="url" class="form-input" id="gasUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">Deploy GAS sebagai Web App, lalu paste URL-nya di sini.</p>
       </div>
+      
       <div class="form-group">
         <label class="form-label">Google Sheet ID</label>
         <input type="text" class="form-input" id="gasSheetIdInput" placeholder="1cPolj_xpBztq6RU3XVi_CZm1j_Kqo-zQC-wsbIYrLXE">
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">ID spreadsheet dari URL: <code>docs.google.com/spreadsheets/d/<b>[ID ini]</b>/edit</code></p>      </div>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">ID spreadsheet dari URL: docs.google.com/spreadsheets/d/<b>[ID ini]</b>/edit</p>
+      </div>
+      
       <div id="gasTestResult" style="display:none;padding:.75rem 1rem;border-radius:.75rem;font-size:.875rem;margin-top:.5rem"></div>
+      
+      <!-- Telegram Bot Section -->
+      <div class="telegram-section">
+        <div class="telegram-section-title">
+          <i class="fab fa-telegram"></i>
+          Konfigurasi Telegram Bot
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Bot Token (dari @BotFather)</label>
+          <input type="password" class="form-input" id="botTokenInput" placeholder="123456789:ABCdefGHIjklMNOpqrSTUvwxyz">
+          <p style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem">
+            Token bot untuk integrasi dengan n8n. Dapatkan dari @BotFather di Telegram.
+          </p>
+          <div class="token-status disconnected" id="tokenStatus">
+            <i class="fas fa-circle-notch"></i>
+            <span>Belum dikonfigurasi</span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" id="closeGasModal2">Batal</button>
-      <button class="btn btn-primary" id="btnSaveGas"><i class="fas fa-save"></i> Simpan & Uji Koneksi</button>
+      <button class="btn btn-primary" id="btnSaveGas"><i class="fas fa-save"></i> Simpan Semua</button>
     </div>
   </div>
 </div>
@@ -706,6 +768,7 @@
      ===================================================== */
   let allData = [];
   let deleteRowTarget = null;
+  let currentBotToken = '';
 
   /* =====================================================
      UTILS
@@ -731,37 +794,61 @@ function setGasUrl(url) { currentGasUrl = url; }
 function getSheetId() { return currentSheetId; }
 function setSheetId(id) { currentSheetId = id; }
 
-// Load dari Firebase saat login
+// Load config dari Firebase (path global: settings/gas_config)
 async function loadGasConfigFromFirebase() {
-  const user = auth.currentUser;
-  if (!user) return;
-  
   try {
     const snapshot = await database.ref('settings/gas_config').once('value');
-const config = snapshot.val();
-
-if (config) {
-  currentGasUrl = config.url || '';
-  currentSheetId = config.sheetId || '';
-  
-  // Update UI input
-  document.getElementById('gasUrlInput').value = currentGasUrl;
-  document.getElementById('gasSheetIdInput').value = currentSheetId;
-}
+    const config = snapshot.val();
     
-    if (config) {
-      currentGasUrl = config.url || '';
-      currentSheetId = config.sheetId || '';
-      
-      // Update UI input fields
-      document.getElementById('gasUrlInput').value = currentGasUrl;
-      document.getElementById('gasSheetIdInput').value = currentSheetId;
+    if (config && config.url && config.sheetId) {
+      currentGasUrl = config.url;
+      currentSheetId = config.sheetId;
+      console.log('✅ GAS Config loaded:', currentGasUrl);
+      return true;
+    } else {
+      console.log('⚠️ GAS Config belum diatur');
+      return false;
     }
   } catch(e) {
-    console.error('Error load GAS config:', e);
+    console.error('❌ Error load GAS config:', e);
+    return false;
   }
 }
 
+// Load Bot Token dari Firebase
+async function loadBotTokenFromFirebase() {
+  try {
+    const snapshot = await database.ref('settings/telegram/botToken').once('value');
+    const token = snapshot.val();
+    
+    if (token) {
+      currentBotToken = token;
+      console.log('✅ Bot Token loaded');
+      updateTokenStatus(true);
+      return true;
+    } else {
+      console.log('⚠️ Bot Token belum diatur');
+      updateTokenStatus(false);
+      return false;
+    }
+  } catch(e) {
+    console.error('❌ Error load Bot Token:', e);
+    updateTokenStatus(false);
+    return false;
+  }
+}
+
+function updateTokenStatus(connected) {
+  const statusEl = document.getElementById('tokenStatus');
+  if (connected) {
+    statusEl.className = 'token-status connected';
+    statusEl.innerHTML = '<i class="fas fa-check-circle"></i><span>Bot Token tersimpan</span>';
+  } else {
+    statusEl.className = 'token-status disconnected';
+    statusEl.innerHTML = '<i class="fas fa-circle-notch"></i><span>Belum dikonfigurasi</span>';
+  }
+}
+    
   /* =====================================================
      GAS API
      ===================================================== */
@@ -981,8 +1068,14 @@ if (config) {
   function openGasModal() {
     document.getElementById('gasUrlInput').value = getGasUrl();
     document.getElementById('gasSheetIdInput').value = getSheetId();
+    document.getElementById('botTokenInput').value = currentBotToken;
     document.getElementById('gasTestResult').style.display = 'none';
     document.getElementById('gasModal').classList.add('active');
+    
+    // Update status token saat buka modal
+    if (currentBotToken) {
+      updateTokenStatus(true);
+    }
   }
 
   function closeGasModal() {
@@ -992,6 +1085,7 @@ if (config) {
   async function saveGas() {
   const url = document.getElementById('gasUrlInput').value.trim();
   const sheetId = document.getElementById('gasSheetIdInput').value.trim();
+  const botToken = document.getElementById('botTokenInput').value.trim();
   
   if (!url || !sheetId) { 
     showToast('URL dan Sheet ID wajib diisi', 'warning'); 
@@ -1007,19 +1101,25 @@ if (config) {
       return;
     }
     
-    // Simpan ke Firebase (bukan localStorage!)
+    // Simpan GAS Config ke Firebase
     await database.ref('settings/gas_config').set({
-  url: url,
-  sheetId: sheetId,
-  updatedBy: user.uid,  // Catat siapa yang update (opsional)
-  updatedAt: Date.now()
-});
+      url: url,
+      sheetId: sheetId,
+      updatedBy: user.uid,
+      updatedAt: Date.now()
+    });
+    
+    // Simpan Bot Token ke Firebase (jika diisi)
+    if (botToken) {
+      await database.ref('settings/telegram/botToken').set(botToken);
+      currentBotToken = botToken;
+    }
     
     // Update variable lokal
     currentGasUrl = url;
     currentSheetId = sheetId;
     
-    showToast('Koneksi berhasil disimpan!', 'success');
+    showToast('Konfigurasi berhasil disimpan!', 'success');
     closeGasModal();
     loadData();
     
@@ -1042,7 +1142,7 @@ if (config) {
   /* =====================================================
      EVENT LISTENERS
      ===================================================== */
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', async function() {
     // Sidebar
     document.getElementById('menuToggle').addEventListener('click', () => {
       document.getElementById('sidebar').classList.toggle('collapsed');
@@ -1263,16 +1363,17 @@ function exportToCSV() {
   showToast('File CSV berhasil di-download', 'success');
 }
 
-     // Init - Perbaikan
+     // Init - Load configs
     const hasUrl = !!getGasUrl();
     const hasSheetId = !!getSheetId();
     const ready = hasUrl && hasSheetId;
     updateGasIcon(ready);
     
+    // Load semua konfigurasi dari Firebase
     if (ready) {
       loadData();
     } else {
-      // Coba load dari Firebase dulu, kalau masih kosong baru buka modal
+      // Coba load dari Firebase dulu
       loadGasConfigFromFirebase().then(() => {
         const readyAfterLoad = !!getGasUrl() && !!getSheetId();
         updateGasIcon(readyAfterLoad);
@@ -1284,6 +1385,9 @@ function exportToCSV() {
         }
       });
     }
+    
+    // Load Bot Token juga
+    await loadBotTokenFromFirebase();
     }); 
     
 </script>
