@@ -332,6 +332,40 @@
     padding: 0.4rem;
   }
 }
+
+/* ===== TOGGLE COLLAPSE TABLE ===== */
+.btn-toggle-table {
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
+  transition: transform 0.3s ease;
+}
+
+.btn-toggle-table.collapsed {
+  transform: rotate(180deg);
+}
+
+.data-card-body {
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  max-height: 2000px;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.data-card-body.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+}
+
+/* Responsive: tombol toggle lebih besar di mobile */
+@media (max-width: 768px) {
+  .btn-toggle-table {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+}
     
   </style>
 </head>
@@ -489,11 +523,15 @@
       <!-- Table -->
       <div class="data-card">
         <div class="data-card-header">
-          <span class="data-card-title">Daftar Pelanggan</span>
-          <div class="card-actions">
-  <!-- Desktop: Tombol Langsung -->
-  <button class="btn btn-outline btn-sm desktop-only" id="btnRefresh" title="Muat ulang">
-    <i class="fas fa-sync-alt"></i> <span>Refresh</span>
+  <div style="display:flex;align-items:center;gap:.75rem;">
+    <span class="data-card-title">Daftar Pelanggan</span>
+    <button class="btn-icon btn-toggle-table" id="btnToggleTable" title="Sembunyikan/Tampilkan Tabel">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+  </div>
+  <div class="card-actions">
+    <!-- Desktop: Tombol Langsung -->
+    <button class="btn btn-outline btn-sm desktop-only" id="btnRefresh" title="Muat ulang">
   </button>
   <button class="btn btn-outline btn-sm desktop-only" id="btnCopyAll" style="display:none">
     <i class="fas fa-copy"></i> <span>Salin Semua</span>
@@ -1007,6 +1045,33 @@
     document.getElementById('fieldNama').addEventListener('keydown', e => {
       if (e.key === 'Enter') saveForm();
     });
+
+        // Enter key in form
+    document.getElementById('fieldNama').addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveForm();
+    });
+
+    // Toggle Collapse Table
+    const btnToggleTable = document.getElementById('btnToggleTable');
+    const tableContainer = document.getElementById('tableContainer');
+
+    btnToggleTable.addEventListener('click', () => {
+      tableContainer.classList.toggle('collapsed');
+      btnToggleTable.classList.toggle('collapsed');
+      
+      const icon = btnToggleTable.querySelector('i');
+      if (tableContainer.classList.contains('collapsed')) {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+        btnToggleTable.title = 'Tampilkan Tabel';
+      } else {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+        btnToggleTable.title = 'Sembunyikan Tabel';
+      }
+    });
+
+    // Load user from Firebase Auth
 
     // Load user from Firebase Auth
     try {
