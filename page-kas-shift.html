@@ -1101,15 +1101,30 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             }
           });
           
-          await database.ref('shifts/' + today + '/' + user.uid).update({
-            status: 'closed',
-            closeTime: Date.now(),
-            kasAkhir,
-            penjualan,
-            kasMasuk,
-            kasKeluar,
-            catatan
-          });
+          // Ambil modal data dulu
+const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+const modalData = modalSnapshot.val();
+
+// Hitung Kas Sistem (seharusnya)
+const kasSistem = (modalData ? modalData.amount : 0) + penjualan + kasMasuk - kasKeluar;
+const selisih = kasAkhir - kasSistem;
+
+let statusSelisih = 'pas';
+if (selisih > 0) statusSelisih = 'lebih';
+if (selisih < 0) statusSelisih = 'kurang';
+
+await database.ref('shifts/' + today + '/' + user.uid).update({
+  status: 'closed',
+  closeTime: Date.now(),
+  kasAkhir,
+  kasSistem,      // <-- TAMBAH
+  selisih,        // <-- TAMBAH
+  statusSelisih,  // <-- TAMBAH
+  penjualan,
+  kasMasuk,
+  kasKeluar,
+  catatan
+});
           
           document.getElementById('closeShiftModal').classList.remove('active');
           document.getElementById('kasAkhirInput').value = '';
@@ -1196,34 +1211,52 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             `;
           } else {
             shiftsArray.forEach(shift => {
-              const formattedDate = new Date(shift.date).toLocaleDateString('id-ID', {
-                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-              });
-              const openTime = shift.openTime ? new Date(shift.openTime).toLocaleTimeString('id-ID') : '-';
-              const closeTime = shift.closeTime ? new Date(shift.closeTime).toLocaleTimeString('id-ID') : '-';
-              
-              let duration = '-';
-              if (shift.openTime && shift.closeTime) {
-                const diff = shift.closeTime - shift.openTime;
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                duration = `${hours}j ${minutes}m`;
-              }
-              
-               html += `
-  <div class="shift-item">
-    <div class="shift-info">
-      <span class="shift-date">${formattedDate}</span>
-      <span class="shift-time">${openTime} - ${closeTime}</span>
-      <span class="shift-user">${shift.userName || 'Unknown'}</span>
-      ${shift.status === 'closed' && shift.kasAkhir ? `<span style="color: var(--success); font-size: 0.8rem; margin-top: 4px;">Kas Akhir: ${Utils.formatRupiah(shift.kasAkhir)}</span>` : ''}
+  const formattedDate = new Date(shift.date).toLocaleDateString('id-ID', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  const openTime = shift.openTime ? new Date(shift.openTime).toLocaleTimeString('id-ID') : '-';
+  const closeTime = shift.closeTime ? new Date(shift.closeTime).toLocaleTimeString('id-ID') : '-';
+  
+  let duration = '-';
+  if (shift.openTime && shift.closeTime) {
+    const diff = shift.closeTime - shift.openTime;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    duration = `${hours}j ${minutes}m`;
+  }
+  
+  // TAMBAHAN: Hitung tampilan selisih
+  let selisihHtml = '';
+  if (shift.status === 'closed') {
+    const selisihColor = shift.selisih > 0 ? 'var(--success)' : (shift.selisih < 0 ? 'var(--danger)' : 'var(--text-muted)');
+    const selisihText = shift.selisih > 0 ? 'Lebih' : (shift.selisih < 0 ? 'Kurang' : 'Pas');
+    const selisihFormatted = shift.selisih ? Utils.formatRupiah(Math.abs(shift.selisih)) : 'Rp 0';
+    
+    selisihHtml = `
+      <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border-color);">
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Kas Sistem: ${shift.kasSistem ? Utils.formatRupiah(shift.kasSistem) : '-'}</div>
+        <div style="font-size: 0.8rem; color: ${selisihColor}; font-weight: 600;">
+          Selisih: ${selisihText} ${selisihFormatted}
+        </div>
+      </div>
+    `;
+  }
+  
+   html += `
+    <div class="shift-item">
+      <div class="shift-info">
+        <span class="shift-date">${formattedDate}</span>
+        <span class="shift-time">${openTime} - ${closeTime}</span>
+        <span class="shift-user">${shift.userName || 'Unknown'}</span>
+        ${shift.status === 'closed' && shift.kasAkhir ? `<span style="color: var(--success); font-size: 0.8rem; margin-top: 2px;">Kas Fisik: ${Utils.formatRupiah(shift.kasAkhir)}</span>` : ''}
+        ${selisihHtml}
+      </div>
+      <div class="shift-status">
+        <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
+        <span class="shift-duration">${duration}</span>
+      </div>
     </div>
-    <div class="shift-status">
-      <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
-      <span class="shift-duration">${duration}</span>
-    </div>
-  </div>
-`;
+  `;
             });
           }
           
