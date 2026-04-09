@@ -1031,12 +1031,7 @@
     document.getElementById('closeGasModal2').addEventListener('click', closeGasModal);
     document.getElementById('btnSaveGas').addEventListener('click', saveGas);
 
-    // Search
-    document.getElementById('searchInput').addEventListener('input', () => {
-      renderTable(getFiltered());
-    });
-
-    // Logout
+      // Logout
     document.getElementById('btnLogout').addEventListener('click', () => {
       if (confirm('Yakin ingin logout?')) {
         localStorage.removeItem('webpos_session');
@@ -1125,18 +1120,6 @@
       }
     } catch(e) {}
 
-    // Init
-    const hasUrl = !!getGasUrl();
-    const hasSheetId = !!getSheetId();
-    const ready = hasUrl && hasSheetId;
-    updateGasIcon(ready);
-    if (ready) {
-      loadData();
-    } else {
-      setTimeout(openGasModal, 400);
-    }
-  });
-
     /* ===== TOGGLE DROPDOWN RESPONSIVE ===== */
 const btnToggleActions = document.getElementById('btnToggleActions');
 const dropdownMenu = document.getElementById('dropdownMenu');
@@ -1223,6 +1206,18 @@ function exportToCSV() {
   window.URL.revokeObjectURL(url);
   showToast('File CSV berhasil di-download', 'success');
 }
+
+    // Init
+    const hasUrl = !!getGasUrl();
+    const hasSheetId = !!getSheetId();
+    const ready = hasUrl && hasSheetId;
+    updateGasIcon(ready);
+    if (ready) {
+      loadData();
+    } else {
+      setTimeout(openGasModal, 400);
+    }
+  });
     
 </script>
 </body>
