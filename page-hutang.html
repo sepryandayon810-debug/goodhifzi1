@@ -2202,6 +2202,7 @@ async function recordToKas(type, amount, description, user) {
     const kasId = 'kas_' + Date.now();
     const today = new Date().toISOString().split('T')[0];
     
+    // Struktur data yang dibaca dashboard
     const transactionData = {
       type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
       amount: parseInt(amount),
@@ -2213,18 +2214,18 @@ async function recordToKas(type, amount, description, user) {
       status: 'completed'
     };
 
-    console.log('📤 Simpan ke:', `transactions/${today}/${kasId}`);
+    console.log('📤 Simpan ke transactions/' + today + '/' + kasId);
+    console.log('📦 Data:', transactionData);
+
+    // Simpan ke path yang dibaca dashboard
+    await database.ref('transactions/' + today + '/' + kasId).set(transactionData);
+    console.log('✅ Berhasil tersimpan di transactions!');
     
-    // Simpan ke transactions (path yang dibaca dashboard)
-    await database.ref(`transactions/${today}/${kasId}`).set(transactionData);
-    console.log('✅ Sukses!');
-    
-    Utils.showToast(`✅ Masuk ke Kas ${type === 'masuk' ? 'Masuk' : 'Keluar'}`, 'success');
     return true;
     
   } catch (error) {
     console.error('❌ Gagal:', error);
-    Utils.showToast('Gagal mencatat ke kas', 'error');
+    Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
     throw error;
   }
 }
