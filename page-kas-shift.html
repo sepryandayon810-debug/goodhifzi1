@@ -1084,6 +1084,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           let penjualan = 0;
           let kasMasuk = 0;
           let kasKeluar = 0;
+          let topup = 0;        
+          let tarik = 0;        
+          let topupAdminFee = 0;
           
           Object.values(transactions).forEach(trans => {
             if (trans.status !== 'cancelled') {
@@ -1097,6 +1100,13 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 case 'kas_keluar':
                   kasKeluar += trans.amount || 0;
                   break;
+                case 'topup':           // TAMBAH
+                  topup += trans.amount || 0;
+                  topupAdminFee += trans.adminFee || 0;
+                  break;
+                case 'tarik':           // TAMBAH
+                  tarik += trans.amount || 0;
+                  break;
               }
             }
           });
@@ -1106,23 +1116,32 @@ const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once
 const modalData = modalSnapshot.val();
 
 // Hitung Kas Sistem (seharusnya)
-const kasSistem = (modalData ? modalData.amount : 0) + penjualan + kasMasuk - kasKeluar;
+const kasSistem = (modalData ? modalData.amount : 0) + 
+                  kasMasuk - 
+                  kasKeluar + 
+                  penjualan + 
+                  topup +        // <-- ini belum dipakai
+                  topupAdminFee - // <-- ini belum dipakai  
+                  tarik;         // <-- ini belum dipakai
+
 const selisih = kasAkhir - kasSistem;
 
 let statusSelisih = 'pas';
 if (selisih > 0) statusSelisih = 'lebih';
 if (selisih < 0) statusSelisih = 'kurang';
 
-await database.ref('shifts/' + today + '/' + user.uid).update({
   status: 'closed',
   closeTime: Date.now(),
   kasAkhir,
-  kasSistem,      // <-- TAMBAH
-  selisih,        // <-- TAMBAH
-  statusSelisih,  // <-- TAMBAH
+  kasSistem,
+  selisih,
+  statusSelisih,
   penjualan,
   kasMasuk,
   kasKeluar,
+  topup,           // ← Tambah
+  tarik,           // ← Tambah  
+  topupAdminFee,   // ← Tambah
   catatan
 });
           
