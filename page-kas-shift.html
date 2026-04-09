@@ -915,19 +915,33 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
-          return;
-        }
+  auth.onAuthStateChanged(async (user) => {
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    if (user) {
+      // Load data user dari database
+      try {
+        const userSnap = await database.ref('users/' + user.uid).once('value');
+        const userData = userSnap.val() || {};
         
-        if (user) {
-          Auth.loadUserData(user.uid);
+        // Update sidebar
+        document.getElementById('userName').textContent = userData.name || user.email || 'User';
+        document.getElementById('userRole').textContent = userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : 'Kasir';
+        if (userData.name) {
+          const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+          document.getElementById('userAvatar').textContent = initials;
         }
-        
-        initKasShift();
-      });
-
+      } catch (e) {
+        console.error('Error load user:', e);
+      }
+      
+      initKasShift();
+    }
+  });
+});
       function initKasShift() {
   let isShiftOpen = false;
   let currentShiftId = null;
@@ -1201,6 +1215,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           Utils.showLoading();
           
           try {
+             const currentUser = Auth.getCurrentUser();
             const snapshot = await database.ref('shifts').once('value');
             const shiftsData = snapshot.val() || {};
             
