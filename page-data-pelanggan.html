@@ -1263,8 +1263,8 @@ function exportToCSV() {
   showToast('File CSV berhasil di-download', 'success');
 }
 
-        // Init
-    const hasUrl = !!getGasUrl();  // Cek dari variable, bukan localStorage
+     // Init - Perbaikan
+    const hasUrl = !!getGasUrl();
     const hasSheetId = !!getSheetId();
     const ready = hasUrl && hasSheetId;
     updateGasIcon(ready);
@@ -1274,15 +1274,16 @@ function exportToCSV() {
     } else {
       // Coba load dari Firebase dulu, kalau masih kosong baru buka modal
       loadGasConfigFromFirebase().then(() => {
-      const ready = !!getGasUrl() && !!getSheetId();
-      updateGasIcon(ready);
-      
-      if (ready) {
-        loadData();
-      } else {
-        setTimeout(openGasModal, 400);
-      }
-    });
+        const readyAfterLoad = !!getGasUrl() && !!getSheetId();
+        updateGasIcon(readyAfterLoad);
+        
+        if (readyAfterLoad) {
+          loadData();
+        } else {
+          setTimeout(openGasModal, 400);
+        }
+      });
+    }
     
 </script>
 </body>
