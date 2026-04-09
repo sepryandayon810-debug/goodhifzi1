@@ -856,6 +856,29 @@
       if (e.key === 'Enter') saveForm();
     });
 
+    // Load user from Firebase Auth
+    try {
+      if (typeof auth !== 'undefined') {
+        auth.onAuthStateChanged((authUser) => {
+          if (authUser && typeof Auth !== 'undefined') {
+            Auth.loadUserData(authUser.uid);
+            setTimeout(() => {
+              const currentUser = Auth.getCurrentUser();
+              if (currentUser) {
+                const nameEl = document.getElementById('userName');
+                const roleEl = document.getElementById('userRole');
+                if (nameEl && currentUser.name) nameEl.textContent = currentUser.name;
+                if (roleEl && currentUser.role) {
+                  const role = currentUser.role;
+                  roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                }
+              }
+            }, 1500);
+          }
+        });
+      }
+    } catch(e) {}
+
     // Init
     const hasUrl = !!getGasUrl();
     const hasSheetId = !!getSheetId();
