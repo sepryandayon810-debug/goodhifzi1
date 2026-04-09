@@ -413,6 +413,50 @@
     font-size: 0.875rem;
   }
 }
+
+/* Fix Layout Sidebar & Header */
+@media (min-width: 1025px) {
+  /* Desktop: Sidebar default terbuka, tidak collapsed */
+  .sidebar {
+    transform: translateX(0) !important;
+    width: var(--sidebar-width) !important;
+  }
+  .sidebar .logo-text {
+    opacity: 1 !important;
+    width: auto !important;
+  }
+  .sidebar .nav-link span {
+    display: block !important;
+  }
+  .main-content {
+    margin-left: var(--sidebar-width) !important;
+  }
+}
+
+/* Saat sidebar collapsed di desktop */
+.sidebar.collapsed ~ .main-content {
+  margin-left: var(--sidebar-collapsed) !important;
+}
+
+/* Fix header title terpotong */
+.header-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100vw - 200px); /* Beri ruang untuk elemen lain */
+}
+
+/* Mobile: Pastikan sidebar full saat dibuka */
+@media (max-width: 1024px) {
+  .sidebar.mobile-open {
+    width: 280px !important;
+  }
+  .sidebar.mobile-open .logo-text,
+  .sidebar.mobile-open .nav-link span {
+    display: block !important;
+    opacity: 1 !important;
+  }
+}
     
   </style>
 </head>
