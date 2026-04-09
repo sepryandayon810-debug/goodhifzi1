@@ -1111,7 +1111,7 @@ async function deleteTransaction(id) {
 
           if (product) {
             const currentStock = product.stock || 0;
-            const qtyToReturn = parseInt(item.qty) || 0;
+            const qtyToReturn = parseInt(item.quantity || item.qty) || 0;
             const newStock = currentStock + qtyToReturn;
 
             await productRef.update({ 
