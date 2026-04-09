@@ -593,7 +593,39 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     .text-danger {
       color: var(--danger);
     }
+
+    /* Chart Styles */
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.chart-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
 </head>
 <body>
   <div class="app-container">
@@ -877,21 +909,28 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         <!-- Report Content -->
         <div class="report-content">
           <!-- Chart Section -->
-          <div class="report-card">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-chart-area"></i>
-                Grafik Penjualan
-              </h3>
-            </div>
-            <div class="card-body">
-              <div class="chart-container" id="chartContainer">
-                <p><i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3;"></i></p>
-                <p>Generate laporan untuk melihat grafik</p>
-              </div>
-            </div>
-          </div>
-
+<div class="report-card">
+  <div class="card-header">
+    <h3 class="card-title">
+      <i class="fas fa-chart-area"></i>
+      <span id="chartTitle">Grafik Penjualan</span>
+    </h3>
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="btn btn-sm btn-outline" onclick="changeChartType('line')" title="Grafik Garis">
+        <i class="fas fa-chart-line"></i>
+      </button>
+      <button class="btn btn-sm btn-outline" onclick="changeChartType('bar')" title="Grafik Batang">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div style="position: relative; height: 300px; width: 100%;">
+      <canvas id="reportChart"></canvas>
+    </div>
+  </div>
+</div>
+          
           <!-- Summary Section -->
           <div class="report-card">
             <div class="card-header">
@@ -993,6 +1032,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       function initLaporan() {
         let currentReport = 'penjualan';
         let reportData = [];
+        let chartInstance = null;
+        let currentChartType = 'line';
 
         // Set default dates
         const today = new Date().toISOString().split('T')[0];
