@@ -929,8 +929,24 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       });
 
       function initKasShift() {
-        let isShiftOpen = false;
-        let currentShiftId = null;
+  let isShiftOpen = false;
+  let currentShiftId = null;
+
+  // === TAMBAHKAN DI SINI (setelah let, sebelum format currency) ===
+  const user = Auth.getCurrentUser();
+  if (user) {
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    const userAvatarEl = document.getElementById('userAvatar');
+    
+    if (userNameEl) userNameEl.textContent = user.name || user.email || 'User';
+    if (userRoleEl) userRoleEl.textContent = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
+    
+    if (userAvatarEl && user.name) {
+      const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      userAvatarEl.textContent = initials;
+    }
+  }
 
         // Format currency input
         document.getElementById('kasAkhirInput').addEventListener('input', (e) => {
