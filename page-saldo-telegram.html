@@ -1062,18 +1062,18 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         
         if (user) {
           Auth.loadUserData(user.uid);
-          setTimeout(() => {
-            const currentUser = Auth.getCurrentUser();
-            if (currentUser) {
-              const nameEl = document.getElementById('userName');
-              const roleEl = document.getElementById('userRole');
-              if (nameEl && currentUser.name) nameEl.textContent = currentUser.name;
-              if (roleEl && currentUser.role) {
-                const role = currentUser.role;
-                roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+          // Baca langsung dari Firebase database
+          if (typeof database !== 'undefined') {
+            database.ref('users/' + user.uid).once('value').then(function(snap) {
+              var ud = snap.val();
+              if (ud) {
+                var nameEl = document.getElementById('userName');
+                var roleEl = document.getElementById('userRole');
+                if (nameEl && ud.name) nameEl.textContent = ud.name;
+                if (roleEl && ud.role) roleEl.textContent = ud.role.charAt(0).toUpperCase() + ud.role.slice(1);
               }
-            }
-          }, 1500);
+            }).catch(function(){});
+          }
         }
         
         initTelegram();
