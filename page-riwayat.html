@@ -1179,7 +1179,7 @@ async function deleteTransaction(id) {
             const snap = await ref.once('value');
             const prod = snap.val();
             if (prod) {
-              await ref.update({ stock: (prod.stock || 0) + (item.qty || 0) });
+              await ref.update({ stock: (prod.stock || 0) + (item.quantity || item.qty || 0) });
             }
           } catch(e) { console.error(e); }
         }
