@@ -2203,70 +2203,33 @@ async function recordToKas(type, amount, description, user) {
     const today = new Date().toISOString().split('T')[0];
     const now = Date.now();
     
-    // Data umum
-    const baseData = {
+    // Data untuk transactions (sesuai struktur page-kas-masuk.html)
+    const transactionData = {
       id: kasId,
+      type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
       amount: parseInt(amount),
-      description: description,
+      note: description,
       date: today,
-      timestamp: now,
+      timestamp: firebase.database.ServerValue.TIMESTAMP || now,
       userId: user.uid,
-      userName: user.name || user.email,
+      userName: user.displayName || user.name || user.email || 'User',
+      status: 'completed',
       source: 'hutang_piutang',
-      status: 'completed'
+      category: type === 'masuk' ? 'Piutang' : 'Hutang'
     };
 
-    // Simpan ke path sesuai tipe
+    // Simpan ke transactions/${today} agar terbaca di Ringkasan Kas
+    await database.ref(`transactions/${today}/${kasId}`).set(transactionData);
+    console.log('✅ Tersimpan di transactions/' + today);
+
+    // Backup ke kas_masuk/kas_keluar (opsional, untuk kompatibilitas)
     if (type === 'masuk') {
-      // Piutang dibayar = Kas Masuk
-      const kasMasukData = {
-        ...baseData,
-        type: 'kas_masuk',
-        category: 'Piutang',
-        note: description
-      };
-      
-      // Opsi 1: Path kas_masuk (paling umum untuk sistem terpisah)
-      try {
-        await database.ref('kas_masuk/' + kasId).set(kasMasukData);
-        console.log('✅ Tersimpan di kas_masuk');
-      } catch (e1) {
-        console.warn('⚠️ kas_masuk gagal, coba transactions:', e1.message);
-        
-        // Opsi 2: Fallback ke transactions dengan type kas_masuk
-        await database.ref('transactions/' + kasId).set({
-          ...kasMasukData,
-          transactionType: 'income'
-        });
-        console.log('✅ Tersimpan di transactions (kas_masuk)');
-      }
-      
+      await database.ref('kas_masuk/' + kasId).set(transactionData);
     } else {
-      // Hutang dibayar = Kas Keluar
-      const kasKeluarData = {
-        ...baseData,
-        type: 'kas_keluar',
-        category: 'Hutang',
-        note: description
-      };
-      
-      // Opsi 1: Path kas_keluar
-      try {
-        await database.ref('kas_keluar/' + kasId).set(kasKeluarData);
-        console.log('✅ Tersimpan di kas_keluar');
-      } catch (e2) {
-        console.warn('⚠️ kas_keluar gagal, coba transactions:', e2.message);
-        
-        // Opsi 2: Fallback ke transactions dengan type kas_keluar
-        await database.ref('transactions/' + kasId).set({
-          ...kasKeluarData,
-          transactionType: 'expense'
-        });
-        console.log('✅ Tersimpan di transactions (kas_keluar)');
-      }
+      await database.ref('kas_keluar/' + kasId).set(transactionData);
     }
     
-    // Update summary kas harian (opsional)
+    // Update summary kas harian
     try {
       const summaryRef = database.ref('kas_summary/' + today);
       const summarySnap = await summaryRef.once('value');
