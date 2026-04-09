@@ -4,70 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <!-- THEME INITIALIZATION - MUST BE FIRST -->
   <script>
-    (function() {
-      // Load theme color immediately to prevent flash
-      const themeColor = localStorage.getItem('theme_color') || 'orange'; // default orange sesuai permintaan
-      const isDark = localStorage.getItem('dark_mode') === 'true';
-      
-      document.documentElement.setAttribute('data-theme-color', themeColor);
-      if (isDark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-      
-      // Define all theme colors
-      const themes = {
-        indigo: { primary: '#6366f1', dark: '#4f46e5', light: '#818cf8', secondary: '#ec4899' },
-        blue: { primary: '#3b82f6', dark: '#2563eb', light: '#60a5fa', secondary: '#06b6d4' },
-        green: { primary: '#10b981', dark: '#059669', light: '#34d399', secondary: '#84cc16' },
-        orange: { primary: '#f97316', dark: '#ea580c', light: '#fb923c', secondary: '#f59e0b' },
-        purple: { primary: '#8b5cf6', dark: '#7c3aed', light: '#a78bfa', secondary: '#d946ef' },
-        red: { primary: '#ef4444', dark: '#dc2626', light: '#f87171', secondary: '#f97316' },
-        pink: { primary: '#ec4899', dark: '#db2777', light: '#f472b6', secondary: '#8b5cf6' },
-        teal: { primary: '#14b8a6', dark: '#0d9488', light: '#2dd4bf', secondary: '#06b6d4' }
-      };
-      
-      const theme = themes[themeColor] || themes.orange;
-      
-      // Inject CSS variables immediately
-      const style = document.createElement('style');
-      style.textContent = `
-        :root {
-          --primary: ${theme.primary};
-          --primary-dark: ${theme.dark};
-          --primary-light: ${theme.light};
-          --secondary: ${theme.secondary};
-          --success: #10b981;
-          --warning: #f59e0b;
-          --danger: #ef4444;
-          --info: #3b82f6;
-        }
-        ${isDark ? `
-        :root {
-          --bg-primary: #0f172a;
-          --bg-secondary: #1e293b;
-          --bg-card: #1e293b;
-          --text-primary: #f8fafc;
-          --text-secondary: #cbd5e1;
-          --text-muted: #64748b;
-          --border-color: #334155;
-        }
-        ` : `
-        :root {
-          --bg-primary: #f8fafc;
-          --bg-secondary: #f1f5f9;
-          --bg-card: #ffffff;
-          --text-primary: #0f172a;
-          --text-secondary: #475569;
-          --text-muted: #94a3b8;
-          --border-color: #e2e8f0;
-        }
-        `}
-      `;
-      document.head.appendChild(style);
-    })();
-  </script>
+  // Set tema sebelum halaman tampil (biar tidak flicker)
+  const themeColor = localStorage.getItem('theme_color') || 'indigo';
+  const isDark = localStorage.getItem('dark_mode') === 'true';
+  document.documentElement.setAttribute('data-theme-color', themeColor);
+  if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+</script>
 
   <title>WebPOS - Printer & Struk</title>
 
@@ -89,6 +32,20 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
+
+    /* TAMBAH INI - START - Warna Tema */
+:root { --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #ec4899; }
+[data-theme-color="orange"] { --primary: #f97316; --primary-dark: #ea580c; --secondary: #f59e0b; }
+[data-theme-color="blue"] { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #06b6d4; }
+[data-theme-color="green"] { --primary: #10b981; --primary-dark: #059669; --secondary: #84cc16; }
+[data-theme-color="purple"] { --primary: #8b5cf6; --primary-dark: #7c3aed; --secondary: #d946ef; }
+[data-theme-color="red"] { --primary: #ef4444; --primary-dark: #dc2626; --secondary: #f97316; }
+[data-theme-color="pink"] { --primary: #ec4899; --primary-dark: #db2777; --secondary: #8b5cf6; }
+[data-theme-color="teal"] { --primary: #14b8a6; --primary-dark: #0d9488; --secondary: #06b6d4; }
+
+[data-theme="dark"] { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --border-color: #334155; }
+[data-theme="light"] { --bg-primary: #f8fafc; --bg-secondary: #f1f5f9; --bg-card: #ffffff; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8; --border-color: #e2e8f0; }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { font-size: 16px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
     
@@ -937,9 +894,11 @@
     // ==========================================
     // INITIALIZATION
     // ==========================================
-    document.addEventListener('DOMContentLoaded', async function() {
-      // Update theme icon based on current state
-      updateThemeIcon();
+   document.addEventListener('DOMContentLoaded', async function() {
+  // TAMBAH BARIS INI:
+  syncTheme(); // <-- TAMBAH INI
+  
+  updateThemeIcon();
       
       // Initialize OCR
       await initOCR();
@@ -1921,6 +1880,25 @@
         el.remove();
       }, 3000);
     }
+
+    // TAMBAH FUNGSI INI - START
+function syncTheme() {
+  if (typeof Utils !== 'undefined' && Utils.Theme) {
+    document.documentElement.setAttribute('data-theme-color', Utils.Theme.getColor());
+    if (Utils.Theme.isDarkMode()) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  }
+}
+
+// Dengar perubahan dari tab lain (Setting/Dashboard)
+window.addEventListener('storage', (e) => {
+  if (e.key === 'theme_color' || e.key === 'dark_mode') {
+    location.reload();
+  }
+});
+// TAMBAH FUNGSI INI - END
+    
   </script>
 </body>
 </html>
