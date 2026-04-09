@@ -1578,7 +1578,19 @@
               window.location.href = 'login.html';
               return;
             }
-            if (user && typeof Auth !== 'undefined') Auth.loadUserData(user.uid);
+            if (user && typeof Auth !== 'undefined') {
+              Auth.loadUserData(user.uid);
+              setTimeout(() => {
+                const roleEl = document.getElementById('userRole');
+                if (roleEl && (!roleEl.textContent || roleEl.textContent.trim() === '-')) {
+                  const nameEl = document.getElementById('userName');
+                  if (nameEl && (!nameEl.textContent || nameEl.textContent === 'Loading...')) {
+                    nameEl.textContent = user.displayName || user.email || 'Admin';
+                  }
+                  roleEl.textContent = 'Administrator';
+                }
+              }, 2000);
+            }
             initHutang();
           });
         } else {
@@ -1653,11 +1665,11 @@
           
           kasBox.style.display = 'block';
           if (type === 'hutang') {
-            label.textContent = 'Catat ke Kas Keluar';
-            sublabel.textContent = 'Otomatis mengurangi saldo kas saat menyimpan hutang baru';
-          } else {
             label.textContent = 'Catat ke Kas Masuk';
-            sublabel.textContent = 'Otomatis menambah saldo kas saat menyimpan piutang baru';
+            sublabel.textContent = 'Otomatis menambah saldo kas saat mencatat hutang baru (uang diterima)';
+          } else {
+            label.textContent = 'Catat ke Kas Keluar';
+            sublabel.textContent = 'Otomatis mengurangi saldo kas saat mencatat piutang baru (uang dikeluarkan)';
           }
         }
 
@@ -1961,7 +1973,7 @@
             // If affectKas is checked, record to kas
             if (affectKas && !id) { // Only for new records
               console.log('🔄 Mencatat ke kas...');
-              await recordToKas(type === 'hutang' ? 'keluar' : 'masuk', amount, 
+              await recordToKas(type === 'hutang' ? 'masuk' : 'keluar', amount, 
                 `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
             }
             
