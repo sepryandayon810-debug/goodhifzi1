@@ -737,8 +737,17 @@ async function loadGasConfigFromFirebase() {
   if (!user) return;
   
   try {
-    const snapshot = await database.ref('users/' + user.uid + '/gas_config').once('value');
-    const config = snapshot.val();
+    const snapshot = await database.ref('settings/gas_config').once('value');
+const config = snapshot.val();
+
+if (config) {
+  currentGasUrl = config.url || '';
+  currentSheetId = config.sheetId || '';
+  
+  // Update UI input
+  document.getElementById('gasUrlInput').value = currentGasUrl;
+  document.getElementById('gasSheetIdInput').value = currentSheetId;
+}
     
     if (config) {
       currentGasUrl = config.url || '';
@@ -999,11 +1008,12 @@ async function loadGasConfigFromFirebase() {
     }
     
     // Simpan ke Firebase (bukan localStorage!)
-    await database.ref('users/' + user.uid + '/gas_config').set({
-      url: url,
-      sheetId: sheetId,
-      updatedAt: Date.now()
-    });
+    await database.ref('settings/gas_config').set({
+  url: url,
+  sheetId: sheetId,
+  updatedBy: user.uid,  // Catat siapa yang update (opsional)
+  updatedAt: Date.now()
+});
     
     // Update variable lokal
     currentGasUrl = url;
@@ -1264,13 +1274,15 @@ function exportToCSV() {
     } else {
       // Coba load dari Firebase dulu, kalau masih kosong baru buka modal
       loadGasConfigFromFirebase().then(() => {
-        if (!getGasUrl() || !getSheetId()) {
-          setTimeout(openGasModal, 400);
-        } else {
-          loadData();
-        }
-      });
-    }
+      const ready = !!getGasUrl() && !!getSheetId();
+      updateGasIcon(ready);
+      
+      if (ready) {
+        loadData();
+      } else {
+        setTimeout(openGasModal, 400);
+      }
+    });
     
 </script>
 </body>
