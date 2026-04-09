@@ -942,352 +942,354 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }
   });
 });
-      function initKasShift() {
-  let isShiftOpen = false;
-  let currentShiftId = null;
+          // ============================================
+    // 1. DEFINISI FUNGSI initKasShift (DI LUAR event listener)
+    // ============================================
+    function initKasShift() {
+      let isShiftOpen = false;
+      let currentShiftId = null;
 
-  // === TAMBAHKAN DI SINI (setelah let, sebelum format currency) ===
-  const user = Auth.getCurrentUser();
-  if (user) {
-    const userNameEl = document.getElementById('userName');
-    const userRoleEl = document.getElementById('userRole');
-    const userAvatarEl = document.getElementById('userAvatar');
-    
-    if (userNameEl) userNameEl.textContent = user.name || user.email || 'User';
-    if (userRoleEl) userRoleEl.textContent = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
-    
-    if (userAvatarEl && user.name) {
-      const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-      userAvatarEl.textContent = initials;
-    }
-  }
+      // Format currency input
+      document.getElementById('kasAkhirInput').addEventListener('input', (e) => {
+        e.target.value = Utils.formatNumberInput(e.target.value);
+      });
 
-        // Format currency input
-        document.getElementById('kasAkhirInput').addEventListener('input', (e) => {
-          e.target.value = Utils.formatNumberInput(e.target.value);
-        });
+      // Check shift status
+      checkShiftStatus();
+      
+      // Load shift history
+      loadShiftHistory();
 
-        // Check shift status
-        checkShiftStatus();
-        
-        // Load shift history
-        loadShiftHistory();
+      // Toggle shift button
+      document.getElementById('btnToggleShift').addEventListener('click', () => {
+        if (isShiftOpen) {
+          document.getElementById('closeShiftModal').classList.add('active');
+        } else {
+          openShift();
+        }
+      });
 
-        // Toggle shift button
-        document.getElementById('btnToggleShift').addEventListener('click', () => {
-          if (isShiftOpen) {
-            document.getElementById('closeShiftModal').classList.add('active');
-          } else {
-            openShift();
-          }
-        });
+      // Cancel close shift
+      document.getElementById('btnCancelClose').addEventListener('click', () => {
+        document.getElementById('closeShiftModal').classList.remove('active');
+      });
 
-        // Cancel close shift
-        document.getElementById('btnCancelClose').addEventListener('click', () => {
-          document.getElementById('closeShiftModal').classList.remove('active');
-        });
+      // Confirm close shift
+      document.getElementById('btnConfirmClose').addEventListener('click', closeShift);
 
-        // Confirm close shift
-        document.getElementById('btnConfirmClose').addEventListener('click', closeShift);
+      // Sidebar toggle
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
 
-        // Sidebar toggle
-        document.getElementById('menuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('collapsed');
-        });
+      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('mobile-open');
+      });
 
-        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('mobile-open');
-        });
-
-        // Dropdown menus
-        document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
-          const toggle = dropdown.querySelector('.nav-dropdown-toggle');
-          if (toggle) {
-            toggle.addEventListener('click', (e) => {
-              e.preventDefault();
-              dropdown.classList.toggle('open');
-            });
-          }
-        });
-
-        // Theme toggle
-        document.getElementById('btnTheme').addEventListener('click', () => {
-          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-          document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-          localStorage.setItem('dark_mode', !isDark);
-        });
-
-        // Logout
-        document.getElementById('btnLogout').addEventListener('click', () => {
-          Utils.confirm('Apakah Anda yakin ingin logout?', () => {
-            Auth.logout();
+      // Dropdown menus
+      document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+        const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+        if (toggle) {
+          toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle('open');
           });
+        }
+      });
+
+      // Theme toggle
+      document.getElementById('btnTheme').addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('dark_mode', !isDark);
+      });
+
+      // Logout
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        Utils.confirm('Apakah Anda yakin ingin logout?', () => {
+          Auth.logout();
         });
+      });
 
-        async function checkShiftStatus() {
-          const today = Utils.getTodayString();
-          const user = Auth.getCurrentUser();
+      async function checkShiftStatus() {
+        const today = Utils.getTodayString();
+        const user = Auth.getCurrentUser();
+        
+        try {
+          const snapshot = await database.ref('shifts/' + today + '/' + user.uid).once('value');
+          const shiftData = snapshot.val();
           
-          try {
-            const snapshot = await database.ref('shifts/' + today + '/' + user.uid).once('value');
-            const shiftData = snapshot.val();
-            
-            if (shiftData && shiftData.status === 'open') {
-              isShiftOpen = true;
-              currentShiftId = shiftData.id;
-              updateShiftUI(true, shiftData.openTime);
-            } else {
-              isShiftOpen = false;
-              currentShiftId = null;
-              updateShiftUI(false);
-            }
-            
-            // Load today's summary
-            loadTodaySummary();
-          } catch (error) {
-            console.error('Error checking shift status:', error);
-          }
-        }
-
-        function updateShiftUI(isOpen, openTime = null) {
-          const icon = document.getElementById('shiftStatusIcon');
-          const text = document.getElementById('shiftStatusText');
-          const time = document.getElementById('shiftStatusTime');
-          const btn = document.getElementById('btnToggleShift');
-          
-          if (isOpen) {
-            icon.classList.remove('closed');
-            icon.classList.add('open');
-            icon.innerHTML = '<i class="fas fa-store"></i>';
-            text.classList.remove('closed');
-            text.classList.add('open');
-            text.textContent = 'BUKA';
-            time.textContent = openTime ? 'Dibuka: ' + new Date(openTime).toLocaleString('id-ID') : '-';
-            btn.classList.remove('open');
-            btn.classList.add('close');
-            btn.innerHTML = '<i class="fas fa-store-slash"></i><span>Tutup Shift</span>';
+          if (shiftData && shiftData.status === 'open') {
+            isShiftOpen = true;
+            currentShiftId = shiftData.id;
+            updateShiftUI(true, shiftData.openTime);
           } else {
-            icon.classList.remove('open');
-            icon.classList.add('closed');
-            icon.innerHTML = '<i class="fas fa-store-slash"></i>';
-            text.classList.remove('open');
-            text.classList.add('closed');
-            text.textContent = 'TUTUP';
-            time.textContent = '-';
-            btn.classList.remove('close');
-            btn.classList.add('open');
-            btn.innerHTML = '<i class="fas fa-store"></i><span>Buka Shift</span>';
-          }
-        }
-
-        async function openShift() {
-          Utils.showLoading();
-          
-          try {
-            const today = Utils.getTodayString();
-            const user = Auth.getCurrentUser();
-            const shiftId = 'shift_' + Date.now();
-            
-            // Get modal for today
-            const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
-            const modalData = modalSnapshot.val();
-            
-            await database.ref('shifts/' + today + '/' + user.uid).set({
-              id: shiftId,
-              status: 'open',
-              openTime: Date.now(),
-              userId: user.uid,
-              userName: user.name || user.email,
-              modalAwal: modalData ? modalData.amount : 0
-            });
-            
-            Utils.showToast('Shift berhasil dibuka', 'success');
-            checkShiftStatus();
-          } catch (error) {
-            console.error('Error opening shift:', error);
-            Utils.showToast('Gagal membuka shift', 'error');
+            isShiftOpen = false;
+            currentShiftId = null;
+            updateShiftUI(false);
           }
           
-          Utils.hideLoading();
-        }
-
-        async function closeShift() {
-          Utils.showLoading();
-          
-          try {
-            const today = Utils.getTodayString();
-            const user = Auth.getCurrentUser();
-            const kasAkhir = parseInt(document.getElementById('kasAkhirInput').value.replace(/\./g, '')) || 0;
-            const catatan = document.getElementById('catatanInput').value;
-            
-            // Get today's transactions for summary
-            const transSnapshot = await database.ref('transactions/' + today).once('value');
-            const transactions = transSnapshot.val() || {};
-            
-            let penjualan = 0;
-            let kasMasuk = 0;
-            let kasKeluar = 0;
-            
-            Object.values(transactions).forEach(trans => {
-              if (trans.status !== 'cancelled') {
-                switch (trans.type) {
-                  case 'penjualan':
-                    penjualan += trans.total || 0;
-                    break;
-                  case 'kas_masuk':
-                    kasMasuk += trans.amount || 0;
-                    break;
-                  case 'kas_keluar':
-                    kasKeluar += trans.amount || 0;
-                    break;
-                }
-              }
-            });
-            
-            await database.ref('shifts/' + today + '/' + user.uid).update({
-              status: 'closed',
-              closeTime: Date.now(),
-              kasAkhir,
-              penjualan,
-              kasMasuk,
-              kasKeluar,
-              catatan
-            });
-            
-            document.getElementById('closeShiftModal').classList.remove('active');
-            document.getElementById('kasAkhirInput').value = '';
-            document.getElementById('catatanInput').value = '';
-            
-            Utils.showToast('Shift berhasil ditutup', 'success');
-            checkShiftStatus();
-            loadShiftHistory();
-          } catch (error) {
-            console.error('Error closing shift:', error);
-            Utils.showToast('Gagal menutup shift', 'error');
-          }
-          
-          Utils.hideLoading();
-        }
-
-        async function loadTodaySummary() {
-          const today = Utils.getTodayString();
-          const user = Auth.getCurrentUser();
-          
-          try {
-            // Get modal
-            const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
-            const modalData = modalSnapshot.val();
-            
-            // Get transactions
-            const transSnapshot = await database.ref('transactions/' + today).once('value');
-            const transactions = transSnapshot.val() || {};
-            
-            let penjualan = 0;
-            let kasMasuk = 0;
-            let kasKeluar = 0;
-            
-            Object.values(transactions).forEach(trans => {
-              if (trans.status !== 'cancelled') {
-                switch (trans.type) {
-                  case 'penjualan':
-                    penjualan += trans.total || 0;
-                    break;
-                  case 'kas_masuk':
-                    kasMasuk += trans.amount || 0;
-                    break;
-                  case 'kas_keluar':
-                    kasKeluar += trans.amount || 0;
-                    break;
-                }
-              }
-            });
-            
-            document.getElementById('summaryModal').textContent = Utils.formatRupiah(modalData ? modalData.amount : 0);
-            document.getElementById('summaryPenjualan').textContent = Utils.formatRupiah(penjualan);
-            document.getElementById('summaryKasMasuk').textContent = Utils.formatRupiah(kasMasuk);
-            document.getElementById('summaryKasKeluar').textContent = Utils.formatRupiah(kasKeluar);
-          } catch (error) {
-            console.error('Error loading today summary:', error);
-          }
-        }
-
-        async function loadShiftHistory() {
-          Utils.showLoading();
-          
-          try {
-             const currentUser = Auth.getCurrentUser();
-            const snapshot = await database.ref('shifts').once('value');
-            const shiftsData = snapshot.val() || {};
-            
-            const historyList = document.getElementById('shiftHistory');
-            let html = '';
-            
-            const shiftsArray = [];
-            
-            Object.entries(shiftsData).forEach(([date, users]) => {
-              Object.entries(users).forEach(([userId, data]) => {
-                shiftsArray.push({
-                  date,
-                  userId,
-                  ...data
-                });
-              });
-            });
-            
-            shiftsArray.sort((a, b) => (b.openTime || 0) - (a.openTime || 0));
-            
-            if (shiftsArray.length === 0) {
-              html = `
-                <div class="empty-state">
-                  <i class="fas fa-clock"></i>
-                  <p>Belum ada riwayat shift</p>
-                </div>
-              `;
-            } else {
-              shiftsArray.forEach(shift => {
-                const formattedDate = new Date(shift.date).toLocaleDateString('id-ID', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                });
-                
-                const openTime = shift.openTime ? new Date(shift.openTime).toLocaleTimeString('id-ID') : '-';
-                const closeTime = shift.closeTime ? new Date(shift.closeTime).toLocaleTimeString('id-ID') : '-';
-                
-                let duration = '-';
-                if (shift.openTime && shift.closeTime) {
-                  const diff = shift.closeTime - shift.openTime;
-                  const hours = Math.floor(diff / (1000 * 60 * 60));
-                  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                  duration = `${hours}j ${minutes}m`;
-                }
-                
-                html += `
-                  <div class="shift-item">
-                    <div class="shift-info">
-                      <span class="shift-date">${formattedDate}</span>
-                      <span class="shift-time">${openTime} - ${closeTime}</span>
-                      <span class="shift-user">${shift.userName || 'Unknown'}</span>
-                    </div>
-                    <div class="shift-status">
-                      <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
-                      <span class="shift-duration">${duration}</span>
-                    </div>
-                  </div>
-                `;
-              });
-            }
-            
-            historyList.innerHTML = html;
-          } catch (error) {
-            console.error('Error loading shift history:', error);
-            Utils.showToast('Gagal memuat riwayat shift', 'error');
-          }
-          
-          Utils.hideLoading();
+          loadTodaySummary();
+        } catch (error) {
+          console.error('Error checking shift status:', error);
         }
       }
+
+      function updateShiftUI(isOpen, openTime = null) {
+        const icon = document.getElementById('shiftStatusIcon');
+        const text = document.getElementById('shiftStatusText');
+        const time = document.getElementById('shiftStatusTime');
+        const btn = document.getElementById('btnToggleShift');
+        
+        if (isOpen) {
+          icon.classList.remove('closed');
+          icon.classList.add('open');
+          icon.innerHTML = '<i class="fas fa-store"></i>';
+          text.classList.remove('closed');
+          text.classList.add('open');
+          text.textContent = 'BUKA';
+          time.textContent = openTime ? 'Dibuka: ' + new Date(openTime).toLocaleString('id-ID') : '-';
+          btn.classList.remove('open');
+          btn.classList.add('close');
+          btn.innerHTML = '<i class="fas fa-store-slash"></i><span>Tutup Shift</span>';
+        } else {
+          icon.classList.remove('open');
+          icon.classList.add('closed');
+          icon.innerHTML = '<i class="fas fa-store-slash"></i>';
+          text.classList.remove('open');
+          text.classList.add('closed');
+          text.textContent = 'TUTUP';
+          time.textContent = '-';
+          btn.classList.remove('close');
+          btn.classList.add('open');
+          btn.innerHTML = '<i class="fas fa-store"></i><span>Buka Shift</span>';
+        }
+      }
+
+      async function openShift() {
+        Utils.showLoading();
+        
+        try {
+          const today = Utils.getTodayString();
+          const user = Auth.getCurrentUser();
+          const shiftId = 'shift_' + Date.now();
+          
+          const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+          const modalData = modalSnapshot.val();
+          
+          await database.ref('shifts/' + today + '/' + user.uid).set({
+            id: shiftId,
+            status: 'open',
+            openTime: Date.now(),
+            userId: user.uid,
+            userName: user.name || user.email,
+            modalAwal: modalData ? modalData.amount : 0
+          });
+          
+          Utils.showToast('Shift berhasil dibuka', 'success');
+          checkShiftStatus();
+        } catch (error) {
+          console.error('Error opening shift:', error);
+          Utils.showToast('Gagal membuka shift', 'error');
+        }
+        
+        Utils.hideLoading();
+      }
+
+      async function closeShift() {
+        Utils.showLoading();
+        
+        try {
+          const today = Utils.getTodayString();
+          const user = Auth.getCurrentUser();
+          const kasAkhir = parseInt(document.getElementById('kasAkhirInput').value.replace(/\./g, '')) || 0;
+          const catatan = document.getElementById('catatanInput').value;
+          
+          const transSnapshot = await database.ref('transactions/' + today).once('value');
+          const transactions = transSnapshot.val() || {};
+          
+          let penjualan = 0;
+          let kasMasuk = 0;
+          let kasKeluar = 0;
+          
+          Object.values(transactions).forEach(trans => {
+            if (trans.status !== 'cancelled') {
+              switch (trans.type) {
+                case 'penjualan':
+                  penjualan += trans.total || 0;
+                  break;
+                case 'kas_masuk':
+                  kasMasuk += trans.amount || 0;
+                  break;
+                case 'kas_keluar':
+                  kasKeluar += trans.amount || 0;
+                  break;
+              }
+            }
+          });
+          
+          await database.ref('shifts/' + today + '/' + user.uid).update({
+            status: 'closed',
+            closeTime: Date.now(),
+            kasAkhir,
+            penjualan,
+            kasMasuk,
+            kasKeluar,
+            catatan
+          });
+          
+          document.getElementById('closeShiftModal').classList.remove('active');
+          document.getElementById('kasAkhirInput').value = '';
+          document.getElementById('catatanInput').value = '';
+          
+          Utils.showToast('Shift berhasil ditutup', 'success');
+          checkShiftStatus();
+          loadShiftHistory();
+        } catch (error) {
+          console.error('Error closing shift:', error);
+          Utils.showToast('Gagal menutup shift', 'error');
+        }
+        
+        Utils.hideLoading();
+      }
+
+      async function loadTodaySummary() {
+        const today = Utils.getTodayString();
+        const user = Auth.getCurrentUser();
+        
+        try {
+          const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+          const modalData = modalSnapshot.val();
+          
+          const transSnapshot = await database.ref('transactions/' + today).once('value');
+          const transactions = transSnapshot.val() || {};
+          
+          let penjualan = 0;
+          let kasMasuk = 0;
+          let kasKeluar = 0;
+          
+          Object.values(transactions).forEach(trans => {
+            if (trans.status !== 'cancelled') {
+              switch (trans.type) {
+                case 'penjualan':
+                  penjualan += trans.total || 0;
+                  break;
+                case 'kas_masuk':
+                  kasMasuk += trans.amount || 0;
+                  break;
+                case 'kas_keluar':
+                  kasKeluar += trans.amount || 0;
+                  break;
+              }
+            }
+          });
+          
+          document.getElementById('summaryModal').textContent = Utils.formatRupiah(modalData ? modalData.amount : 0);
+          document.getElementById('summaryPenjualan').textContent = Utils.formatRupiah(penjualan);
+          document.getElementById('summaryKasMasuk').textContent = Utils.formatRupiah(kasMasuk);
+          document.getElementById('summaryKasKeluar').textContent = Utils.formatRupiah(kasKeluar);
+        } catch (error) {
+          console.error('Error loading today summary:', error);
+        }
+      }
+
+      async function loadShiftHistory() {
+        Utils.showLoading();
+        
+        try {
+          const currentUser = Auth.getCurrentUser();
+          const snapshot = await database.ref('shifts').once('value');
+          const shiftsData = snapshot.val() || {};
+          
+          const historyList = document.getElementById('shiftHistory');
+          let html = '';
+          
+          const shiftsArray = [];
+          
+          Object.entries(shiftsData).forEach(([date, users]) => {
+            Object.entries(users).forEach(([userId, data]) => {
+              shiftsArray.push({ date, userId, ...data });
+            });
+          });
+          
+          shiftsArray.sort((a, b) => (b.openTime || 0) - (a.openTime || 0));
+          
+          if (shiftsArray.length === 0) {
+            html = `
+              <div class="empty-state">
+                <i class="fas fa-clock"></i>
+                <p>Belum ada riwayat shift</p>
+              </div>
+            `;
+          } else {
+            shiftsArray.forEach(shift => {
+              const formattedDate = new Date(shift.date).toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+              });
+              const openTime = shift.openTime ? new Date(shift.openTime).toLocaleTimeString('id-ID') : '-';
+              const closeTime = shift.closeTime ? new Date(shift.closeTime).toLocaleTimeString('id-ID') : '-';
+              
+              let duration = '-';
+              if (shift.openTime && shift.closeTime) {
+                const diff = shift.closeTime - shift.openTime;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                duration = `${hours}j ${minutes}m`;
+              }
+              
+              html += `
+                <div class="shift-item">
+                  <div class="shift-info">
+                    <span class="shift-date">${formattedDate}</span>
+                    <span class="shift-time">${openTime} - ${closeTime}</span>
+                    <span class="shift-user">${shift.userName || 'Unknown'}</span>
+                  </div>
+                  <div class="shift-status">
+                    <span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span>
+                    <span class="shift-duration">${duration}</span>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          historyList.innerHTML = html;
+        } catch (error) {
+          console.error('Error loading shift history:', error);
+          Utils.showToast('Gagal memuat riwayat shift', 'error');
+        }
+        
+        Utils.hideLoading();
+      }
+    }
+
+    // ============================================
+    // 2. EVENT LISTENER (DI LUAR fungsi initKasShift)
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      auth.onAuthStateChanged(async (user) => {
+        if (!user && !Utils.getStorage('webpos_session')) {
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        if (user) {
+          try {
+            const userSnap = await database.ref('users/' + user.uid).once('value');
+            const userData = userSnap.val() || {};
+            document.getElementById('userName').textContent = userData.name || user.email || 'User';
+            document.getElementById('userRole').textContent = userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : 'Kasir';
+            if (userData.name) {
+              const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+              document.getElementById('userAvatar').textContent = initials;
+            }
+          } catch (e) {
+            console.error('Error load user:', e);
+          }
+          
+          initKasShift();
+        }
+      });
     });
   </script>
 </body>
