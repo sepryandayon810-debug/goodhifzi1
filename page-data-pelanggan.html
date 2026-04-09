@@ -372,13 +372,36 @@
         <div class="data-card-header">
           <span class="data-card-title">Daftar Pelanggan</span>
           <div class="card-actions">
-            <button class="btn btn-outline btn-sm" id="btnRefresh" title="Muat ulang">
-              <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-            <button class="btn btn-outline btn-sm" id="btnCopyAll" style="display:none">
-              <i class="fas fa-copy"></i> Salin Semua
-            </button>
-          </div>
+  <!-- Desktop: Tombol Langsung -->
+  <button class="btn btn-outline btn-sm desktop-only" id="btnRefresh" title="Muat ulang">
+    <i class="fas fa-sync-alt"></i> <span>Refresh</span>
+  </button>
+  <button class="btn btn-outline btn-sm desktop-only" id="btnCopyAll" style="display:none">
+    <i class="fas fa-copy"></i> <span>Salin Semua</span>
+  </button>
+  
+  <!-- Mobile: Dropdown Toggle -->
+  <div class="dropdown-wrapper">
+    <button class="btn btn-outline btn-sm dropdown-toggle" id="btnToggleActions" title="Aksi Lainnya">
+      <i class="fas fa-ellipsis-v"></i> <span class="mobile-only">Menu</span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu">
+      <button class="dropdown-item" id="btnRefreshMobile">
+        <i class="fas fa-sync-alt"></i> Refresh Data
+      </button>
+      <button class="dropdown-item" id="btnCopyAllMobile" style="display:none">
+        <i class="fas fa-copy"></i> Salin Semua
+      </button>
+      <button class="dropdown-item" id="btnExportMobile">
+        <i class="fas fa-file-export"></i> Export Data
+      </button>
+      <div class="dropdown-divider"></div>
+      <button class="dropdown-item text-danger" id="btnClearSearchMobile">
+        <i class="fas fa-times-circle"></i> Reset Pencarian
+      </button>
+    </div>
+  </div>
+</div>
         </div>
         <div id="tableContainer">
           <div class="empty-state">
@@ -896,6 +919,94 @@
       setTimeout(openGasModal, 400);
     }
   });
+
+    /* ===== TOGGLE DROPDOWN RESPONSIVE ===== */
+const btnToggleActions = document.getElementById('btnToggleActions');
+const dropdownMenu = document.getElementById('dropdownMenu');
+
+// Toggle dropdown
+btnToggleActions.addEventListener('click', (e) => {
+  e.stopPropagation();
+  dropdownMenu.classList.toggle('active');
+  
+  // Rotate icon
+  const icon = btnToggleActions.querySelector('i');
+  if (dropdownMenu.classList.contains('active')) {
+    icon.classList.remove('fa-ellipsis-v');
+    icon.classList.add('fa-times');
+    btnToggleActions.classList.add('active');
+  } else {
+    icon.classList.remove('fa-times');
+    icon.classList.add('fa-ellipsis-v');
+    btnToggleActions.classList.remove('active');
+  }
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  if (!dropdownMenu.contains(e.target) && !btnToggleActions.contains(e.target)) {
+    dropdownMenu.classList.remove('active');
+    const icon = btnToggleActions.querySelector('i');
+    icon.classList.remove('fa-times');
+    icon.classList.add('fa-ellipsis-v');
+    btnToggleActions.classList.remove('active');
+  }
+});
+
+// Mobile menu items functionality
+document.getElementById('btnRefreshMobile').addEventListener('click', () => {
+  loadData();
+  dropdownMenu.classList.remove('active');
+  showToast('Data di-refresh', 'success');
+});
+
+document.getElementById('btnCopyAllMobile').addEventListener('click', () => {
+  copyFiltered();
+  dropdownMenu.classList.remove('active');
+});
+
+document.getElementById('btnExportMobile').addEventListener('click', () => {
+  exportToCSV();
+  dropdownMenu.classList.remove('active');
+});
+
+document.getElementById('btnClearSearchMobile').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  renderTable(allData);
+  dropdownMenu.classList.remove('active');
+  showToast('Pencarian direset', 'success');
+});
+
+// Sync mobile buttons visibility with desktop
+const originalRenderTable = renderTable;
+renderTable = function(rows) {
+  originalRenderTable(rows);
+  // Sync visibility
+  const hasData = rows && rows.length > 0;
+  document.getElementById('btnCopyAllMobile').style.display = hasData ? 'flex' : 'none';
+};
+
+// Tambah fungsi export CSV (helper)
+function exportToCSV() {
+  if (!allData.length) {
+    showToast('Tidak ada data untuk export', 'warning');
+    return;
+  }
+  const csv = [
+    ['No', 'Nama', 'Nomor'],
+    ...allData.map((r, i) => [i+1, r.nama, r.nomor])
+  ].map(row => row.join(',')).join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `data-pelanggan-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  showToast('File CSV berhasil di-download', 'success');
+}
+    
 </script>
 </body>
 </html>
