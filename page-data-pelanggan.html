@@ -345,19 +345,28 @@
   transform: rotate(180deg);
 }
 
-.data-card-body {
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+#tableContainer {              /* ✅ Ganti dari .data-card-body ke #tableContainer */
+  transition: max-height 0.3s ease, opacity 0.3s ease;
   max-height: 2000px;
   opacity: 1;
   overflow: hidden;
 }
 
-.data-card-body.collapsed {
+#tableContainer.collapsed {    /* ✅ Target ID yang benar */
   max-height: 0;
   opacity: 0;
   padding: 0;
 }
 
+/* Responsive: tombol toggle lebih besar di mobile */
+@media (max-width: 768px) {
+  .btn-toggle-table {
+    width: 32px;
+    height: 32px;
+    font-size: 0.875rem;
+  }
+}
+    
 /* Responsive: tombol toggle lebih besar di mobile */
 @media (max-width: 768px) {
   .btn-toggle-table {
@@ -532,7 +541,8 @@
   <div class="card-actions">
     <!-- Desktop: Tombol Langsung -->
     <button class="btn btn-outline btn-sm desktop-only" id="btnRefresh" title="Muat ulang">
-  </button>
+  <i class="fas fa-sync-alt"></i> <span>Refresh</span>
+</button>
   <button class="btn btn-outline btn-sm desktop-only" id="btnCopyAll" style="display:none">
     <i class="fas fa-copy"></i> <span>Salin Semua</span>
   </button>
