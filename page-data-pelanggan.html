@@ -480,6 +480,139 @@
     text-overflow: ellipsis;
   }
 }
+
+    /* ============================================
+   MOBILE SUPER COMPACT - Tambahan Drastis
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Font lebih kecil */
+  html { font-size: 13px !important; }
+  
+  /* Header lebih pendek */
+  :root {
+    --header-height: 50px;
+    --bottom-nav-height: 55px;
+  }
+  
+  .main-header {
+    height: 50px;
+    padding: 0 0.75rem;
+  }
+  
+  .header-title {
+    font-size: 0.95rem !important; /* Judul lebih kecil */
+    max-width: 150px; /* Batasi lebar judul */
+  }
+  
+  /* Tombol burger lebih kecil */
+  #mobileMenuToggle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.9rem;
+  }
+  
+  /* Tombol action header lebih kecil */
+  .header-actions .btn-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+  
+  /* Content padding minimal */
+  .page-content {
+    padding: 0.625rem !important;
+    padding-bottom: calc(var(--bottom-nav-height) + 0.625rem) !important;
+  }
+  
+  /* Stats card jadi 2 kolom, lebih rapat */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+  
+  .stat-card {
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+    border-radius: 0.625rem;
+  }
+  
+  .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+    border-radius: 0.5rem;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem !important;
+  }
+  
+  .stat-label {
+    font-size: 0.6rem !important;
+  }
+  
+  /* Toolbar lebih compact */
+  .page-toolbar {
+    margin-bottom: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .search-box input {
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem !important;
+    font-size: 0.85rem !important;
+    height: 38px;
+  }
+  
+  .btn-primary {
+    padding: 0.5rem 0.875rem !important;
+    font-size: 0.8rem !important;
+    height: 38px;
+  }
+  
+  /* Data card lebih rapat */
+  .data-card {
+    border-radius: 0.75rem;
+  }
+  
+  .data-card-header {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .data-card-title {
+    font-size: 0.9rem !important;
+  }
+  
+  /* Bottom nav lebih kecil */
+  .mobile-nav {
+    height: 55px !important;
+    padding: 0 0.5rem !important;
+  }
+  
+  .mobile-nav-item {
+    font-size: 0.6rem !important;
+    gap: 0.15rem !important;
+    padding: 0.25rem !important;
+  }
+  
+  .mobile-nav-item i {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* Layar sangat kecil (iPhone SE, dll) */
+@media (max-width: 380px) {
+  html { font-size: 12px !important; }
+  
+  .stats-grid {
+    grid-template-columns: 1fr !important; /* 1 kolom penuh */
+  }
+  
+  .header-title {
+    font-size: 0.85rem !important;
+  }
+}
     
   </style>
 </head>
@@ -583,7 +716,7 @@
     <!-- Header -->
     <header class="main-header">
       <div class="header-left">
-       <button class="btn-icon" id="mobileMenuToggle">
+       <button class="btn-icon" id="mobileMenuToggle" style="display:flex;">
       <i class="fas fa-bars"></i>
     </button>
           <h1 class="header-title">Data Pelanggan</h1>
