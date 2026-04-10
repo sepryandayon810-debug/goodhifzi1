@@ -641,9 +641,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       <!-- Header -->
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
+  <button class="btn-icon" id="mobileMenuToggle">
+  <i class="fas fa-bars"></i>
+</button>
           <h1 class="header-title">Modal Harian</h1>
         </div>
         
@@ -801,13 +801,39 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
         // Sidebar toggle
         document.getElementById('menuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('collapsed');
-        });
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
 
-        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('mobile-open');
-        });
+// Sidebar toggle - Mobile (burger menu) - VERSI BARU
+const mobileToggle = document.getElementById('mobileMenuToggle');
+const sidebarEl = document.getElementById('sidebar');
 
+if (mobileToggle) {
+  mobileToggle.removeAttribute('style');
+  mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebarEl.classList.toggle('mobile-open');
+  });
+}
+
+// Tutup sidebar saat klik link di mobile
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 1024) {
+      sidebarEl.classList.remove('mobile-open');
+    }
+  });
+});
+
+// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 1024 && 
+      sidebarEl.classList.contains('mobile-open') &&
+      !sidebarEl.contains(e.target) && 
+      e.target !== mobileToggle) {
+    sidebarEl.classList.remove('mobile-open');
+  }
+});
         // Dropdown menus
         document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
           const toggle = dropdown.querySelector('.nav-dropdown-toggle');
@@ -851,110 +877,122 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
 
       async function loadModalHistory() {
-        Utils.showLoading();
-        
-        try {
-          const fromDate = document.getElementById('filterDateFrom').value;
-          const toDate = document.getElementById('filterDateTo').value;
+  Utils.showLoading();
+  
+  try {
+    const fromDate = document.getElementById('filterDateFrom').value;
+    const toDate = document.getElementById('filterDateTo').value;
+    const user = Auth.getCurrentUser();
+    
+    if (!user || !user.uid) {
+      console.warn('User not authenticated');
+      Utils.hideLoading();
+      return;
+    }
+    
+    const historyList = document.getElementById('modalHistory');
+    let html = '';
+    const modalArray = [];
+    
+    let permissionError = null;
+    
+    try {
+      // Coba load data modal
+      // PERHATIAN: Query ini hanya akan work jika user adalah owner/admin 
+      // atau rules diupdate (lihat solusi C di bawah)
+      const snapshot = await database.ref('modal').once('value');
+      const modalData = snapshot.val() || {};
+      
+      Object.entries(modalData).forEach(([date, users]) => {
+        // Filter hanya data user yang sedang login (privacy)
+        if (users && users[user.uid]) {
+          const data = users[user.uid];
           
-          const snapshot = await database.ref('modal').once('value');
-          const modalData = snapshot.val() || {};
+          // Filter tanggal jika ada
+          if (fromDate && date < fromDate) return;
+          if (toDate && date > toDate) return;
           
-          const historyList = document.getElementById('modalHistory');
-          let html = '';
-          
-          const modalArray = [];
-          
-          Object.entries(modalData).forEach(([date, users]) => {
-            Object.entries(users).forEach(([userId, data]) => {
-              if (fromDate && date < fromDate) return;
-              if (toDate && date > toDate) return;
-              
-              modalArray.push({
-                date,
-                userId,
-                ...data
-              });
-            });
-          });
-          
-          modalArray.sort((a, b) => b.date.localeCompare(a.date));
-          
-          if (modalArray.length === 0) {
-            html = `
-              <div class="empty-state">
-                <i class="fas fa-coins"></i>
-                <p>Belum ada data modal</p>
-              </div>
-            `;
-          } else {
-            modalArray.forEach(modal => {
-              const formattedDate = new Date(modal.date).toLocaleDateString('id-ID', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              });
-              
-              html += `
-                <div class="history-item">
-                  <div class="history-info">
-                    <span class="history-date">${formattedDate}</span>
-                    <span class="history-user">${modal.userName || 'Unknown'}</span>
-                    ${modal.note ? `<span style="font-size: 0.75rem; color: var(--text-muted);">${modal.note}</span>` : ''}
-                  </div>
-                  <span class="history-amount">${Utils.formatRupiah(modal.amount)}</span>
-                </div>
-              `;
-            });
-          }
-          
-          historyList.innerHTML = html;
-        } catch (error) {
-          console.error('Error loading modal history:', error);
-          Utils.showToast('Gagal memuat riwayat modal', 'error');
-        }
-        
-        Utils.hideLoading();
-      }
-
-      async function saveModal() {
-        Utils.showLoading();
-        
-        try {
-          const date = document.getElementById('modalDate').value;
-          const amount = parseInt(document.getElementById('modalAmount').value.replace(/\./g, '')) || 0;
-          const note = document.getElementById('modalNote').value;
-          const user = Auth.getCurrentUser();
-          
-          if (amount <= 0) {
-            Utils.showToast('Jumlah modal harus lebih dari 0', 'error');
-            Utils.hideLoading();
-            return;
-          }
-          
-          await database.ref('modal/' + date + '/' + user.uid).set({
-            amount,
-            note,
+          modalArray.push({
+            date,
             userId: user.uid,
-            userName: user.name || user.email,
-            timestamp: Date.now()
+            ...data
           });
-          
-          Utils.showToast('Modal berhasil disimpan', 'success');
-          document.getElementById('modalForm').reset();
-          document.getElementById('modalDate').value = date;
-          
-          // Reload data
-          loadTodayModal();
-          loadModalHistory();
-        } catch (error) {
-          console.error('Error saving modal:', error);
-          Utils.showToast('Gagal menyimpan modal', 'error');
         }
-        
-        Utils.hideLoading();
+      });
+    } catch (permError) {
+      console.warn('Permission error or no data:', permError.message);
+      permissionError = permError;
+      // Jika permission denied, coba load hanya data hari ini sebagai fallback
+      try {
+        const today = Utils.getTodayString();
+        const todaySnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+        const todayData = todaySnapshot.val();
+        if (todayData) {
+          modalArray.push({
+            date: today,
+            userId: user.uid,
+            ...todayData
+          });
+        }
+      } catch (e) {
+        console.log('No data for today');
       }
+    }
+    
+    modalArray.sort((a, b) => b.date.localeCompare(a.date));
+    
+    if (modalArray.length === 0) {
+      html = `
+        <div class="empty-state">
+          <i class="fas fa-coins"></i>
+          <p>Belum ada data modal${fromDate || toDate ? ' untuk periode ini' : ''}</p>
+          ${permissionError ? '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">⚠️ Riwayat lengkap tidak dapat diakses (Permission)</p>' : ''}
+        </div>
+      `;
+    } else {
+      modalArray.forEach(modal => {
+        const formattedDate = new Date(modal.date).toLocaleDateString('id-ID', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        html += `
+          <div class="history-item">
+            <div class="history-info">
+              <span class="history-date">${formattedDate}</span>
+              <span class="history-user">${modal.userName || 'Unknown'}</span>
+              ${modal.note ? `<span style="font-size: 0.75rem; color: var(--text-muted);">${modal.note}</span>` : ''}
+            </div>
+            <span class="history-amount">${Utils.formatRupiah(modal.amount)}</span>
+          </div>
+        `;
+      });
+    }
+    
+    historyList.innerHTML = html;
+    
+    // Show toast jika ada permission error tapi tetap tampilkan data yang berhasil diambil
+    if (permissionError) {
+      Utils.showToast('Mode terbatas: Hanya menampilkan data hari ini', 'warning');
+    }
+    
+  } catch (error) {
+    console.error('Error loading modal history:', error);
+    Utils.showToast('Gagal memuat riwayat modal', 'error');
+    
+    document.getElementById('modalHistory').innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-exclamation-circle" style="color: var(--danger);"></i>
+        <p>Gagal memuat data</p>
+        <p style="font-size:0.75rem;">${error.message || 'Error'}</p>
+      </div>
+    `;
+  }
+  
+  Utils.hideLoading();
+}
     });
   </script>
 </body>
