@@ -1258,7 +1258,7 @@ document.addEventListener('click', (e) => {
 
   container.innerHTML = filtered.map(p => {
     // Deteksi produk unlimited (digital/pulsa/token/voucher)
-    onst catId = (p.categoryId || '').toString().toLowerCase();
+    const catId = (p.categoryId || '').toString().toLowerCase();
 const prodName = (p.name || '').toLowerCase();
 const isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik', 'games'].includes(catId) || 
                   ['pulsa', 'token', 'voucher', 'digital', 'games', 'game', 'diamond', 'steam', 'top up', 'topup'].some(keyword => prodName.includes(keyword));
