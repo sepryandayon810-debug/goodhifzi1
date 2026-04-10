@@ -140,6 +140,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
 .card-body{padding:1.5rem}
+.d-md-none{display:none!important}
+@media(max-width:768px){
+  .d-md-none{display:inline-flex!important}
+}
 
 /* ===== MOBILE NAV ===== */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
@@ -402,7 +406,9 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     <main class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon" id="mobileMenuToggle" style="display:none"><i class="fas fa-bars"></i></button>
+          <button class="btn-icon d-md-none" id="mobileMenuToggle">
+  <i class="fas fa-bars"></i>
+</button>
           <h1 class="header-title">Riwayat Transaksi</h1>
         </div>
         <div class="header-actions">
@@ -631,11 +637,36 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         el('sidebar').classList.toggle('collapsed');
       });
 
-      const mobileToggle = el('mobileMenuToggle');
-      if (mobileToggle) {
-        mobileToggle.style.display = window.innerWidth <= 1024 ? 'flex' : 'none';
-        mobileToggle.addEventListener('click', () => el('sidebar').classList.toggle('mobile-open'));
-      }
+const mobileToggle = el('mobileMenuToggle');
+if (mobileToggle) {
+  // Hapus inline style yang lama, gunakan CSS class d-md-none
+  mobileToggle.removeAttribute('style');
+  
+  mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation(); // Penting: biar gak conflict
+    el('sidebar').classList.toggle('mobile-open');
+  });
+}
+
+// Tutup sidebar saat klik link di mobile (sama seperti Kasir)
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 1024) {
+      el('sidebar').classList.remove('mobile-open');
+    }
+  });
+});
+
+// Tutup sidebar saat klik overlay (area gelap) - sama seperti Kasir
+document.addEventListener('click', (e) => {
+  const sidebar = el('sidebar');
+  if (window.innerWidth <= 1024 && 
+      sidebar.classList.contains('mobile-open') &&
+      !sidebar.contains(e.target) && 
+      e.target !== mobileToggle) {
+    sidebar.classList.remove('mobile-open');
+  }
+});
 
       // Logout
       el('btnLogout').addEventListener('click', () => {
