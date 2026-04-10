@@ -343,107 +343,311 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .quick-amount:hover{background:var(--primary);color:white;border-color:var(--primary)}
 
 /* ============================================
-   MOBILE OPTIMIZATION - TAMBAHAN DI AKHIR
+   FIX BURGER MENU & MOBILE SUPER COMPACT
    ============================================ */
 
-@media (max-width: 768px) {
-  /* Reduce base font size */
-  html { font-size: 14px; }
-  
-  /* Compact header */
-  .main-header { height: 60px; padding: 0 1rem; }
-  .header-title { font-size: 1.1rem; }
-  
-  /* Compact page content */
-  .page-content { padding: 0.75rem; padding-bottom: 90px; }
-  
-  /* Compact stats cards */
-  .stats-grid { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 0.5rem; 
-    margin-bottom: 0.75rem;
+/* Fix: Burger menu harus tampil di mobile */
+@media (max-width: 1024px) {
+  .d-md-none {
+    display: flex !important; /* Tampilkan di mobile */
   }
-  .stat-card { 
-    padding: 0.75rem; 
-    gap: 0.5rem; 
-  }
-  .stat-icon { 
-    width: 36px; 
-    height: 36px; 
-    font-size: 1rem; 
-  }
-  .stat-value { font-size: 1rem; }
-  .stat-label { font-size: 0.65rem; }
-  
-  /* Compact kas calculation */
-  .kas-calculation { 
-    padding: 1rem; 
-    margin-bottom: 0.75rem; 
-  }
-  .kas-calculation-header { 
-    padding-bottom: 0.75rem; 
-    margin-bottom: 0.75rem; 
-  }
-  .kas-calculation-title { font-size: 0.95rem; }
-  .kas-calculation-grid { 
-    grid-template-columns: 1fr; 
-    gap: 0.5rem; 
-  }
-  .kas-item { 
-    padding: 0.75rem 1rem; 
-  }
-  .kas-item-icon { 
-    width: 28px; 
-    height: 28px; 
-    font-size: 0.75rem; 
-  }
-  .kas-item-label { font-size: 0.75rem; }
-  .kas-item-value { font-size: 0.9rem; }
-  .kas-total { 
-    margin-top: 1rem; 
-    padding-top: 1rem; 
-  }
-  .kas-total-label { font-size: 0.9rem; }
-  .kas-total-value { font-size: 1.25rem; }
-  .formula-display { 
-    margin-top: 0.75rem; 
-    padding: 0.75rem; 
-    font-size: 0.7rem; 
-  }
-  
-  /* Compact quick actions */
-  .quick-actions { 
-    grid-template-columns: repeat(2, 1fr) !important; 
-    gap: 0.5rem; 
-  }
-  .quick-action-btn { 
-    padding: 0.75rem; 
-    font-size: 0.75rem; 
-  }
-  .quick-action-btn i { font-size: 1.25rem; }
-  
-  /* Compact cards */
-  .card-header { padding: 1rem; }
-  .card-title { font-size: 0.95rem; }
-  .card-body { padding: 1rem; }
-  
-  /* Compact sidebar mobile */
-  .sidebar { width: 260px; }
-  .sidebar-header { min-height: 60px; padding: 1rem; }
-  .logo-icon { width: 36px; height: 36px; font-size: 1rem; }
-  .nav-link { padding: 0.5rem 0.75rem; font-size: 0.85rem; }
-  
-  /* Compact bottom nav */
-  .mobile-nav { height: 60px; }
-  .mobile-nav-item i { font-size: 1.1rem; }
-  .mobile-nav-item { font-size: 0.65rem; }
 }
 
+/* Desktop: Burger menu disembunyikan */
+@media (min-width: 1025px) {
+  #mobileMenuToggle {
+    display: none !important;
+  }
+}
+
+/* Mobile Super Compact */
+@media (max-width: 768px) {
+  html { font-size: 13px !important; }
+  
+  :root {
+    --header-height: 55px;
+    --bottom-nav-height: 60px;
+  }
+  
+  /* Header lebih kecil */
+  .main-header {
+    height: 55px;
+    padding: 0 0.75rem;
+  }
+  
+  .header-title {
+    font-size: 1.1rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+  }
+  
+  /* Burger menu */
+  #mobileMenuToggle {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Tombol header lebih kecil */
+  .header-actions .btn-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  /* Hide header stats di mobile kecil */
+  .header-stats {
+    display: none;
+  }
+  
+  /* Content padding minimal */
+  .page-content {
+    padding: 0.625rem !important;
+    padding-bottom: calc(var(--bottom-nav-height) + 0.625rem) !important;
+  }
+  
+  /* Quick actions horizontal scroll & lebih kecil */
+  .quick-actions-bar {
+    padding: 0.5rem;
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .quick-action-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.375rem;
+  }
+  
+  .quick-action-btn i {
+    font-size: 0.9rem;
+  }
+  
+  /* Search box lebih kecil */
+  .product-toolbar {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .search-box input {
+    padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+    font-size: 0.85rem;
+    height: 40px;
+  }
+  
+  .view-toggle {
+    padding: 0.2rem;
+  }
+  
+  .view-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Category pills lebih kecil */
+  .category-pills {
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .category-pill {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Product grid lebih compact */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.625rem;
+  }
+  
+  .product-card {
+    border-radius: 0.75rem;
+  }
+  
+  .product-card-image {
+    aspect-ratio: 1;
+  }
+  
+  .product-card-image i {
+    font-size: 2rem;
+  }
+  
+  .product-stock-badge {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6rem;
+    top: 0.375rem;
+    right: 0.375rem;
+  }
+  
+  .product-card-info {
+    padding: 0.75rem;
+  }
+  
+  .product-card-name {
+    font-size: 0.8rem;
+    margin-bottom: 0.125rem;
+  }
+  
+  .product-card-price {
+    font-size: 0.9rem;
+  }
+  
+  .product-card-code {
+    font-size: 0.7rem;
+  }
+  
+  /* Skeleton lebih kecil */
+  .product-card.skeleton {
+    height: 160px;
+  }
+  
+  /* Cart toggle (tombol keranjang) lebih kecil */
+  .cart-toggle {
+    width: 48px;
+    height: 48px;
+    bottom: 80px;
+    right: 0.75rem;
+  }
+  
+  .cart-toggle i {
+    font-size: 1.1rem;
+  }
+  
+  .cart-toggle .badge {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+    top: -4px;
+    right: -4px;
+  }
+  
+  /* Bottom nav lebih compact */
+  .mobile-nav {
+    height: 60px;
+    padding: 0 0.5rem;
+  }
+  
+  .mobile-nav-item {
+    padding: 0.375rem;
+    gap: 0.2rem;
+    font-size: 0.6rem;
+  }
+  
+  .mobile-nav-item i {
+    font-size: 1.1rem;
+  }
+  
+  /* Modal pembayaran lebih compact */
+  .modal {
+    max-width: 100%;
+    border-radius: 1rem 1rem 0 0;
+    margin: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 85vh;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-title {
+    font-size: 1.1rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .payment-methods {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .payment-method {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .payment-method i {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .payment-method span {
+    font-size: 0.7rem;
+  }
+  
+  .amount-display {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .amount-label {
+    font-size: 0.8rem;
+  }
+  
+  .amount-value {
+    font-size: 1.5rem;
+  }
+  
+  .quick-amounts {
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .quick-amount {
+    padding: 0.375rem 0.875rem;
+    font-size: 0.8rem;
+  }
+  
+  .numpad {
+    gap: 0.375rem;
+  }
+  
+  .numpad-btn {
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 0.625rem;
+  }
+  
+  .modal-footer {
+    padding: 0.875rem 1rem;
+  }
+  
+  .modal-footer .btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Extra small devices */
 @media (max-width: 380px) {
-  /* Extra small screens */
-  html { font-size: 13px; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .quick-actions { grid-template-columns: 1fr; }
+  html { font-size: 12px !important; }
+  
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem;
+  }
+  
+  .quick-action-btn span {
+    display: none; /* Sembunyikan text, hanya icon */
+  }
+  
+  .quick-action-btn {
+    padding: 0.625rem;
+  }
+  
+  .header-title {
+    max-width: 100px;
+  }
 }
     
   </style>
