@@ -2,7 +2,33 @@
 <html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
+  <script>
+  // Force mobile detection
+  (function() {
+    var isMobile = window.innerWidth <= 1024 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      document.documentElement.classList.add('force-mobile');
+    }
+  })();
+  </script>
+  
+  <meta name="theme-color" content="#6366f1">
+  <title>WebPOS - Kasir</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Fonts -->
+  ...
+  
+  <!-- CSS Style -->
+  <style>
+    /* CSS Anda di sini */
+  </style>
+</head>
+  
   <meta name="theme-color" content="#6366f1">
   <title>WebPOS - Kasir</title>
 
