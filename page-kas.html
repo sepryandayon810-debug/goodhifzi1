@@ -226,8 +226,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .d-none{display:none!important}
 .d-block{display:block!important}
 .d-flex{display:flex!important}
-.d-md-none{display:none!important}
-@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
+@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}} /* ← INI JUGA REDUNDANT */
 .text-left{text-align:left!important}
 .text-center{text-align:center!important}
 .text-right{text-align:right!important}
@@ -477,7 +476,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     <main class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+<button class="btn-icon" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
           <h1 class="header-title">Kas Management</h1>
         </div>
         <div class="header-actions">
@@ -610,9 +609,37 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         document.getElementById('sidebar').classList.toggle('collapsed');
       });
 
-      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('mobile-open');
-      });
+const mobileToggle = document.getElementById('mobileMenuToggle');
+const sidebar = document.getElementById('sidebar');
+
+if (mobileToggle) {
+  // Hapus inline style lama jika ada
+  mobileToggle.removeAttribute('style');
+  
+  mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('mobile-open');
+  });
+}
+
+// Tutup sidebar saat klik link di mobile
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 1024) {
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+});
+
+// Tutup sidebar saat klik overlay (area gelap)
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 1024 && 
+      sidebar.classList.contains('mobile-open') &&
+      !sidebar.contains(e.target) && 
+      e.target !== mobileToggle) {
+    sidebar.classList.remove('mobile-open');
+  }
+});
 
       document.getElementById('btnLogout').addEventListener('click', () => {
         Utils.confirm('Yakin ingin logout?', () => Auth.logout());
