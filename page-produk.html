@@ -212,7 +212,36 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .produk-filters{display:flex;gap:0.5rem;flex-wrap:wrap}
 .filter-select{padding:0.875rem 1rem;border:1px solid var(--border-color);border-radius:var(--radius-lg);background:var(--bg-card);font-size:0.875rem;min-width:150px;color:var(--text-primary)}
 .produk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
-@media(max-width:640px){.produk-grid{grid-template-columns:repeat(2,1fr);gap:0.75rem}}
+@media(max-width:640px){
+  .produk-grid{
+    grid-template-columns:repeat(2,1fr) !important;
+    gap:0.5rem !important;
+  }
+  .produk-card{
+    min-height:180px; /* Lebih pendek */
+  }
+  .produk-image{
+    height:90px; /* Gambar lebih kecil */
+  }
+  .produk-info{
+    padding:0.5rem;
+  }
+  .produk-name{
+    font-size:0.75rem !important; /* Teks lebih kecil */
+    white-space:normal; /* Bisa 2 baris */
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .produk-price{
+    font-size:0.85rem !important;
+  }
+  .produk-actions .btn{
+    padding:0.3rem 0.4rem !important;
+    font-size:0.65rem !important;
+  }
+}
 .produk-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);overflow:hidden;transition:all 0.25s;position:relative}
 .produk-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
 .produk-image{aspect-ratio:1;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;position:relative}
@@ -423,10 +452,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <div class="produk-filters">
               <select class="filter-select" id="filterKategori"><option value="">Semua Kategori</option></select>
               <select class="filter-select" id="filterStatus">
-                <option value="">Semua Status</option>
-                <option value="active">Aktif</option>
-                <option value="inactive">Nonaktif</option>
-              </select>
+  <option value="">Semua Status</option>
+  <option value="active">Aktif</option>
+  <option value="inactive">Nonaktif</option>
+</select>
+<select class="filter-select" id="filterSort">
+  <option value="">Urutkan: Default</option>
+  <option value="name_asc">Nama: A-Z</option>
+  <option value="name_desc">Nama: Z-A</option>
+  <option value="price_low">Harga: Termurah</option>
+  <option value="price_high">Harga: Termahal</option>
+</select>
               <div class="view-toggle">
                 <button class="view-btn active" data-view="grid" title="Grid View"><i class="fas fa-th-large"></i></button>
                 <button class="view-btn" data-view="list" title="List View"><i class="fas fa-list"></i></button>
@@ -750,9 +786,19 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       menuToggle.addEventListener("click", function(){
         sidebar.classList.toggle("collapsed");
       });
-      mobileMenuToggle.addEventListener("click", function(){
-        sidebar.classList.toggle("mobile-open");
-      });
+      mobileMenuToggle.addEventListener("click", function(e){
+  e.stopPropagation(); // ⭐ Tambahan: biar gak conflict
+  sidebar.classList.toggle("mobile-open");
+});
+
+// ⭐ TAMBAHKAN INI: Tutup sidebar saat klik link di mobile
+document.querySelectorAll('.nav-link').forEach(function(link){
+  link.addEventListener('click', function(){
+    if(window.innerWidth <= 1024){
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+});
 
       // Dropdown navigasi
       document.querySelectorAll("[data-dropdown]").forEach(function(dropdown){
@@ -947,7 +993,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           if(product.image) html += '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">';
           else html += '<i class="fas fa-box"></i>';
           html += '<span class="produk-status ' + (product.status === "active" ? "active" : "inactive") + '">' + (product.status === "active" ? "Aktif" : "Nonaktif") + '</span>';
-          html += '<span class="produk-stock-badge">Stok: ' + (product.stock || 0) + '</span>';
+// ⭐ Tambahkan deteksi unlimited
+var catId = (product.categoryId || '').toString().toLowerCase();
+var prodName = (product.name || '').toString().toLowerCase();
+var isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik', 'games'].includes(catId) || 
+                ['pulsa', 'token', 'voucher', 'digital', 'games', 'game', 'diamond', 'steam', 'top up', 'topup'].some(function(keyword){ 
+                  return prodName.indexOf(keyword) !== -1; 
+                });
+var isUnlimited = product.isUnlimited || isDigital || product.stock === 999999;
+
+var stockBadge = '';
+if(isUnlimited){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--info)">∞ Unlimited</span>';
+} else if(product.stock <= 0){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--danger)">Habis</span>';
+} else if(product.stock <= 5){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--warning)">' + product.stock + ' sisa</span>';
+} else {
+  stockBadge = '<span class="produk-stock-badge">Stok: ' + product.stock + '</span>';
+}
+html += stockBadge;
           html += '</div>';
           html += '<div class="produk-info">';
           html += '<div class="produk-name">' + escapeHtml(product.name) + '</div>';
@@ -1060,7 +1125,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           if(product.image) html += '<img src="' + product.image + '" alt="' + escapeHtml(product.name) + '">';
           else html += '<i class="fas fa-box"></i>';
           html += '<span class="produk-status ' + (product.status === "active" ? "active" : "inactive") + '">' + (product.status === "active" ? "Aktif" : "Nonaktif") + '</span>';
-          html += '<span class="produk-stock-badge">Stok: ' + (product.stock || 0) + '</span>';
+// ⭐ Tambahkan deteksi unlimited
+var catId = (product.categoryId || '').toString().toLowerCase();
+var prodName = (product.name || '').toString().toLowerCase();
+var isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik', 'games'].includes(catId) || 
+                ['pulsa', 'token', 'voucher', 'digital', 'games', 'game', 'diamond', 'steam', 'top up', 'topup'].some(function(keyword){ 
+                  return prodName.indexOf(keyword) !== -1; 
+                });
+var isUnlimited = product.isUnlimited || isDigital || product.stock === 999999;
+
+var stockBadge = '';
+if(isUnlimited){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--info)">∞ Unlimited</span>';
+} else if(product.stock <= 0){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--danger)">Habis</span>';
+} else if(product.stock <= 5){
+  stockBadge = '<span class="produk-stock-badge" style="background:var(--warning)">' + product.stock + ' sisa</span>';
+} else {
+  stockBadge = '<span class="produk-stock-badge">Stok: ' + product.stock + '</span>';
+}
+html += stockBadge;
           html += '</div><div class="produk-info">';
           html += '<div class="produk-name">' + escapeHtml(product.name) + '</div>';
           html += '<div class="produk-code">' + (product.code || "-") + '</div>';
@@ -1093,33 +1177,60 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     // EVENT LISTENERS
     // ============================================================
     function setupEventListeners(){
-      // Produk grid — event delegation
-      document.getElementById("produkGrid").addEventListener("click", function(e){
-        var btn = e.target.closest(".btn-edit-produk");
-        if(btn){ e.stopPropagation(); editProduct(btn.dataset.id); return; }
-        btn = e.target.closest(".btn-hapus-produk");
-        if(btn){ e.stopPropagation(); deleteProduct(btn.dataset.id); }
-      });
+  // Produk grid — event delegation
+  document.getElementById("produkGrid").addEventListener("click", function(e){
+    var btn = e.target.closest(".btn-edit-produk");
+    if(btn){ e.stopPropagation(); editProduct(btn.dataset.id); return; }
+    btn = e.target.closest(".btn-hapus-produk");
+    if(btn){ e.stopPropagation(); deleteProduct(btn.dataset.id); }
+  });
 
-      // Kategori grid — event delegation
-      document.getElementById("kategoriGrid").addEventListener("click", function(e){
-  if(e.target.closest(".btn-edit-kategori") || e.target.closest(".btn-hapus-kategori")) return;
-  var card = e.target.closest(".kategori-card[data-id]");
-  if(card && !card.classList.contains("add-kategori-card")){
-    var catId = card.dataset.id;
-    var cat = categories.find(function(c){ return c.id === catId; });
-    var btn = e.target.closest(".btn-edit-kategori");
-    if(btn){ e.stopPropagation(); editCategory(btn.dataset.id); return; }
-    btn = e.target.closest(".btn-hapus-kategori");
-    if(btn){ e.stopPropagation(); deleteCategory(btn.dataset.id); }
-  }
-});
+  // ⭐ EVENT DELEGATION UNTUK GRID KATEGORI (bisa edit dari detail kategori)
+  document.getElementById("kategoriProdukGrid").addEventListener("click", function(e){
+    var btn = e.target.closest(".btn-edit-produk");
+    if(btn){ 
+      e.stopPropagation(); 
+      editProduct(btn.dataset.id); 
+      return; 
+    }
+    btn = e.target.closest(".btn-hapus-produk");
+    if(btn){ 
+      e.stopPropagation(); 
+      deleteProduct(btn.dataset.id); 
+    }
+  });
 
+  // Kategori grid — event delegation
+  document.getElementById("kategoriGrid").addEventListener("click", function(e){
+    // Handle tombol edit
+    var btnEdit = e.target.closest(".btn-edit-kategori");
+    if(btnEdit){ 
+      e.stopPropagation(); 
+      editCategory(btnEdit.dataset.id); 
+      return; 
+    }
+    
+    // Handle tombol hapus
+    var btnHapus = e.target.closest(".btn-hapus-kategori");
+    if(btnHapus){ 
+      e.stopPropagation(); 
+      deleteCategory(btnHapus.dataset.id); 
+      return; 
+    }
+    
+    // Handle klik card (buka detail)
+    var card = e.target.closest(".kategori-card[data-id]");
+    if(card && !card.classList.contains("add-kategori-card")){
+      openKategoriDetail(card.dataset.id);
+    }
+  });
       // Search & filter
       var searchInput = document.getElementById("searchProduk");
       if(searchInput) searchInput.addEventListener("input", debounce(applyFilters, 300));
       document.getElementById("filterKategori").addEventListener("change", applyFilters);
       document.getElementById("filterStatus").addEventListener("change", applyFilters);
+      document.getElementById("filterSort").addEventListener("change", applyFilters);
+
 
       // View toggle (grid/list)
       document.querySelectorAll(".view-btn").forEach(function(btn){
@@ -1191,19 +1302,40 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     // FILTER
     // ============================================================
     function applyFilters(){
-      var search = (document.getElementById("searchProduk").value || "").toLowerCase();
-      var category = document.getElementById("filterKategori").value;
-      var status = document.getElementById("filterStatus").value;
-      filteredProducts = products.filter(function(p){
-        var matchSearch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.code && p.code.toLowerCase().includes(search));
-        var matchCategory = !category || p.categoryId === category;
-        var matchStatus = !status || p.status === status;
-        return matchSearch && matchCategory && matchStatus;
-      });
-      currentPage = 1;
-      renderProducts();
-      renderPagination();
-    }
+  var search = (document.getElementById("searchProduk").value || "").toLowerCase();
+  var category = document.getElementById("filterKategori").value;
+  var status = document.getElementById("filterStatus").value;
+  var sort = document.getElementById("filterSort").value; // ⭐ Ambil nilai sorting
+  
+  filteredProducts = products.filter(function(p){
+    var matchSearch = !search || (p.name && p.name.toLowerCase().includes(search)) || (p.code && p.code.toLowerCase().includes(search));
+    var matchCategory = !category || p.categoryId === category;
+    var matchStatus = !status || p.status === status;
+    return matchSearch && matchCategory && matchStatus;
+  });
+  
+  // ⭐ SORTING LOGIC (TAMBAHAN)
+  if(sort){
+    filteredProducts.sort(function(a, b){
+      switch(sort){
+        case 'name_asc':
+          return (a.name || '').localeCompare(b.name || '', 'id');
+        case 'name_desc':
+          return (b.name || '').localeCompare(a.name || '', 'id');
+        case 'price_low':
+          return (a.sellingPrice || 0) - (b.sellingPrice || 0);
+        case 'price_high':
+          return (b.sellingPrice || 0) - (a.sellingPrice || 0);
+        default:
+          return 0;
+      }
+    });
+  }
+  
+  currentPage = 1;
+  renderProducts();
+  renderPagination();
+}
 
     // ============================================================
     // MODAL PRODUK
