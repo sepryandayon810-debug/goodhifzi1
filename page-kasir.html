@@ -342,111 +342,178 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .quick-amount{padding:.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;font-size:.875rem;cursor:pointer;transition:all .15s;color:var(--text-secondary)}
 .quick-amount:hover{background:var(--primary);color:white;border-color:var(--primary)}
 
-/* ============================================
-   MOBILE OPTIMIZATION - TAMBAHAN DI AKHIR
-   ============================================ */
-
-@media (max-width: 768px) {
-  /* Reduce base font size */
-  html { font-size: 14px; }
-  
-  /* Compact header */
-  .main-header { height: 60px; padding: 0 1rem; }
-  .header-title { font-size: 1.1rem; }
-  
-  /* Compact page content */
-  .page-content { padding: 0.75rem; padding-bottom: 90px; }
-  
-  /* Compact stats cards */
-  .stats-grid { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 0.5rem; 
-    margin-bottom: 0.75rem;
-  }
-  .stat-card { 
-    padding: 0.75rem; 
-    gap: 0.5rem; 
-  }
-  .stat-icon { 
-    width: 36px; 
-    height: 36px; 
-    font-size: 1rem; 
-  }
-  .stat-value { font-size: 1rem; }
-  .stat-label { font-size: 0.65rem; }
-  
-  /* Compact kas calculation */
-  .kas-calculation { 
-    padding: 1rem; 
-    margin-bottom: 0.75rem; 
-  }
-  .kas-calculation-header { 
-    padding-bottom: 0.75rem; 
-    margin-bottom: 0.75rem; 
-  }
-  .kas-calculation-title { font-size: 0.95rem; }
-  .kas-calculation-grid { 
-    grid-template-columns: 1fr; 
-    gap: 0.5rem; 
-  }
-  .kas-item { 
-    padding: 0.75rem 1rem; 
-  }
-  .kas-item-icon { 
-    width: 28px; 
-    height: 28px; 
-    font-size: 0.75rem; 
-  }
-  .kas-item-label { font-size: 0.75rem; }
-  .kas-item-value { font-size: 0.9rem; }
-  .kas-total { 
-    margin-top: 1rem; 
-    padding-top: 1rem; 
-  }
-  .kas-total-label { font-size: 0.9rem; }
-  .kas-total-value { font-size: 1.25rem; }
-  .formula-display { 
-    margin-top: 0.75rem; 
-    padding: 0.75rem; 
-    font-size: 0.7rem; 
+/* ===== PERBAIKAN MOBILE ===== */
+@media(max-width:768px){
+  /* Burger menu harus tampil */
+  .btn-icon.d-md-none {
+    display: flex !important;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    align-items: center;
+    justify-content: center;
   }
   
-  /* Compact quick actions */
-  .quick-actions { 
-    grid-template-columns: repeat(2, 1fr) !important; 
-    gap: 0.5rem; 
+  /* Grid produk lebih kecil di mobile */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
   }
-  .quick-action-btn { 
-    padding: 0.75rem; 
-    font-size: 0.75rem; 
+  
+  .product-card {
+    min-height: 180px;
   }
-  .quick-action-btn i { font-size: 1.25rem; }
   
-  /* Compact cards */
-  .card-header { padding: 1rem; }
-  .card-title { font-size: 0.95rem; }
-  .card-body { padding: 1rem; }
+  .product-card-image {
+    height: 100px;
+  }
   
-  /* Compact sidebar mobile */
-  .sidebar { width: 260px; }
-  .sidebar-header { min-height: 60px; padding: 1rem; }
-  .logo-icon { width: 36px; height: 36px; font-size: 1rem; }
-  .nav-link { padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+  .product-card-info {
+    padding: 0.5rem;
+  }
   
-  /* Compact bottom nav */
-  .mobile-nav { height: 60px; }
-  .mobile-nav-item i { font-size: 1.1rem; }
-  .mobile-nav-item { font-size: 0.65rem; }
+  .product-card-name {
+    font-size: 0.75rem;
+  }
+  
+  .product-card-price {
+    font-size: 0.85rem;
+  }
+  
+  /* Quick action bar scrollable */
+  .quick-actions-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .quick-action-btn {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
 }
 
-@media (max-width: 380px) {
-  /* Extra small screens */
-  html { font-size: 13px; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .quick-actions { grid-template-columns: 1fr; }
+/* ===== MODAL INPUT MANUAL ===== */
+.manual-modal .form-group {
+  margin-bottom: 1rem;
+}
+
+.manual-modal .form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.manual-modal .form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.manual-modal .form-input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.manual-modal .price-display {
+  background: linear-gradient(135deg, var(--success), #059669);
+  color: white;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.manual-modal .price-display .label {
+  font-size: 0.75rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.manual-modal .price-display .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.manual-modal .profit-display {
+  background: rgba(99,102,241,0.1);
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 0.75rem;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.manual-modal .checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.manual-modal .checkbox-wrapper input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
+.manual-modal .checkbox-wrapper label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  flex: 1;
+}
+
+/* List View Mode */
+.products-grid.list-view {
+  grid-template-columns: 1fr !important;
+}
+
+.products-grid.list-view .product-card {
+  display: flex;
+  flex-direction: row;
+  height: 80px;
+  align-items: center;
+}
+
+.products-grid.list-view .product-card-image {
+  width: 80px;
+  height: 80px;
+  aspect-ratio: auto;
+}
+
+.products-grid.list-view .product-card-info {
+  flex: 1;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.products-grid.list-view .product-card-name {
+  white-space: normal;
+  font-size: 0.9rem;
 }
     
-  </style>
+</style>
 </head>
 <body>
   <div class="app-container">
@@ -749,15 +816,16 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                   <span id="tax">Rp 0</span>
                 </div>
                 <div class="summary-row" style="font-size:.8rem;align-items:center;margin-bottom:.25rem;">
-                  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text-secondary);font-weight:500;">
-                    <input type="checkbox" id="ppnToggle" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
-                    Kenakan PPN 11%
-                  </label>
-                <div class="summary-row total">
-                  <span>Total</span>
-                  <span id="total">Rp 0</span>
-                </div>
-              </div>
+  <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;color:var(--text-secondary);font-weight:500;">
+    <input type="checkbox" id="ppnToggle" style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
+    Kenakan PPN 11%
+  </label>
+<!-- TAMBAHKAN PENUTUP DIV DI SINI -->
+</div>
+<div class="summary-row total">
+  <span>Total</span>
+  <span id="total">Rp 0</span>
+</div>
 
               <div class="cart-actions">
                 <button class="btn btn-secondary" id="btnDiskon">
@@ -908,26 +976,38 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     // ===== SIDEBAR COLLAPSE =====
-    const sidebar = document.getElementById('sidebar');
-    document.getElementById('menuToggle').addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-    });
+const sidebar = document.getElementById('sidebar'); // ✅ Hanya satu kali
+const mobileMenuToggle = document.getElementById('mobileMenuToggle'); // Gabungkan deklarasi
 
-    // Mobile menu
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-    if (mobileMenuToggle) {
-      mobileMenuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
-      });
+document.getElementById('menuToggle').addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+});
+
+if (mobileMenuToggle) {
+  mobileMenuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('mobile-open');
+  });
+}
+
+// Tutup sidebar saat klik link di mobile
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 1024) {
+      sidebar.classList.remove('mobile-open');
     }
+  });
+});
 
-    // Tutup sidebar mobile saat klik di luar
-    document.addEventListener('click', (e) => {
-      if (window.innerWidth <= 1024 && !sidebar.contains(e.target) && e.target !== mobileMenuToggle) {
-        sidebar.classList.remove('mobile-open');
-      }
-    });
-
+// Tutup sidebar saat klik overlay (area gelap)
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 1024 && 
+      sidebar.classList.contains('mobile-open') &&
+      !sidebar.contains(e.target) && 
+      e.target !== mobileMenuToggle) {
+    sidebar.classList.remove('mobile-open');
+  }
+});
     // ===== DARK MODE =====
     const btnTheme = document.getElementById('btnTheme');
     const savedTheme = localStorage.getItem('webpos_theme') || 'light';
@@ -1100,47 +1180,66 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     // ===== RENDER PRODUCTS =====
     function renderProducts() {
-      const container = document.getElementById('productsGrid');
-      let filtered = [...products];
+  const container = document.getElementById('productsGrid');
+  let filtered = [...products];
 
-      if (currentCategory !== 'all') {
-        filtered = filtered.filter(p => p.categoryId === currentCategory);
-      }
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(p => p.categoryId === currentCategory);
+  }
 
-      const q = document.getElementById('productSearch').value.toLowerCase();
-      if (q) {
-        filtered = filtered.filter(p =>
-          p.name.toLowerCase().includes(q) ||
-          (p.code && p.code.toLowerCase().includes(q))
-        );
-      }
+  const q = document.getElementById('productSearch').value.toLowerCase();
+  if (q) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.code && p.code.toLowerCase().includes(q))
+    );
+  }
 
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
-            <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;opacity:.5;display:block;"></i>
-            <p>Produk tidak ditemukan</p>
-          </div>`;
-        return;
-      }
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
+        <i class="fas fa-search" style="font-size:3rem;margin-bottom:1rem;opacity:.5;display:block;"></i>
+        <p>Produk tidak ditemukan</p>
+      </div>`;
+    return;
+  }
 
-      container.innerHTML = filtered.map(p => {
-        const stockClass = p.stock <= 0 ? 'empty' : p.stock <= 5 ? 'low' : '';
-        const stockText = p.stock <= 0 ? 'Habis' : p.stock <= 5 ? `${p.stock} sisa` : p.stock;
-        return `
-          <div class="product-card" onclick="addToCart('${p.id}')">
-            <div class="product-card-image">
-              ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '<i class="fas fa-box"></i>'}
-              <span class="product-stock-badge ${stockClass}">${stockText}</span>
-            </div>
-            <div class="product-card-info">
-              <div class="product-card-name">${p.name}</div>
-              <div class="product-card-price">${formatRupiah(p.sellingPrice)}</div>
-              ${p.code ? `<div class="product-card-code">${p.code}</div>` : ''}
-            </div>
-          </div>`;
-      }).join('');
+  container.innerHTML = filtered.map(p => {
+    // Deteksi produk unlimited (digital/pulsa/token/voucher)
+    const isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik'].includes(p.categoryId) || 
+                      ['pulsa', 'token', 'voucher', 'digital'].some(keyword => p.name.toLowerCase().includes(keyword));
+    const isUnlimited = p.isUnlimited || isDigital || p.stock === 999999;
+    
+    // Tentukan tampilan badge stok
+    let stockClass, stockText;
+    if (isUnlimited || p.stock === 999999) {
+      stockClass = ''; // Tidak ada class khusus (default hijau)
+      stockText = '∞'; // Infinity symbol
+    } else if (p.stock <= 0) {
+      stockClass = 'empty';
+      stockText = 'Habis';
+    } else if (p.stock <= 5) {
+      stockClass = 'low';
+      stockText = `${p.stock} sisa`;
+    } else {
+      stockClass = '';
+      stockText = p.stock;
     }
+    
+    return `
+      <div class="product-card" onclick="addToCart('${p.id}')" style="${p.stock <= 0 && !isUnlimited ? 'opacity:0.6;pointer-events:none;' : ''}">
+        <div class="product-card-image">
+          ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '<i class="fas fa-box"></i>'}
+          <span class="product-stock-badge ${stockClass}">${stockText}</span>
+        </div>
+        <div class="product-card-info">
+          <div class="product-card-name">${p.name}</div>
+          <div class="product-card-price">${formatRupiah(p.sellingPrice)}</div>
+          ${p.code ? `<div class="product-card-code">${p.code}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
 
     // ===== SEARCH =====
     let searchTimer;
@@ -1151,64 +1250,70 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     // ===== ADD TO CART =====
     window.addToCart = function(productId) {
-      const product = products.find(p => p.id === productId);
-      if (!product) return;
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
 
-      if (product.stock <= 0) {
-        showToast('Produk habis', 'warning');
-        return;
-      }
+  // Cek stok - sekarang support unlimited (stok 0 atau isUnlimited = true tetap bisa)
+  const isUnlimited = product.isUnlimited || product.stock === 0 && product.category === 'digital';
+  
+  if (!isUnlimited && product.stock <= 0) {
+    showToast('Produk habis', 'warning');
+    return;
+  }
 
-      const existing = cart.find(i => i.productId === productId);
-      if (existing) {
-        if (existing.quantity + 1 > product.stock) {
-          showToast('Stok tidak mencukupi', 'warning');
-          return;
-        }
-        existing.quantity++;
-        existing.total = existing.quantity * existing.price;
-      } else {
-        cart.push({
-          productId: product.id,
-          name: product.name,
-          price: product.sellingPrice,
-          cost: product.costPrice || 0,
-          quantity: 1,
-          total: product.sellingPrice,
-          image: product.image || null
-        });
-      }
+  const existing = cart.find(i => i.productId === productId);
+  if (existing) {
+    // Kalau unlimited, boleh tambah tanpa batas
+    if (!isUnlimited && existing.quantity + 1 > product.stock) {
+      showToast('Stok tidak mencukupi', 'warning');
+      return;
+    }
+    existing.quantity++;
+    existing.total = existing.quantity * existing.price;
+  } else {
+    cart.push({
+      productId: product.id,
+      name: product.name,
+      price: product.sellingPrice,
+      cost: product.costPrice || 0,
+      quantity: 1,
+      total: product.sellingPrice,
+      image: product.image || null,
+      isUnlimited: isUnlimited // tandai untuk logic selanjutnya
+    });
+  }
 
-      saveCart();
-      renderCart();
-      updateSummary();
-      showToast(`${product.name} ditambahkan`, 'success');
-    };
+  saveCart();
+  renderCart();
+  updateSummary();
+  showToast(`${product.name} ditambahkan`, 'success');
+};
 
     // ===== UPDATE QTY =====
     window.updateQty = function(productId, delta) {
-      const item = cart.find(i => i.productId === productId);
-      if (!item) return;
+  const item = cart.find(i => i.productId === productId);
+  if (!item) return;
 
-      const product = products.find(p => p.id === productId);
-      const newQty = item.quantity + delta;
+  const product = products.find(p => p.id === productId);
+  const newQty = item.quantity + delta;
 
-      if (newQty <= 0) {
-        removeFromCart(productId);
-        return;
-      }
+  if (newQty <= 0) {
+    removeFromCart(productId);
+    return;
+  }
 
-      if (product && newQty > product.stock) {
-        showToast('Stok tidak mencukupi', 'warning');
-        return;
-      }
+  // Kalau unlimited (digital/pulsa), skip cek stok
+  if (!item.isUnlimited && product && newQty > product.stock) {
+    showToast('Stok tidak mencukupi', 'warning');
+    return;
+  }
 
-      item.quantity = newQty;
-      item.total = item.quantity * item.price;
-      saveCart();
-      renderCart();
-      updateSummary();
-    };
+  item.quantity = newQty;
+  item.total = item.quantity * item.price;
+  saveCart();
+  renderCart();
+  updateSummary();
+};
 
     // ===== REMOVE FROM CART =====
     window.removeFromCart = function(productId) {
@@ -1482,38 +1587,79 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
     // ===== QUICK ACTIONS =====
     // btnTopup & btnTarik sudah pakai onclick di HTML
-    document.getElementById('btnManual').addEventListener('click', () => {
-      const name = prompt('Nama produk:');
-      if (!name) return;
-      const price = parseInt(prompt('Harga:'));
-      if (!price) return;
-      const manual = {
-        id: 'manual_' + Date.now(),
-        name,
-        sellingPrice: price,
-        costPrice: 0,
-        stock: 9999
-      };
-      products.unshift(manual);
-      renderProducts();
-      addToCart(manual.id);
-    });
+    const manualModal = document.getElementById('manualModal');
 
-    document.getElementById('btnHold').addEventListener('click', () => {
-      if (cart.length === 0) {
-        showToast('Keranjang masih kosong', 'warning');
-        return;
-      }
-      const held = JSON.parse(localStorage.getItem('held_transactions') || '[]');
-      held.push({ cart, discount, timestamp: Date.now() });
-      localStorage.setItem('held_transactions', JSON.stringify(held));
-      cart = [];
-      discount = 0;
-      saveCart();
-      renderCart();
-      updateSummary();
-      showToast('Transaksi ditahan', 'success');
-    });
+function openManualModal() {
+  manualModal.classList.add('active');
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualCost').value = '';
+  document.getElementById('manualPrice').value = '';
+  document.getElementById('manualUnlimited').checked = true;
+  calculateProfit();
+  setTimeout(() => document.getElementById('manualName').focus(), 100);
+}
+
+function closeManualModal() {
+  manualModal.classList.remove('active');
+}
+
+// Hapus saja fungsi ini, tidak perlu karena checkbox sudah default berfungsi
+// function toggleUnlimitedStock() { ... }
+
+function calculateProfit() {
+  const cost = parseInt(document.getElementById('manualCost').value) || 0;
+  const price = parseInt(document.getElementById('manualPrice').value) || 0;
+  const profit = price - cost;
+  
+  const profitEl = document.getElementById('profitDisplay');
+  profitEl.textContent = `Laba: ${formatRupiah(profit)}`;
+  profitEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+  profitEl.style.borderColor = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+  profitEl.style.background = profit >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+  
+  document.getElementById('sellPriceDisplay').textContent = formatRupiah(price);
+}
+
+function confirmManualInput() {
+  const name = document.getElementById('manualName').value.trim();
+  const cost = parseInt(document.getElementById('manualCost').value) || 0;
+  const price = parseInt(document.getElementById('manualPrice').value) || 0;
+  const unlimited = document.getElementById('manualUnlimited').checked;
+  
+  if (!name) {
+    showToast('Nama produk wajib diisi', 'error');
+    return;
+  }
+  
+  if (price <= 0) {
+    showToast('Harga jual harus lebih dari 0', 'error');
+    return;
+  }
+  
+  const manual = {
+    id: 'manual_' + Date.now(),
+    name: name,
+    sellingPrice: price,
+    costPrice: cost,
+    stock: unlimited ? 999999 : 1, // Unlimited stock untuk digital
+    isUnlimited: unlimited,
+    isManual: true
+  };
+  
+  products.unshift(manual);
+  renderProducts();
+  addToCart(manual.id);
+  closeManualModal();
+  showToast(`${name} ditambahkan ke keranjang`, 'success');
+}
+
+// Event listener tombol manual
+document.getElementById('btnManual').addEventListener('click', openManualModal);
+
+// Tutup modal saat klik overlay
+manualModal.addEventListener('click', (e) => {
+  if (e.target === manualModal) closeManualModal();
+});
 
     // ===== LOGOUT =====
     document.getElementById('btnLogout').addEventListener('click', () => {
@@ -1545,18 +1691,32 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     });
 
     // ===== VIEW TOGGLE =====
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const grid = document.getElementById('productsGrid');
-        if (btn.dataset.view === 'list') {
-          grid.style.gridTemplateColumns = '1fr';
-        } else {
-          grid.style.gridTemplateColumns = '';
-        }
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const grid = document.getElementById('productsGrid');
+    
+    if (btn.dataset.view === 'list') {
+      // Mode list: 1 kolom full width
+      grid.style.gridTemplateColumns = '1fr';
+      // Tambahkan styling list untuk card
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.style.display = 'flex';
+        card.style.flexDirection = 'row';
+        card.style.height = '80px';
       });
-    });
+    } else {
+      // Mode grid: kembalikan ke default (2 kolom mobile, auto-fill desktop)
+      grid.style.gridTemplateColumns = '';
+      document.querySelectorAll('.product-card').forEach(card => {
+        card.style.display = '';
+        card.style.flexDirection = '';
+        card.style.height = '';
+      });
+    }
+  });
+});
 
     // ===== INISIALISASI =====
     firebase.auth().onAuthStateChanged(user => {
@@ -1571,5 +1731,58 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       loadHeaderStats();
     });
   </script>
+
+  <div class="modal-overlay" id="manualModal">
+  <div class="modal manual-modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-edit" style="margin-right: 0.5rem;"></i>
+        Input Produk Manual
+      </h3>
+      <button class="modal-close" onclick="closeManualModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nama Produk</label>
+        <input type="text" class="form-input" id="manualName" placeholder="Contoh: Pulsa Axis 10k">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Harga Beli (Modal)</label>
+        <input type="number" class="form-input" id="manualCost" placeholder="0" oninput="calculateProfit()">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Harga Jual</label>
+        <input type="number" class="form-input" id="manualPrice" placeholder="0" oninput="calculateProfit()">
+      </div>
+      
+      <div class="checkbox-wrapper">
+  <input type="checkbox" id="manualUnlimited" checked style="width:20px;height:20px;accent-color:var(--primary);">
+  <label for="manualUnlimited" style="font-size:0.85rem;color:var(--text-secondary);cursor:pointer;flex:1;">
+    Produk tanpa batas stok (Digital/Pulsa/Token)
+  </label>
+</div>
+      
+      <div class="profit-display" id="profitDisplay">
+        Laba: Rp 0
+      </div>
+      
+      <div class="price-display">
+        <div class="label">Harga Jual ke Customer</div>
+        <div class="value" id="sellPriceDisplay">Rp 0</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeManualModal()">Batal</button>
+      <button class="btn btn-primary" onclick="confirmManualInput()">
+        <i class="fas fa-plus"></i> Tambah ke Keranjang
+      </button>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>
