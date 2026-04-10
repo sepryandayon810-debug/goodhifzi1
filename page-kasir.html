@@ -1219,6 +1219,7 @@ document.addEventListener('click', (e) => {
     let discount = 0;
     let currentCategory = 'all';
     let currentSort = 'default'; // 'default', 'az', 'za'
+    let currentView = 'grid'
     let paymentAmount = 0;
     let paymentMethod = 'cash';
     const TAX_RATE = 0.11;
@@ -1285,10 +1286,9 @@ document.addEventListener('click', (e) => {
     // ===== VIEW MODE HELPER =====
 function applyCurrentView() {
   const grid = document.getElementById('productsGrid');
-  const listBtn = document.querySelector('.view-btn[data-view="list"]');
   
-  // Jika tombol List aktif, pastikan class list-view ada
-  if (listBtn && listBtn.classList.contains('active')) {
+  // ⭐ GANTI: Gunakan variabel currentView, bukan cek class tombol
+  if (currentView === 'list') {
     grid.classList.add('list-view');
   } else {
     grid.classList.remove('list-view');
@@ -1832,21 +1832,15 @@ manualModal.addEventListener('click', (e) => {
       }
     });
 
-    // ===== VIEW TOGGLE =====
 // ===== VIEW TOGGLE =====
 document.querySelectorAll('.view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    // Update active state pada tombol
     document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    currentView = btn.dataset.view;
     
-    // Toggle class pada grid
-    const grid = document.getElementById('productsGrid');
-    if (btn.dataset.view === 'list') {
-      grid.classList.add('list-view');
-    } else {
-      grid.classList.remove('list-view');
-    }
+    // ⭐ TAMBAHKAN: Panggil fungsi untuk terapkan view
+    applyCurrentView();
   });
 });
     
@@ -1861,6 +1855,7 @@ document.querySelectorAll('.view-btn').forEach(btn => {
       loadProducts();
       loadCart();
       loadHeaderStats();
+       applyCurrentView();
     });
     
   </script>
