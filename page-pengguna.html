@@ -1195,15 +1195,16 @@ document.addEventListener('click', (e) => {
         }
 
         function renderPenggunaList() {
-          const list = document.getElementById('penggunaList');
-          
-          let pengguna = Object.entries(penggunaData)
-            .map(([id, data]) => ({ id, ...data }));
-          
-          // Apply filter
-          if (currentFilter !== 'all') {
-            pengguna = pengguna.filter(p => p.status === currentFilter);
-          }
+  const list = document.getElementById('penggunaList');
+  
+  let pengguna = Object.entries(penggunaData)
+    .map(([id, data]) => ({ id, ...data }))
+    .filter(p => p.status !== 'deleted'); // ⭐ Sembunyikan yang deleted
+  
+  // Apply filter
+  if (currentFilter !== 'all') {
+    pengguna = pengguna.filter(p => p.status === currentFilter);
+  }
           
           // Sort by created date (newest first)
           pengguna.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
