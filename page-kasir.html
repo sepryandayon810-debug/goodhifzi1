@@ -1819,6 +1819,7 @@ manualModal.addEventListener('click', (e) => {
     });
 
     // ===== VIEW TOGGLE =====
+// ===== VIEW TOGGLE =====
 document.querySelectorAll('.view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
@@ -1826,26 +1827,15 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     const grid = document.getElementById('productsGrid');
     
     if (btn.dataset.view === 'list') {
-      // Mode list: 1 kolom full width
-      grid.style.gridTemplateColumns = '1fr';
-      // Tambahkan styling list untuk card
-      document.querySelectorAll('.product-card').forEach(card => {
-        card.style.display = 'flex';
-        card.style.flexDirection = 'row';
-        card.style.height = '80px';
-      });
+      // Mode list: tambahkan class list-view
+      grid.classList.add('list-view');
     } else {
-      // Mode grid: kembalikan ke default (2 kolom mobile, auto-fill desktop)
-      grid.style.gridTemplateColumns = '';
-      document.querySelectorAll('.product-card').forEach(card => {
-        card.style.display = '';
-        card.style.flexDirection = '';
-        card.style.height = '';
-      });
+      // Mode grid: hapus class list-view
+      grid.classList.remove('list-view');
     }
   });
 });
-
+    
     // ===== INISIALISASI =====
     firebase.auth().onAuthStateChanged(user => {
       if (!user) {
