@@ -725,9 +725,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       <!-- Header -->
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
+          <<button class="btn-icon" id="mobileMenuToggle">
+  <i class="fas fa-bars"></i>
+</button>
           <h1 class="header-title">Reset Data</h1>
         </div>
         
@@ -931,14 +931,41 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         document.getElementById('btnCancel').addEventListener('click', closeModal);
         document.getElementById('btnConfirm').addEventListener('click', executeReset);
 
-        // Sidebar toggle
-        document.getElementById('menuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('collapsed');
-        });
+        /// Sidebar toggle - Desktop (collapse/expand)
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+});
 
-        document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-          document.getElementById('sidebar').classList.toggle('mobile-open');
-        });
+// Sidebar toggle - Mobile (burger menu) - VERSI BARU
+const mobileToggle = document.getElementById('mobileMenuToggle');
+const sidebar = document.getElementById('sidebar');
+
+if (mobileToggle) {
+  mobileToggle.removeAttribute('style');
+  mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('mobile-open');
+  });
+}
+
+// Tutup sidebar saat klik link di mobile
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    if (window.innerWidth <= 1024) {
+      sidebar.classList.remove('mobile-open');
+    }
+  });
+});
+
+// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
+document.addEventListener('click', (e) => {
+  if (window.innerWidth <= 1024 && 
+      sidebar.classList.contains('mobile-open') &&
+      !sidebar.contains(e.target) && 
+      e.target !== mobileToggle) {
+    sidebar.classList.remove('mobile-open');
+  }
+});
 
         // Dropdown menus
         document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
