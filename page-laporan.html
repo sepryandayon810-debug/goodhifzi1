@@ -925,9 +925,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     </div>
   </div>
   <div class="card-body">
-    <div style="position: relative; height: 300px; width: 100%;">
-      <canvas id="reportChart"></canvas>
-    </div>
+    <div id="chartContainer" style="position: relative; height: 300px; width: 100%;">
+  <canvas id="reportChart"></canvas>
+</div>
   </div>
 </div>
           
@@ -1077,6 +1077,68 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           document.getElementById('dateTo').value = today.toISOString().split('T')[0];
         });
 
+        function renderChart(transactions) {
+  const ctx = document.getElementById('reportChart').getContext('2d');
+  
+  // Destroy existing chart if any
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+  
+  // Group data by date
+  const dataByDate = {};
+  transactions.forEach(trans => {
+    if (trans.status !== 'cancelled' && trans.type === 'penjualan') {
+      const date = trans.date || new Date(trans.timestamp).toISOString().split('T')[0];
+      dataByDate[date] = (dataByDate[date] || 0) + (trans.total || 0);
+    }
+  });
+  
+  const labels = Object.keys(dataByDate).sort();
+  const data = labels.map(date => dataByDate[date]);
+  
+  chartInstance = new Chart(ctx, {
+    type: currentChartType,
+    data: {
+      labels: labels.map(d => new Date(d).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})),
+      datasets: [{
+        label: 'Penjualan',
+        data: data,
+        borderColor: 'var(--primary)',
+        backgroundColor: currentChartType === 'bar' ? 'rgba(99, 102, 241, 0.5)' : 'rgba(99, 102, 241, 0.1)',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'Rp ' + value.toLocaleString('id-ID');
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Global function for chart type buttons
+window.changeChartType = function(type) {
+  currentChartType = type;
+  if (reportData.length > 0) {
+    renderChart(reportData);
+  }
+};
+
         // Generate report
         document.getElementById('btnGenerate').addEventListener('click', generateReport);
 
@@ -1207,13 +1269,18 @@ document.addEventListener('click', (e) => {
             renderTransactionList(transactions);
             
             // Render chart placeholder
-            document.getElementById('chartContainer').innerHTML = `
-              <div style="text-align: center;">
-                <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success);"></i>
-                <p style="margin-top: 1rem;">Laporan berhasil digenerate</p>
-                <p style="color: var(--text-muted);">${transactions.length} transaksi ditemukan</p>
-              </div>
-            `;
+            // Render chart atau placeholder
+if (transactions.length === 0) {
+  document.getElementById('chartContainer').innerHTML = `
+    <div style="text-align: center; padding-top: 100px;">
+      <i class="fas fa-chart-bar" style="font-size: 3rem; color: var(--text-muted);"></i>
+      <p style="margin-top: 1rem; color: var(--text-muted);">Tidak ada data untuk ditampilkan</p>
+    </div>
+  `;
+} else {
+  // Jika ada data, render chart menggunakan Chart.js
+  renderChart(transactions);
+}
             
             Utils.showToast('Laporan berhasil digenerate', 'success');
           } catch (error) {
@@ -1350,9 +1417,11 @@ document.addEventListener('click', (e) => {
           document.getElementById('statLaba').textContent = 'Rp 0';
           
           document.getElementById('chartContainer').innerHTML = `
-            <p><i class="fas fa-chart-bar" style="font-size: 3rem; opacity: 0.3;"></i></p>
-            <p>Generate laporan untuk melihat grafik</p>
-          `;
+  <div style="text-align: center; padding-top: 100px;">
+    <i class="fas fa-chart-bar" style="font-size: 3rem; color: var(--text-muted); opacity: 0.3;"></i>
+    <p style="margin-top: 1rem; color: var(--text-muted);">Generate laporan untuk melihat grafik</p>
+  </div>
+`;
           
           document.getElementById('summaryTableBody').innerHTML = `
             <tr>
