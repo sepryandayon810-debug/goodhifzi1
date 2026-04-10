@@ -1282,8 +1282,21 @@ document.addEventListener('click', (e) => {
       }
     }
 
-    // ===== RENDER PRODUCTS =====
-    function renderProducts() {
+    // ===== VIEW MODE HELPER =====
+function applyCurrentView() {
+  const grid = document.getElementById('productsGrid');
+  const listBtn = document.querySelector('.view-btn[data-view="list"]');
+  
+  // Jika tombol List aktif, pastikan class list-view ada
+  if (listBtn && listBtn.classList.contains('active')) {
+    grid.classList.add('list-view');
+  } else {
+    grid.classList.remove('list-view');
+  }
+}
+
+// ===== RENDER PRODUCTS =====
+function renderProducts() {
   const container = document.getElementById('productsGrid');
   let filtered = [...products];
 
@@ -1298,7 +1311,7 @@ document.addEventListener('click', (e) => {
       (p.code && p.code.toLowerCase().includes(q))
     );
   }
-
+  
   // SORTING LOGIC
   if (currentSort === 'az') {
     filtered.sort((a, b) => a.name.localeCompare(b.name, 'id', { sensitivity: 'base' }));
@@ -1353,6 +1366,7 @@ document.addEventListener('click', (e) => {
         </div>
       </div>`;
   }).join('');
+  applyCurrentView();
 }
     // ===== SEARCH =====
     let searchTimer;
@@ -1822,15 +1836,15 @@ manualModal.addEventListener('click', (e) => {
 // ===== VIEW TOGGLE =====
 document.querySelectorAll('.view-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    // Update active state pada tombol
     document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const grid = document.getElementById('productsGrid');
     
+    // Toggle class pada grid
+    const grid = document.getElementById('productsGrid');
     if (btn.dataset.view === 'list') {
-      // Mode list: tambahkan class list-view
       grid.classList.add('list-view');
     } else {
-      // Mode grid: hapus class list-view
       grid.classList.remove('list-view');
     }
   });
