@@ -1258,8 +1258,10 @@ document.addEventListener('click', (e) => {
 
   container.innerHTML = filtered.map(p => {
     // Deteksi produk unlimited (digital/pulsa/token/voucher)
-    const isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik', 'games'].includes(p.categoryId) || 
-                  ['pulsa', 'token', 'voucher', 'digital', 'games', 'game'].some(keyword => p.name.toLowerCase().includes(keyword));
+    onst catId = (p.categoryId || '').toString().toLowerCase();
+const prodName = (p.name || '').toLowerCase();
+const isDigital = ['digital', 'pulsa', 'token', 'voucher', 'kuota', 'listrik', 'games'].includes(catId) || 
+                  ['pulsa', 'token', 'voucher', 'digital', 'games', 'game', 'diamond', 'steam', 'top up', 'topup'].some(keyword => prodName.includes(keyword));
     const isUnlimited = p.isUnlimited || isDigital || p.stock === 999999;
     
     // Tentukan tampilan badge stok
@@ -1306,9 +1308,12 @@ document.addEventListener('click', (e) => {
   if (!product) return;
 
   // Cek stok - sekarang support unlimited (stok 0 atau isUnlimited = true tetap bisa)
+const prodCatId = (product.categoryId || '').toString().toLowerCase();
+const prodCat = (product.category || '').toString().toLowerCase();
 const isUnlimited = product.isUnlimited || 
-                    (product.stock === 0 && ['digital', 'games'].includes(product.category)) ||
-                    product.categoryId === 'games';  
+                    (product.stock === 0 && ['digital', 'games'].includes(prodCat)) ||
+                    prodCatId === 'games' ||
+                    ['digital', 'games', 'pulsa', 'token'].includes(prodCatId);  
   if (!isUnlimited && product.stock <= 0) {
     showToast('Produk habis', 'warning');
     return;
