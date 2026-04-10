@@ -4,34 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#f97316">
-  <!-- THEME LOADER - HARUS di awal -->
+<!-- THEME LOADER - HARUS di awal -->
 <script>
   (function() {
-    // Standarisasi: pakai key yang sama dengan halaman lain
+    // Coba beberapa kemungkinan key yang dipakai halaman Setting
+    const themeColor = localStorage.getItem('theme_color') || 
+                       localStorage.getItem('theme') || 
+                       localStorage.getItem('webpos_color') || 
+                       'orange';
+    
     const themeMode = localStorage.getItem('webpos_theme') || 'light';
-    const themeColor = localStorage.getItem('theme_color') || 'orange';
     
-    // Apply dark mode
+    // Apply ke HTML tag
     document.documentElement.setAttribute('data-theme', themeMode);
-    
-    // Apply color theme (orange, blue, dll)
     document.documentElement.setAttribute('data-theme-color', themeColor);
     
-    // Update meta theme-color untuk mobile browser
+    // ⭐ TAMBAHAN KRITIS: Apply CSS variables langsung via inline style 
+    // untuk mencegah flicker/flash ke warna default
     const colorMap = {
-      'orange': '#f97316',
-      'blue': '#3b82f6',
-      'green': '#10b981',
-      'purple': '#8b5cf6',
-      'red': '#ef4444',
-      'pink': '#ec4899',
-      'teal': '#14b8a6',
-      'indigo': '#6366f1'
+      'orange': {p: '#f97316', pd: '#ea580c', s: '#f59e0b'},
+      'blue': {p: '#3b82f6', pd: '#2563eb', s: '#06b6d4'},
+      'green': {p: '#10b981', pd: '#059669', s: '#84cc16'},
+      'purple': {p: '#8b5cf6', pd: '#7c3aed', s: '#d946ef'},
+      'red': {p: '#ef4444', pd: '#dc2626', s: '#f97316'},
+      'pink': {p: '#ec4899', pd: '#db2777', s: '#8b5cf6'},
+      'teal': {p: '#14b8a6', pd: '#0d9488', s: '#06b6d4'},
+      'indigo': {p: '#6366f1', pd: '#4f46e5', s: '#ec4899'}
     };
+    
+    const c = colorMap[themeColor] || colorMap['orange'];
+    
+    // Set style langsung pada <html> tag (override :root)
+    document.documentElement.style.setProperty('--primary', c.p);
+    document.documentElement.style.setProperty('--primary-dark', c.pd);
+    document.documentElement.style.setProperty('--secondary', c.s);
+    
+    // Update meta theme-color
     const metaColor = document.querySelector('meta[name="theme-color"]');
-    if (metaColor && colorMap[themeColor]) {
-      metaColor.setAttribute('content', colorMap[themeColor]);
-    }
+    if (metaColor) metaColor.setAttribute('content', c.p);
   })();
 </script>
   <title>WebPOS - Kas & Shift</title>
