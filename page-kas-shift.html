@@ -3,7 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#6366f1">
+<meta name="theme-color" content="#f97316">
+  <!-- THEME LOADER - HARUS di awal -->
+<script>
+  (function() {
+    // Standarisasi: pakai key yang sama dengan halaman lain
+    const themeMode = localStorage.getItem('webpos_theme') || 'light';
+    const themeColor = localStorage.getItem('theme_color') || 'orange';
+    
+    // Apply dark mode
+    document.documentElement.setAttribute('data-theme', themeMode);
+    
+    // Apply color theme (orange, blue, dll)
+    document.documentElement.setAttribute('data-theme-color', themeColor);
+    
+    // Update meta theme-color untuk mobile browser
+    const colorMap = {
+      'orange': '#f97316',
+      'blue': '#3b82f6',
+      'green': '#10b981',
+      'purple': '#8b5cf6',
+      'red': '#ef4444',
+      'pink': '#ec4899',
+      'teal': '#14b8a6',
+      'indigo': '#6366f1'
+    };
+    const metaColor = document.querySelector('meta[name="theme-color"]');
+    if (metaColor && colorMap[themeColor]) {
+      metaColor.setAttribute('content', colorMap[themeColor]);
+    }
+  })();
+</script>
   <title>WebPOS - Kas & Shift</title>
 
   <!-- Font Awesome -->
@@ -1000,10 +1030,15 @@ document.addEventListener('click', (e) => {
 
       // Theme toggle
       document.getElementById('btnTheme').addEventListener('click', () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        localStorage.setItem('dark_mode', !isDark);
-      });
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const newTheme = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('webpos_theme', newTheme); // ⭐ Key yang sama dengan kasir
+  
+  // Update icon
+  const icon = document.getElementById('btnTheme').querySelector('i');
+  icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+});
 
       // Logout
       document.getElementById('btnLogout').addEventListener('click', () => {
