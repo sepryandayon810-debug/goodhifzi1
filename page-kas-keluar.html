@@ -275,7 +275,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     <main class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+<button class="btn-icon" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
           <h1 class="header-title">Kas Keluar</h1>
         </div>
         <div class="header-actions">
@@ -393,53 +393,83 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       initEventListeners();
     });
 
-    function initEventListeners() {
-      document.getElementById('menuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('collapsed');
-      });
-
-      document.getElementById('mobileMenuToggle').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('mobile-open');
-      });
-
-      // Dropdown toggle
-          document.getElementById('btnLogout').addEventListener('click', () => {
-        Utils.confirm('Yakin ingin logout?', () => Auth.logout());
-      });
-
-      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
-  toggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    const parent = this.closest('.nav-dropdown');
-    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
-      if (openDropdown !== parent) openDropdown.classList.remove('open');
-    });
-    parent.classList.toggle('open');
+   function initEventListeners() {
+  // Sidebar toggle - Desktop (collapse/expand)
+  document.getElementById('menuToggle').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('collapsed');
   });
-});
 
-      document.querySelectorAll('.numpad-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const num = btn.dataset.num;
-          const action = btn.dataset.action;
-          if (num !== undefined) amount = (amount * 10) + parseInt(num);
-          else if (action === 'clear') amount = 0;
-          else if (action === 'backspace') amount = Math.floor(amount / 10);
-          updateDisplay();
-          checkKas();
-        });
-      });
+  // Sidebar toggle - Mobile (burger menu) - VERSI BARU
+  const mobileToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('sidebar');
 
-      document.querySelectorAll('.quick-amount').forEach(btn => {
-        btn.addEventListener('click', () => {
-          amount = parseInt(btn.dataset.amount);
-          updateDisplay();
-          checkKas();
-        });
-      });
+  if (mobileToggle) {
+    mobileToggle.removeAttribute('style');
+    mobileToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('mobile-open');
+    });
+  }
 
-      document.getElementById('btnSimpanKas').addEventListener('click', saveKasKeluar);
+  // Tutup sidebar saat klik link di mobile
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 1024) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  });
+
+  // Tutup sidebar saat klik overlay (area gelap di luar sidebar)
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 1024 && 
+        sidebar.classList.contains('mobile-open') &&
+        !sidebar.contains(e.target) && 
+        e.target !== mobileToggle) {
+      sidebar.classList.remove('mobile-open');
     }
+  });
+
+  // Dropdown toggle
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    Utils.confirm('Yakin ingin logout?', () => Auth.logout());
+  });
+
+  document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+    toggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parent = this.closest('.nav-dropdown');
+      document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+        if (openDropdown !== parent) openDropdown.classList.remove('open');
+      });
+      parent.classList.toggle('open');
+    });
+  });
+
+  // Numpad
+  document.querySelectorAll('.numpad-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const num = btn.dataset.num;
+      const action = btn.dataset.action;
+      if (num !== undefined) amount = (amount * 10) + parseInt(num);
+      else if (action === 'clear') amount = 0;
+      else if (action === 'backspace') amount = Math.floor(amount / 10);
+      updateDisplay();
+      checkKas();
+    });
+  });
+
+  // Quick amounts
+  document.querySelectorAll('.quick-amount').forEach(btn => {
+    btn.addEventListener('click', () => {
+      amount = parseInt(btn.dataset.amount);
+      updateDisplay();
+      checkKas();
+    });
+  });
+
+  document.getElementById('btnSimpanKas').addEventListener('click', saveKasKeluar);
+}
 
     async function loadCurrentKas() {
       try {
