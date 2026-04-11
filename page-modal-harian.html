@@ -801,23 +801,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   });
 
       function initModalHarian() {
-  // ⭐ Update user profile dengan data lengkap
   const user = Auth.getCurrentUser();
   if (user) {
     document.getElementById('userName').textContent = user.name || user.email || 'User';
     
-    let roleText = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
-    
-    // ⭐ Cek shift aktif
-    const activeShift = Utils.getStorage('active_shift') || user.shift || 'Pagi';
-    if (activeShift) {
-      roleText += ` • Shift ${activeShift}`;
-    }
-    
-    // ⭐ Badge owner
-    if (user.role === 'owner') {
-      roleText += ' 👑';
-    }
+    // ⭐ Hanya role saja, tanpa shift, tanpa crown
+    const roleText = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
     
     document.getElementById('userRole').textContent = roleText;
   }
