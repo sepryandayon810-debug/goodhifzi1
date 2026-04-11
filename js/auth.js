@@ -598,27 +598,32 @@ const Auth = {
 
   // Filter sidebar menu
   filterSidebarMenu: function() {
-    const currentUser = Auth.getCurrentUser();
-    if (!currentUser || currentUser.role === 'owner') return;
-    
-    const perms = currentUser.permissions || {};
-    
-    document.querySelectorAll('.nav-link[href]').forEach(link => {
-      const href = link.getAttribute('href');
-      const permKey = Auth.PAGE_PERMISSIONS[href];
-      if (permKey && !perms[permKey]) {
-        const item = link.closest('.nav-item');
-        if (item) item.style.display = 'none';
+  const currentUser = Auth.getCurrentUser();
+  if (!currentUser || currentUser.role === 'owner') return;
+  
+  const perms = currentUser.permissions || {};
+  
+  document.querySelectorAll('.nav-link[href]').forEach(link => {
+    const href = link.getAttribute('href');
+    const permKey = Auth.PAGE_PERMISSIONS[href];
+    if (permKey && !perms[permKey]) {
+      const item = link.closest('.nav-item');
+      if (item) {
+        item.classList.add('no-permission'); // ⭐ Tambah class
+        item.style.display = 'none';
       }
-    });
-    
-    document.querySelectorAll('.nav-section').forEach(sec => {
-      if (sec.querySelectorAll('.nav-item:not([style*="none"])').length === 0) {
-        sec.style.display = 'none';
-      }
-    });
-  },
-
+    }
+  });
+  
+  document.querySelectorAll('.nav-section').forEach(sec => {
+    // Cek apakah masih ada item yang visible (bukan .no-permission)
+    const visibleItems = sec.querySelectorAll('.nav-item:not(.no-permission)');
+    if (visibleItems.length === 0) {
+      sec.classList.add('no-permission');
+      sec.style.display = 'none';
+    }
+  });
+}
   // Cek permission spesifik
   hasPermission: function(key) {
     const user = Auth.getCurrentUser();
