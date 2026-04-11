@@ -319,138 +319,190 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   .summary-card-value{font-size:1.35rem}
 }
 /* ==========================================
-   MOBILE RESPONSIVE - RIWAYAT TRANSACTION
+   MOBILE RESPONSIVE - RIWAYAT FIX
    ========================================== */
 
-/* Tablet & Mobile */
+/* Force semua container mobile untuk tidak overflow */
 @media (max-width: 1024px) {
-  .riwayat-toolbar {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 0.875rem !important;
-    gap: 0.75rem !important;
+  .page-content {
+    padding: 0.75rem !important;
+    padding-bottom: calc(var(--bottom-nav-height) + 1rem) !important;
+    overflow-x: hidden !important; /* Prevent horizontal scroll halaman */
   }
   
-  .date-filter {
-    width: 100% !important;
-    flex-direction: column !important;
+  /* ===== QUICK FILTER FIX ===== */
+  .quick-filter {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* Penting: jangan wrap */
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
     gap: 0.5rem !important;
-  }
-  
-  .date-filter input,
-  .date-filter button {
+    margin-bottom: 1rem !important;
+    padding: 0.25rem 0 !important;
     width: 100% !important;
-    min-height: 44px; /* Touch friendly */
   }
   
-  .date-filter span {
-    display: none !important; /* Hide "s/d" text di mobile */
+  .quick-filter::-webkit-scrollbar {
+    display: none !important;
   }
   
+  .quick-filter-btn {
+    flex: 0 0 auto !important; /* Jangan stretch, ukuran fix */
+    padding: 0.5rem 0.875rem !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    min-height: 40px !important;
+  }
+  
+  /* ===== CATEGORY TABS FIX ===== */
+  .category-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* Penting: jangan wrap */
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 2px solid var(--border-color) !important;
+    width: 100% !important;
+  }
+  
+  .category-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .category-tab {
+    flex: 0 0 auto !important; /* Jangan stretch */
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap !important;
+    border-bottom: 3px solid transparent !important;
+    margin-bottom: -2px !important;
+  }
+  
+  /* ===== SUMMARY CARDS FIX ===== */
   .summary-cards {
     display: flex !important;
+    flex-wrap: nowrap !important; /* Penting: jangan wrap ke bawah */
     overflow-x: auto !important;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
     gap: 0.75rem !important;
-    padding-bottom: 0.5rem;
-    grid-template-columns: none !important; /* Override grid */
+    margin-bottom: 1.25rem !important;
+    padding: 0.25rem 0.25rem 0.5rem 0.25rem !important; /* Padding bottom untuk shadow */
+    width: 100% !important;
   }
   
   .summary-cards::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
   
   .summary-card {
-    min-width: 260px !important;
-    scroll-snap-align: start;
+    flex: 0 0 auto !important; /* Jangan stretch/lebar */
+    min-width: 240px !important; /* Lebar fix */
+    max-width: 240px !important; /* Lebar maksimal */
+    width: 240px !important; /* Force width */
+    scroll-snap-align: start !important;
     padding: 1rem !important;
     gap: 0.75rem !important;
+    margin-bottom: 0 !important; /* Hapus margin bawah */
   }
   
   .summary-card-icon {
     width: 44px !important;
     height: 44px !important;
     font-size: 1.1rem !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .summary-card-content {
+    min-width: 0 !important; /* Allow text truncate */
+    overflow: hidden !important;
   }
   
   .summary-card-value {
-    font-size: 1.25rem !important;
+    font-size: 1.2rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   
-  .category-tabs {
-    gap: 0.25rem !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+  .summary-card-sub {
+    font-size: 0.75rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
   
-  .category-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .category-tab {
-    padding: 0.625rem 0.875rem !important;
-    font-size: 0.8rem !important;
-    white-space: nowrap;
-  }
-  
-  .quick-filter {
-    gap: 0.35rem !important;
+  /* ===== TOOLBAR FIX ===== */
+  .riwayat-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 0.75rem !important;
+    gap: 0.75rem !important;
     margin-bottom: 1rem !important;
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 0.25rem;
+    width: 100% !important;
   }
   
-  .quick-filter::-webkit-scrollbar {
-    display: none;
+  .date-filter {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
   }
   
-  .quick-filter-btn {
-    padding: 0.4rem 0.75rem !important;
-    font-size: 0.8rem !important;
-    border-radius: 0.5rem !important;
-    white-space: nowrap;
+  .date-filter input,
+  .date-filter button {
+    width: 100% !important;
+    min-height: 44px !important;
+    font-size: 0.9rem !important;
   }
   
-  /* Table Mobile Optimization */
+  .date-filter span {
+    display: none !important;
+  }
+  
+  /* ===== TABLE FIX ===== */
+  .card {
+    width: 100% !important;
+    overflow: hidden !important; /* Container tidak scroll */
+  }
+  
   .card-body {
     padding: 0 !important;
-    overflow-x: auto !important;
+    overflow-x: auto !important; /* Hanya table yang scroll */
     -webkit-overflow-scrolling: touch !important;
   }
   
   .transaction-table {
-    min-width: 850px !important; /* Paksa scroll horizontal */
+    min-width: 800px !important; /* Force lebar minimal */
     font-size: 0.85rem !important;
   }
   
   .transaction-table th,
   .transaction-table td {
-    padding: 0.75rem 0.625rem !important;
+    padding: 0.625rem 0.5rem !important;
+    white-space: nowrap !important;
   }
   
-  /* Compact Action Buttons */
+  /* Tombol aksi compact */
+  .transaction-table td:last-child {
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+  
   .transaction-table td:last-child .btn-sm {
     padding: 0.35rem 0.5rem !important;
     font-size: 0.75rem !important;
-    min-width: 32px;
-    height: 32px;
+    min-width: 32px !important;
+    height: 32px !important;
   }
   
-  .expand-btn {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.7rem !important;
-  }
-  
-  /* Detail Panel Mobile */
+  /* Detail panel */
   .detail-panel {
-    padding: 0.875rem !important;
+    padding: 0.75rem !important;
   }
   
   .detail-panel-grid {
@@ -459,139 +511,58 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   }
   
   .detail-panel-item {
-    padding: 0.625rem 0.75rem !important;
-  }
-  
-  .detail-panel-label {
-    font-size: 0.65rem !important;
+    padding: 0.5rem 0.625rem !important;
+    overflow: hidden !important;
   }
   
   .detail-panel-value {
     font-size: 0.8rem !important;
-  }
-  
-  .detail-items-table {
-    font-size: 0.8rem !important;
-  }
-  
-  .detail-items-table th,
-  .detail-items-table td {
-    padding: 0.5rem 0.4rem !important;
-  }
-  
-  /* Header compact */
-  .card-header {
-    padding: 1rem !important;
-  }
-  
-  .card-title {
-    font-size: 1rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 }
 
-/* Mobile kecil (di bawah 480px) - EXTRA COMPACT */
+/* Mobile kecil (di bawah 480px) */
 @media (max-width: 480px) {
+  .quick-filter-btn {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .category-tab {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
   .summary-card {
-    min-width: 240px !important;
+    min-width: 220px !important; /* Lebih kecil di layar kecil */
+    max-width: 220px !important;
+    width: 220px !important;
     padding: 0.875rem !important;
+  }
+  
+  .summary-card-icon {
+    width: 40px !important;
+    height: 40px !important;
   }
   
   .summary-card-value {
     font-size: 1.1rem !important;
   }
   
-  .summary-card-sub {
-    font-size: 0.7rem !important;
-  }
-  
-  /* Transaction Row Compact */
-  .trx-id-cell {
-    gap: 0.15rem !important;
-  }
-  
+  /* Truncate text deskripsi transaksi */
   .trx-desc {
-    font-size: 0.8rem !important;
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  .trx-id {
-    font-size: 0.7rem !important;
+    max-width: 120px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: block !important;
   }
   
   .transaction-type {
     padding: 0.25rem 0.5rem !important;
     font-size: 0.7rem !important;
-  }
-  
-  /* Aksi buttons - icon only on very small screens */
-  .transaction-table td:last-child .btn span {
-    display: none !important;
-  }
-  
-  .transaction-table td:last-child {
-    text-align: center !important;
-  }
-  
-  /* Empty state smaller */
-  .empty-state {
-    padding: 2rem 1rem !important;
-  }
-  
-  .empty-state i {
-    font-size: 2.5rem !important;
-  }
-  
-  /* Modal full screen di mobile kecil */
-  .modal-content {
-    max-width: 95% !important;
-    margin: 1rem !important;
-    max-height: 85vh !important;
-  }
-}
-
-/* Landscape mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-  .summary-cards {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    overflow-x: visible !important;
-  }
-  
-  .summary-card {
-    min-width: auto !important;
-  }
-  
-  .detail-panel-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-}
-
-/* Safe area untuk iPhone notch */
-@supports (padding-top: env(safe-area-inset-top)) {
-  .main-header {
-    padding-top: max(env(safe-area-inset-top), 0.5rem) !important;
-  }
-  
-  .mobile-nav {
-    padding-bottom: env(safe-area-inset-bottom) !important;
-  }
-  
-  .page-content {
-    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 1rem) !important;
-  }
-}
-
-/* Touch targets */
-@media (max-width: 768px) {
-  .quick-filter-btn,
-  .category-tab,
-  .expand-btn,
-  .btn-sm,
-  .date-filter input {
-    min-height: 44px;
   }
 }
     
