@@ -1,42 +1,21 @@
 /**
  * WebPOS Authentication Module - Enhanced
- * With Username Login, User Approval System, and Permission Management
+ * With Username Login and User Approval System
  */
 
-// ==========================================
-// ⭐ CSS PROTECTION (Inject pertama kali)
-// ==========================================
-const style = document.createElement('style');
-style.textContent = `
-  #sidebar .perm-hidden, 
-  #sidebar .nav-item[hidden],
-  #sidebar li[hidden] { 
-    display: none !important; 
-    visibility: hidden !important;
-    height: 0 !important; 
-    overflow: hidden !important;
-    opacity: 0 !important;
-  }
-  #sidebar .nav-section[hidden] { 
-    display: none !important; 
-  }
-`;
-
-if (document.head) {
-  document.head.appendChild(style);
-} else {
-  document.addEventListener('DOMContentLoaded', () => document.head.appendChild(style));
-}
 const Auth = {
   currentUser: null,
   pendingApproval: null,
+
   // Initialize authentication
   init: () => {
+    // Check for existing session
     const session = Utils.getStorage('webpos_session');
     if (session && session.user) {
       Auth.currentUser = session.user;
     }
 
+    // Listen for auth state changes
     if (typeof auth !== 'undefined') {
       auth.onAuthStateChanged((user) => {
         if (user) {
@@ -56,6 +35,7 @@ const Auth = {
       const userData = snapshot.val();
       
       if (userData) {
+        // Check if user is approved
         if (userData.status === 'pending') {
           Auth.pendingApproval = { uid, ...userData };
           await auth.signOut();
@@ -64,59 +44,34 @@ const Auth = {
         
         if (userData.status === 'rejected') {
           await auth.signOut();
-          return { error: 'rejected', message: 'Akun Anda ditolak' };
+          return { error: 'rejected', message: 'Akun Anda ditolak. Silakan hubungi owner.' };
         }
         
         if (userData.status === 'suspended') {
           await auth.signOut();
-          return { error: 'suspended', message: 'Akun Anda ditangguhkan' };
+          return { error: 'suspended', message: 'Akun Anda ditangguhkan. Silakan hubungi owner.' };
         }
 
-        let userPermissions = userData.permissions;
-        if (!userPermissions) {
-          // Default berdasarkan role untuk user lama
-          if (userData.role === 'kasir') {
-            userPermissions = {
-              kasir: true, produk: true, riwayat: false, kas: false, hutang: false,
-              laporan: false, telegram: false, pelanggan: false,
-              pengguna: false, pengaturan: false, backup: false, printer: false, reset: false
-            };
-          } else if (userData.role === 'admin') {
-            userPermissions = {
-              kasir: true, produk: true, riwayat: true, kas: true, hutang: true,
-              laporan: true, telegram: true, pelanggan: true,
-              pengguna: true, pengaturan: true, backup: true, printer: true, reset: false
-            };
-          } else {
-            userPermissions = {
-              kasir: true, produk: true, riwayat: true, kas: true, hutang: true,
-              laporan: true, telegram: true, pelanggan: true,
-              pengguna: true, pengaturan: true, backup: true, printer: true, reset: true
-            };
-          }
-          
-          await database.ref(`users/${uid}/permissions`).set(userPermissions);
-          console.log('✅ Default permissions created for', userData.username);
-        }
-
-        Auth.currentUser = {
+                Auth.currentUser = {
           uid,
           username: userData.username,
           email: userData.email,
           name: userData.name,
           role: userData.role,
-          permissions: userPermissions || {},
+          permissions: userData.permissions || {},  // ⭐ TAMBAH BARIS INI
           avatar: userData.avatar || null,
           status: userData.status,
           approvedBy: userData.approvedBy || null,
           approvedAt: userData.approvedAt || null
         };
 
+        // Save session
         Utils.setStorage('webpos_session', {
           user: Auth.currentUser,
           loginTime: Date.now()
         });
 
+        // Update last login
         await database.ref(`users/${uid}`).update({
           lastLogin: firebase.database.ServerValue.TIMESTAMP,
           isOnline: true
@@ -134,35 +89,54 @@ const Auth = {
   login: async (username, password) => {
     try {
       Utils.showLoading('Logging in...');
+      
+      // Format username
       const formattedUsername = Utils.formatUsername(username);
       
       if (!formattedUsername) {
         Utils.hideLoading();
         Utils.showToast('Username tidak valid', 'error');
-        return { success: false };
+        return { success: false, error: 'Username tidak valid' };
       }
       
+      // Find user by username
       const usersSnapshot = await database.ref('users')
         .orderByChild('username')
         .equalTo(formattedUsername)
         .once('value');
       
       const users = usersSnapshot.val();
+      
       if (!users) {
         Utils.hideLoading();
         Utils.showToast('Username tidak ditemukan', 'error');
-        return { success: false };
+        return { success: false, error: 'Username tidak ditemukan' };
       }
       
+      // Get the first user (username should be unique)
       const userId = Object.keys(users)[0];
       const userData = users[userId];
       
-      if (['pending', 'rejected', 'suspended'].includes(userData.status)) {
+      // Check status
+      if (userData.status === 'pending') {
         Utils.hideLoading();
-        Utils.showToast(`Akun ${userData.status}`, 'error');
-        return { success: false };
+        Utils.showToast('Akun Anda masih menunggu persetujuan owner', 'warning');
+        return { success: false, error: 'pending_approval', message: 'Akun Anda masih menunggu persetujuan owner' };
       }
       
+      if (userData.status === 'rejected') {
+        Utils.hideLoading();
+        Utils.showToast('Akun Anda ditolak', 'error');
+        return { success: false, error: 'rejected', message: 'Akun Anda ditolak' };
+      }
+      
+      if (userData.status === 'suspended') {
+        Utils.hideLoading();
+        Utils.showToast('Akun Anda ditangguhkan', 'error');
+        return { success: false, error: 'suspended', message: 'Akun Anda ditangguhkan' };
+      }
+      
+      // Sign in with email
       const result = await auth.signInWithEmailAndPassword(userData.email, password);
       const user = await Auth.loadUserData(result.user.uid);
       
@@ -170,30 +144,57 @@ const Auth = {
       
       if (user && !user.error) {
         Utils.showToast(`Selamat datang, ${user.name || user.username}!`, 'success');
-        setTimeout(() => Auth.filterSidebarMenu(), 100);
         return { success: true, user };
       }
-      return { success: false };
+      
+      if (user && user.error) {
+        return { success: false, error: user.error, message: user.message };
+      }
+      
+      return { success: false, error: 'User data not found' };
     } catch (error) {
       Utils.hideLoading();
       console.error('Login error:', error);
-      Utils.showToast('Login gagal', 'error');
-      return { success: false };
+      
+      let message = 'Login gagal';
+      switch (error.code) {
+        case 'auth/user-not-found':
+          message = 'Username tidak terdaftar';
+          break;
+        case 'auth/wrong-password':
+          message = 'Password salah';
+          break;
+        case 'auth/invalid-email':
+          message = 'Data user tidak valid';
+          break;
+        case 'auth/user-disabled':
+          message = 'Akun telah dinonaktifkan';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Terlalu banyak percobaan. Silakan coba lagi nanti';
+          break;
+      }
+      
+      Utils.showToast(message, 'error');
+      return { success: false, error: message };
     }
   },
 
   // Register new user
-  register: async (username, password, name, email, role = 'kasir', permissions = null) => {
+  register: async (username, password, name, email, role = 'kasir') => {
     try {
       Utils.showLoading('Mendaftarkan akun...');
+      
+      // Format and validate username
       const formattedUsername = Utils.formatUsername(username);
       
       if (!formattedUsername || formattedUsername.length < 3) {
         Utils.hideLoading();
-        Utils.showToast('Username minimal 3 karakter', 'error');
-        return { success: false };
+        Utils.showToast('Username minimal 3 karakter (huruf, angka, underscore)', 'error');
+        return { success: false, error: 'Username tidak valid' };
       }
       
+      // Check if username exists
       const usernameCheck = await database.ref('users')
         .orderByChild('username')
         .equalTo(formattedUsername)
@@ -202,28 +203,41 @@ const Auth = {
       if (usernameCheck.val()) {
         Utils.hideLoading();
         Utils.showToast('Username sudah digunakan', 'error');
-        return { success: false };
+        return { success: false, error: 'Username sudah digunakan' };
       }
       
+      // Check if email exists
+      if (email) {
+        const emailCheck = await database.ref('users')
+          .orderByChild('email')
+          .equalTo(email)
+          .once('value');
+        
+        if (emailCheck.val()) {
+          Utils.hideLoading();
+          Utils.showToast('Email sudah terdaftar', 'error');
+          return { success: false, error: 'Email sudah terdaftar' };
+        }
+      }
+      
+      // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
       
+      // Determine status based on role
+      // Owner auto-approved, others need approval
       const isOwner = role === 'owner';
-      const defaultPermissions = permissions || {
-        kasir: true, produk: true, riwayat: false, kas: false, hutang: false,
-        laporan: false, telegram: false, pelanggan: false,
-        pengguna: false, pengaturan: false, backup: false, printer: false, reset: false
-      };
+      const status = isOwner ? 'active' : 'pending';
       
+      // Create user data in database
       await database.ref(`users/${uid}`).set({
         uid,
         username: formattedUsername,
         email: userEmail,
         name: name || formattedUsername,
         role,
-        permissions: defaultPermissions,
-        status: isOwner ? 'active' : 'pending',
+        status,
         createdAt: firebase.database.ServerValue.TIMESTAMP,
         lastLogin: firebase.database.ServerValue.TIMESTAMP,
         isOnline: true,
@@ -233,31 +247,54 @@ const Auth = {
 
       Utils.hideLoading();
       
-      if (!isOwner) {
+      if (status === 'pending') {
         await auth.signOut();
         Utils.showToast('Pendaftaran berhasil! Menunggu persetujuan owner.', 'success');
-      } else {
-        Utils.showToast('Akun berhasil dibuat!', 'success');
+        return { 
+          success: true, 
+          uid, 
+          pendingApproval: true,
+          message: 'Akun berhasil dibuat dan menunggu persetujuan owner'
+        };
       }
+      
+      Utils.showToast('Akun berhasil dibuat!', 'success');
       return { success: true, uid };
     } catch (error) {
       Utils.hideLoading();
       console.error('Registration error:', error);
-      Utils.showToast('Pendaftaran gagal', 'error');
-      return { success: false };
+      
+      let message = 'Pendaftaran gagal';
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          message = 'Email sudah terdaftar';
+          break;
+        case 'auth/invalid-email':
+          message = 'Email tidak valid';
+          break;
+        case 'auth/weak-password':
+          message = 'Password terlalu lemah (min 6 karakter)';
+          break;
+      }
+      
+      Utils.showToast(message, 'error');
+      return { success: false, error: message };
     }
   },
 
-  // Approve user
+  // Approve user (Owner/Admin only)
   approveUser: async (uid, approverUid) => {
     try {
       Utils.showLoading('Menyetujui pengguna...');
-      const approverData = (await database.ref(`users/${approverUid}`).once('value')).val();
       
-      if (!approverData || !['owner', 'admin'].includes(approverData.role)) {
+      // Check if approver is owner/admin
+      const approverSnapshot = await database.ref(`users/${approverUid}`).once('value');
+      const approverData = approverSnapshot.val();
+      
+      if (!approverData || (approverData.role !== 'owner' && approverData.role !== 'admin')) {
         Utils.hideLoading();
-        Utils.showToast('Anda tidak memiliki izin', 'error');
-        return { success: false };
+        Utils.showToast('Anda tidak memiliki izin untuk menyetujui pengguna', 'error');
+        return { success: false, error: 'Unauthorized' };
       }
       
       await database.ref(`users/${uid}`).update({
@@ -272,20 +309,24 @@ const Auth = {
     } catch (error) {
       Utils.hideLoading();
       console.error('Approve error:', error);
-      return { success: false };
+      Utils.showToast('Gagal menyetujui pengguna', 'error');
+      return { success: false, error: error.message };
     }
   },
 
-  // Reject user
+  // Reject user (Owner/Admin only)
   rejectUser: async (uid, approverUid, reason = '') => {
     try {
       Utils.showLoading('Menolak pengguna...');
-      const approverData = (await database.ref(`users/${approverUid}`).once('value')).val();
       
-      if (!approverData || !['owner', 'admin'].includes(approverData.role)) {
+      // Check if approver is owner/admin
+      const approverSnapshot = await database.ref(`users/${approverUid}`).once('value');
+      const approverData = approverSnapshot.val();
+      
+      if (!approverData || (approverData.role !== 'owner' && approverData.role !== 'admin')) {
         Utils.hideLoading();
         Utils.showToast('Anda tidak memiliki izin', 'error');
-        return { success: false };
+        return { success: false, error: 'Unauthorized' };
       }
       
       await database.ref(`users/${uid}`).update({
@@ -301,11 +342,33 @@ const Auth = {
     } catch (error) {
       Utils.hideLoading();
       console.error('Reject error:', error);
-      return { success: false };
+      Utils.showToast('Gagal menolak pengguna', 'error');
+      return { success: false, error: error.message };
     }
   },
 
-  // Logout
+  // Get pending users
+  getPendingUsers: async () => {
+    try {
+      const snapshot = await database.ref('users')
+        .orderByChild('status')
+        .equalTo('pending')
+        .once('value');
+      
+      const users = snapshot.val();
+      if (!users) return [];
+      
+      return Object.entries(users).map(([uid, data]) => ({
+        uid,
+        ...data
+      }));
+    } catch (error) {
+      console.error('Error getting pending users:', error);
+      return [];
+    }
+  },
+
+  // Logout user
   logout: async () => {
     try {
       if (Auth.currentUser) {
@@ -314,19 +377,20 @@ const Auth = {
           lastLogout: firebase.database.ServerValue.TIMESTAMP
         });
       }
+
       await auth.signOut();
       Auth.currentUser = null;
       Utils.removeStorage('webpos_session');
+      
+      Utils.showToast('Logout berhasil', 'info');
       window.location.href = 'login.html';
     } catch (error) {
       console.error('Logout error:', error);
+      Utils.showToast('Error saat logout', 'error');
     }
   },
 
-  // Utility methods
-  getCurrentUser: () => Auth.currentUser,
-  isAuthenticated: () => !!Auth.currentUser || !!Utils.getStorage('webpos_session'),
-  
+  // Check if user has required role
   hasRole: (requiredRoles) => {
     if (!Auth.currentUser) return false;
     if (typeof requiredRoles === 'string') {
@@ -335,188 +399,265 @@ const Auth = {
     return requiredRoles.includes(Auth.currentUser.role);
   },
 
-  // Permission System
-  PAGE_PERMISSIONS: {
-    'index.html': 'dashboard',
-    'page-kasir.html': 'kasir',
-    'page-produk.html': 'produk',
-    'page-riwayat.html': 'riwayat',
-    'page-kas.html': 'kas',
-    'page-modal-harian.html': 'kas',
-    'page-kas-masuk.html': 'kas',
-    'page-kas-keluar.html': 'kas',
-    'page-kas-shift.html': 'kas',
-    'page-kas-topup.html': 'kas',
-    'page-kas-tarik.html': 'kas',
-    'page-hutang.html': 'hutang',
-    'page-laporan.html': 'laporan',
-    'page-saldo-telegram.html': 'telegram',
-    'page-data-pelanggan.html': 'pelanggan',
-    'page-pengguna.html': 'pengguna',
-    'page-setting.html': 'pengaturan',
-    'page-backup.html': 'backup',
-    'page-printer.html': 'printer',
-    'page-reset.html': 'reset'
+  // Check if user can access menu
+  canAccess: (menuName) => {
+    if (!Auth.currentUser) return false;
+    
+    const permissions = {
+      owner: ['*'], // Owner can access everything
+      admin: ['kasir', 'produk', 'riwayat', 'modal', 'kas', 'hutang', 
+              'laporan', 'pelanggan', 'pengguna', 'setting', 'backup', 'printer', 'reset'],
+      kasir: ['kasir', 'produk', 'riwayat', 'modal', 'hutang', 'pelanggan']
+    };
+
+    const userPermissions = permissions[Auth.currentUser.role] || [];
+    return userPermissions.includes('*') || userPermissions.includes(menuName);
   },
 
-    // Filter sidebar menu - DEBUG VERSION
-  filterSidebarMenu: function() {
-    const currentUser = Auth.getCurrentUser();
-    console.log('🔍 DEBUG - Current user:', currentUser);
-    
-    if (!currentUser) {
-      console.log('❌ No user logged in');
-      return;
-    }
-    
-    if (currentUser.role === 'owner') {
-      console.log('👑 Owner detected - skipping filter');
-      return;
-    }
-    
-    const perms = currentUser.permissions || {};
-    console.log('🔑 Permissions:', perms);
-    
-    // Cek struktur sidebar
-    const sidebar = document.getElementById('sidebar');
-    console.log('📁 Sidebar found by ID:', !!sidebar);
-    
-    const sidebarClass = document.querySelector('.sidebar');
-    console.log('📁 Sidebar found by class:', !!sidebarClass);
-    
-    const navLinks = document.querySelectorAll('a[href]');
-    console.log('🔗 Total links found:', navLinks.length);
-    
-    // Coba berbagai selector
-    const selectors = [
-      '#sidebar a[href]',
-      '.sidebar a[href]',
-      '.nav-link[href]',
-      'aside a[href]',
-      'nav a[href]',
-      '.menu a[href]'
-    ];
-    
-    let allLinks = [];
-    selectors.forEach(sel => {
-      const found = document.querySelectorAll(sel);
-      console.log(`Selector "${sel}":`, found.length, 'items');
-      if (found.length > 0) {
-        allLinks = [...allLinks, ...found];
-      }
-    });
-    
-    // Remove duplicates
-    allLinks = [...new Set(allLinks)];
-    console.log('🔍 Total unique links to check:', allLinks.length);
-    
-    let hiddenCount = 0;
-    
-    allLinks.forEach(link => {
-      const href = link.getAttribute('href') || '';
-      const cleanHref = href.split('?')[0].split('#')[0].split('/').pop();
-      
-      // Cek juga text content untuk matching
-      const text = link.textContent.trim().toLowerCase();
-      
-      // Mapping manual berdasarkan text sebagai fallback
-      let permKey = Auth.PAGE_PERMISSIONS[cleanHref];
-      
-      // Fallback mapping berdasarkan text
-      if (!permKey) {
-        if (text.includes('kasir')) permKey = 'kasir';
-        else if (text.includes('produk')) permKey = 'produk';
-        else if (text.includes('riwayat')) permKey = 'riwayat';
-        else if (text.includes('kas')) permKey = 'kas';
-        else if (text.includes('hutang')) permKey = 'hutang';
-        else if (text.includes('laporan')) permKey = 'laporan';
-        else if (text.includes('telegram')) permKey = 'telegram';
-        else if (text.includes('pelanggan')) permKey = 'pelanggan';
-        else if (text.includes('pengguna')) permKey = 'pengguna';
-        else if (text.includes('pengaturan') || text.includes('setting')) permKey = 'pengaturan';
-        else if (text.includes('backup')) permKey = 'backup';
-        else if (text.includes('printer')) permKey = 'printer';
-        else if (text.includes('reset')) permKey = 'reset';
-      }
-      
-      if (permKey) {
-        const hasPerm = perms[permKey] === true;
-        console.log(`Checking: "${text}" (${cleanHref}) -> ${permKey}: ${hasPerm}`);
-        
-        if (!hasPerm) {
-          // Coba semua parent container yang mungkin
-          const item = link.closest('.nav-item, li, .menu-item, a');
-          if (item) {
-            console.log(`  ❌ HIDING: ${text}`);
-            item.setAttribute('hidden', '');
-            item.style.cssText = 'display: none !important; visibility: hidden !important; height: 0 !important; opacity: 0 !important;';
-            item.classList.add('perm-hidden');
-            hiddenCount++;
-          }
-        }
-      }
-    });
-    
-    // Hide sections
-    document.querySelectorAll('.nav-section, .sidebar-section, [class*="section"]').forEach(sec => {
-      const visible = sec.querySelectorAll(':scope > *:not([hidden]):not(.perm-hidden)');
-      if (visible.length === 0 || visible.length <= 1) { // 1 untuk header
-        sec.setAttribute('hidden', '');
-        sec.style.display = 'none';
-      }
-    });
-    
-    console.log(`✅ Done! Hidden ${hiddenCount} items`);
+  // Get current user
+  getCurrentUser: () => {
+    return Auth.currentUser;
   },
 
-  hasPermission: function(key) {
-    const user = Auth.getCurrentUser();
-    if (!user) return false;
-    if (user.role === 'owner') return true;
-    return user.permissions?.[key] === true;
+  // Check if authenticated
+  isAuthenticated: () => {
+    const session = Utils.getStorage('webpos_session');
+    return !!Auth.currentUser || !!session;
+  },
+
+  // Require authentication (redirect if not logged in)
+  requireAuth: () => {
+    if (!Auth.isAuthenticated()) {
+      window.location.href = 'login.html';
+      return false;
+    }
+    return true;
+  },
+
+  // Require specific role
+  requireRole: (roles) => {
+    if (!Auth.isAuthenticated()) {
+      window.location.href = 'login.html';
+      return false;
+    }
+    
+    if (!Auth.hasRole(roles)) {
+      Utils.showToast('Anda tidak memiliki izin untuk mengakses halaman ini', 'error');
+      window.location.href = 'index.html';
+      return false;
+    }
+    return true;
+  },
+
+  // Update user profile
+  updateProfile: async (uid, updates) => {
+    try {
+      Utils.showLoading('Memperbarui profil...');
+      
+      await database.ref(`users/${uid}`).update({
+        ...updates,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      });
+      
+      // Update session if current user
+      if (Auth.currentUser && Auth.currentUser.uid === uid) {
+        Auth.currentUser = { ...Auth.currentUser, ...updates };
+        Utils.setStorage('webpos_session', {
+          user: Auth.currentUser,
+          loginTime: Date.now()
+        });
+      }
+      
+      Utils.hideLoading();
+      Utils.showToast('Profil berhasil diperbarui', 'success');
+      return { success: true };
+    } catch (error) {
+      Utils.hideLoading();
+      console.error('Update profile error:', error);
+      Utils.showToast('Gagal memperbarui profil', 'error');
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Change password
+  changePassword: async (newPassword) => {
+    try {
+      Utils.showLoading('Mengubah password...');
+      
+      const user = auth.currentUser;
+      if (!user) {
+        Utils.hideLoading();
+        return { success: false, error: 'User not logged in' };
+      }
+      
+      await user.updatePassword(newPassword);
+      
+      Utils.hideLoading();
+      Utils.showToast('Password berhasil diubah', 'success');
+      return { success: true };
+    } catch (error) {
+      Utils.hideLoading();
+      console.error('Change password error:', error);
+      
+      let message = 'Gagal mengubah password';
+      if (error.code === 'auth/requires-recent-login') {
+        message = 'Silakan login ulang untuk mengubah password';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'Password terlalu lemah';
+      }
+      
+      Utils.showToast(message, 'error');
+      return { success: false, error: message };
+    }
+  },
+
+  // Reset password (send email)
+  sendPasswordReset: async (email) => {
+    try {
+      Utils.showLoading('Mengirim email reset password...');
+      
+      await auth.sendPasswordResetEmail(email);
+      
+      Utils.hideLoading();
+      Utils.showToast('Email reset password telah dikirim', 'success');
+      return { success: true };
+    } catch (error) {
+      Utils.hideLoading();
+      console.error('Reset password error:', error);
+      
+      let message = 'Gagal mengirim email reset';
+      if (error.code === 'auth/user-not-found') {
+        message = 'Email tidak terdaftar';
+      }
+      
+      Utils.showToast(message, 'error');
+      return { success: false, error: message };
+    }
   }
 };
 
 // ==========================================
-// ⭐ GLOBAL INIT & PROTECTION
+// ⭐ TAMBAHAN: CSS PROTECTION UNTUK SIDEBAR
 // ==========================================
-const aggressiveFilter = () => {
-  const user = Auth.getCurrentUser();
-  if (!user || user.role === 'owner') return;
-  
-  // Run multiple times
-  let attempts = 0;
-  const interval = setInterval(() => {
-    Auth.filterSidebarMenu();
-    if (++attempts >= 5) clearInterval(interval);
-  }, 500);
-  
-  // Run on every click (catches dropdowns)
-  document.addEventListener('click', () => {
-    setTimeout(() => Auth.filterSidebarMenu(), 150);
-  });
+const sidebarStyle = document.createElement('style');
+sidebarStyle.textContent = `
+  .perm-hidden, .nav-item[hidden], li[hidden] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+  .nav-section[hidden], .sidebar-section[hidden] {
+    display: none !important;
+  }
+`;
+document.head.appendChild(sidebarStyle);
+// ==========================================
+// ⭐ TAMBAHAN: PERMISSION SYSTEM
+// ==========================================
+Auth.PAGE_PERMISSIONS = {
+  'index.html': 'dashboard',
+  'page-kasir.html': 'kasir',
+  'page-produk.html': 'produk',
+  'page-riwayat.html': 'riwayat',
+  'page-kas.html': 'kas',
+  'page-modal-harian.html': 'kas',
+  'page-kas-masuk.html': 'kas',
+  'page-kas-keluar.html': 'kas',
+  'page-kas-shift.html': 'kas',
+  'page-kas-topup.html': 'kas',
+  'page-kas-tarik.html': 'kas',
+  'page-hutang.html': 'hutang',
+  'page-laporan.html': 'laporan',
+  'page-saldo-telegram.html': 'telegram',
+  'page-data-pelanggan.html': 'pelanggan',
+  'page-pengguna.html': 'pengguna',
+  'page-setting.html': 'pengaturan',
+  'page-backup.html': 'backup',
+  'page-printer.html': 'printer',
+  'page-reset.html': 'reset'
 };
 
-// Override init
+// Override hasPermission untuk cek dari permissions object
+const originalHasPermission = Auth.canAccess;
+Auth.hasPermission = function(key) {
+  const user = Auth.getCurrentUser();
+  if (!user) return false;
+  if (user.role === 'owner') return true;
+  return user.permissions?.[key] === true;
+};
+
+// Tambahan fungsi filter
+Auth.filterSidebarMenu = function() {
+  const currentUser = Auth.getCurrentUser();
+  if (!currentUser || currentUser.role === 'owner') return;
+  
+  const perms = currentUser.permissions || {};
+  console.log('🔒 Filtering for:', currentUser.username, perms);
+  
+  // Cari semua link di sidebar
+  const links = document.querySelectorAll('#sidebar a[href], .sidebar a[href], .nav-link[href]');
+  let hiddenCount = 0;
+  
+  links.forEach(link => {
+    const href = link.getAttribute('href') || '';
+    const cleanHref = href.split('?')[0].split('#')[0].split('/').pop();
+    const permKey = Auth.PAGE_PERMISSIONS[cleanHref];
+    
+    if (permKey && !perms[permKey]) {
+      // Cari parent container (nav-item atau li)
+      let item = link.closest('.nav-item');
+      if (!item) item = link.closest('li');
+      if (!item) item = link.parentElement;
+      
+      if (item) {
+        item.setAttribute('hidden', '');
+        item.classList.add('perm-hidden');
+        item.style.display = 'none';
+        item.style.visibility = 'hidden';
+        hiddenCount++;
+      }
+    }
+  });
+  
+  console.log('✅ Hidden:', hiddenCount, 'items');
+};
+
+// Auto-run filter saat login dan setup observer
 const originalInit = Auth.init;
-Auth.init = () => {
+Auth.init = function() {
   originalInit();
   
   if (typeof auth !== 'undefined') {
     auth.onAuthStateChanged(async (user) => {
       if (user) {
+        // Tunggu user data load
         setTimeout(() => {
           const currentUser = Auth.getCurrentUser();
           if (currentUser && currentUser.role !== 'owner') {
-            console.log('🔐 Auto-filter for:', currentUser.username);
             Auth.filterSidebarMenu();
-            aggressiveFilter();
+            
+            // Observer untuk dropdown
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+              const observer = new MutationObserver(() => {
+                Auth.filterSidebarMenu();
+              });
+              observer.observe(sidebar, { childList: true, subtree: true });
+            }
           }
-        }, 300);
+        }, 500);
       }
     });
   }
 };
 
+// Initialize on load
 document.addEventListener('DOMContentLoaded', Auth.init);
-if (typeof module !== 'undefined') module.exports = Auth;
+
+// Export for module usage
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Auth;
+}
