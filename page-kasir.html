@@ -591,24 +591,66 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     height: 36px !important;
   }
   
-  /* Toolbar: Search di atas, Sort/View di bawah */
+  /* ==========================================
+     QUICK ACTIONS - SCROLLABLE & ICON ONLY
+     ========================================== */
+  .quick-actions-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.375rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  .quick-actions-bar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide text di quick action, tampilkan icon saja */
+  .quick-action-btn span {
+    display: none !important;
+  }
+  
+  .quick-action-btn {
+    padding: 0.625rem !important;
+    min-width: 44px;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  
+  .quick-action-btn i {
+    font-size: 0.875rem !important;
+    margin: 0 !important;
+  }
+  
+  /* ==========================================
+     TOOLBAR & SEARCH - COMPACT
+     ========================================== */
   .product-toolbar {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 0.5rem !important;
   }
   
+  /* Search Box lebih compact */
   .search-box {
     min-width: 100% !important;
     order: 1;
   }
   
   .search-box input {
-    padding: 0.625rem 0.75rem 0.625rem 2.25rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.5rem 0.75rem 0.5rem 2rem !important;
+    font-size: 0.85rem !important;
+    height: 40px !important;
   }
   
-  /* Sort dan View Toggle di baris kedua */
+  .search-box i {
+    left: 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Sort dan View Toggle di baris kedua & diperkecil */
   .product-toolbar > div:last-child {
     order: 2;
     display: flex !important;
@@ -616,19 +658,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     width: 100% !important;
   }
   
-  /* Quick actions lebih kecil */
-  .quick-actions-bar {
-    gap: 0.375rem !important;
-    padding: 0.5rem !important;
+  .sort-toggle, .view-toggle {
+    transform: scale(0.85);
   }
   
-  .quick-action-btn {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.75rem !important;
+  .sort-toggle {
+    transform-origin: left;
   }
   
-  .quick-action-btn i {
-    font-size: 0.875rem !important;
+  .view-toggle {
+    transform-origin: right;
+  }
+  
+  .sort-btn {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .view-btn {
+    width: 36px !important;
+    height: 36px !important;
   }
   
   /* Category pills lebih kecil */
