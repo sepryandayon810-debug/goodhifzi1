@@ -618,7 +618,7 @@ Auth.hasPermission = function(key) {
   return user.permissions?.[key] === true;
 };
 
-// Tambahan fungsi filter - AGRESSIVE VERSION
+// Tambahan fungsi filter - SUPER AGRESSIVE VERSION
 Auth.filterSidebarMenu = function() {
   const currentUser = Auth.getCurrentUser();
   if (!currentUser || currentUser.role === 'owner') return;
@@ -626,38 +626,55 @@ Auth.filterSidebarMenu = function() {
   const perms = currentUser.permissions || {};
   console.log('🔒 Filtering for:', currentUser.username, perms);
   
-  const selectors = ['#sidebar a[href]', '.sidebar a[href]', 'aside a[href]', '.nav-link[href]'];
-  let allLinks = [];
-  selectors.forEach(sel => {
-    try { allLinks = [...allLinks, ...document.querySelectorAll(sel)]; } catch(e){}
-  });
-  allLinks = [...new Set(allLinks)];
+  let removedCount = 0;
   
-  let hiddenCount = 0;
-  allLinks.forEach(link => {
+  // Cari semua link di sidebar
+  document.querySelectorAll('#sidebar a[href], .sidebar a[href], aside a[href], li a[href]').forEach(link => {
     const href = link.getAttribute('href') || '';
     const cleanHref = href.split('?')[0].split('#')[0].split('/').pop();
-    const permKey = Auth.PAGE_PERMISSIONS[cleanHref];
+    const text = link.textContent.trim();
+    
+    let permKey = Auth.PAGE_PERMISSIONS[cleanHref];
+    
+    // Fallback text matching
+    if (!permKey) {
+      const lowerText = text.toLowerCase();
+      if (lowerText.includes('kasir')) permKey = 'kasir';
+      else if (lowerText.includes('produk')) permKey = 'produk';
+      else if (lowerText.includes('riwayat')) permKey = 'riwayat';
+      else if (lowerText.includes('kas') || lowerText.includes('modal')) permKey = 'kas';
+      else if (lowerText.includes('hutang')) permKey = 'hutang';
+      else if (lowerText.includes('laporan')) permKey = 'laporan';
+      else if (lowerText.includes('telegram')) permKey = 'telegram';
+      else if (lowerText.includes('pelanggan')) permKey = 'pelanggan';
+      else if (lowerText.includes('pengguna')) permKey = 'pengguna';
+      else if (lowerText.includes('pengaturan') || lowerText.includes('setting')) permKey = 'pengaturan';
+      else if (lowerText.includes('backup')) permKey = 'backup';
+      else if (lowerText.includes('printer')) permKey = 'printer';
+      else if (lowerText.includes('reset')) permKey = 'reset';
+      else if (lowerText.includes('dashboard')) permKey = 'dashboard';
+    }
     
     if (permKey && !perms[permKey]) {
-      let item = link.closest('.nav-item') || link.closest('li') || link.parentElement;
-      if (item) {
-        item.classList.add('perm-hidden');
-        item.setAttribute('hidden', '');
-        item.style.setProperty('display', 'none', 'important');
-        item.style.setProperty('visibility', 'hidden', 'important');
-        hiddenCount++;
+      console.log(`❌ REMOVING: ${text} (${cleanHref})`);
+      
+      // CARA PALING AMPUH: Hapus parent LI dari DOM!
+      let parent = link.closest('li') || link.parentElement;
+      if (parent) {
+        parent.remove(); // ⭐ HAPUS TOTAL DARI DOM!
+        removedCount++;
       }
     }
   });
   
-  document.querySelectorAll('.nav-section').forEach(sec => {
-    if (sec.querySelectorAll('.nav-item:not(.perm-hidden)').length === 0) {
-      sec.style.setProperty('display', 'none', 'important');
+  // Hapus section headers yang sudah kosong
+  document.querySelectorAll('#sidebar li, #sidebar .nav-item, .sidebar li').forEach(li => {
+    if (li.querySelectorAll('a[href]').length === 0) {
+      li.remove();
     }
   });
   
-  console.log('✅ Hidden:', hiddenCount, 'items');
+  console.log('✅ REMOVED:', removedCount, 'items from DOM');
 };
 // Auto-run filter saat login dan setup observer
 const originalInit = Auth.init;
