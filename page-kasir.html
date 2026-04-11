@@ -62,6 +62,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 /* ===== SIDEBAR ===== */
 .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
 .sidebar.collapsed{width:var(--sidebar-collapsed)}
+@media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
 
 .sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
 .logo-container{display:flex;align-items:center;gap:.5rem}
@@ -219,12 +220,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .d-none{display:none!important}
 .d-block{display:block!important}
 .d-flex{display:flex!important}
-    /* Desktop only - hide on mobile */
-@media (min-width: 1024px) {
-  .d-md-none {
-    display: none !important;
-  }
-}
+@media(max-width:1024px){.d-md-none{display:none!important}}
 .text-center{text-align:center!important}
 .text-primary{color:var(--primary)!important}
 .text-success{color:var(--success)!important}
@@ -259,6 +255,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 /* Products Grid */
 .products-container{flex:1;overflow-y:auto;padding-right:.5rem}
 .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem}
+@media(max-width:640px){.products-grid{grid-template-columns:repeat(2,1fr);gap:.75rem}}
+
 .product-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);overflow:hidden;cursor:pointer;transition:all .25s}
 .product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary)}
 .product-card-image{aspect-ratio:1;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;position:relative}
@@ -343,6 +341,60 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .quick-amounts{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .quick-amount{padding:.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;font-size:.875rem;cursor:pointer;transition:all .15s;color:var(--text-secondary)}
 .quick-amount:hover{background:var(--primary);color:white;border-color:var(--primary)}
+
+/* ===== PERBAIKAN MOBILE ===== */
+@media(max-width:768px){
+  /* Burger menu harus tampil */
+  .btn-icon.d-md-none {
+    display: flex !important;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    border-radius: 0.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Grid produk lebih kecil di mobile */
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  
+  .product-card {
+    min-height: 180px;
+  }
+  
+  .product-card-image {
+    height: 100px;
+  }
+  
+  .product-card-info {
+    padding: 0.5rem;
+  }
+  
+  .product-card-name {
+    font-size: 0.75rem;
+  }
+  
+  .product-card-price {
+    font-size: 0.85rem;
+  }
+  
+  /* Quick action bar scrollable */
+  .quick-actions-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .quick-action-btn {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
 
 /* ===== MODAL INPUT MANUAL ===== */
 .manual-modal .form-group {
@@ -495,556 +547,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   background: var(--bg-card);
   color: var(--primary);
   box-shadow: var(--shadow-sm);
-}
-
- /* ==========================================
-   KASIR MOBILE RESPONSIVE
-   ========================================== */
-
-/* Tablet & Mobile */
-@media (max-width: 1024px) {
-  .kasir-layout {
-    grid-template-columns: 1fr !important;
-    height: auto !important;
-    gap: 1rem !important;
-  }
-  
-  .product-section {
-    height: auto !important;
-    min-height: calc(100vh - 250px);
-  }
-  
-  .cart-section {
-    position: fixed !important;
-    bottom: 70px !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: auto !important;
-    height: 60vh !important;
-    max-height: 60vh !important;
-    border-radius: 1rem 1rem 0 0 !important;
-    z-index: 100 !important;
-    transform: translateY(100%) !important;
-    transition: transform 0.3s ease !important;
-    margin: 0 !important;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.15) !important;
-  }
-  
-  .cart-section.open {
-    transform: translateY(0) !important;
-  }  
-  /* Cart header lebih compact */
-  .cart-header {
-    padding: 0.875rem 1rem !important;
-    cursor: pointer !important;
-  }
-  
-  .cart-title {
-    font-size: 1rem !important;
-  }
-  
-  .cart-items {
-    padding: 0.5rem !important;
-  }
-  
-  .cart-item {
-    padding: 0.75rem !important;
-    margin-bottom: 0.375rem !important;
-  }
-  
-  .cart-item-image {
-    width: 44px !important;
-    height: 44px !important;
-  }
-  
-  .cart-item-name {
-    font-size: 0.8rem !important;
-  }
-  
-  .cart-item-price {
-    font-size: 0.7rem !important;
-  }
-  
-  .qty-btn {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 0.7rem !important;
-  }
-  
-  .qty-input {
-    width: 36px !important;
-    font-size: 0.8rem !important;
-  }
-  
-  .cart-item-total {
-    font-size: 0.85rem !important;
-  }
-  
-  .cart-footer {
-    padding: 0.875rem 1rem !important;
-  }
-  
-  .summary-row {
-    font-size: 0.8rem !important;
-    margin-bottom: 0.375rem !important;
-  }
-  
-  .summary-row.total {
-    font-size: 1rem !important;
-    padding-top: 0.625rem !important;
-    margin-top: 0.625rem !important;
-  }
-  
-  .cart-actions .btn {
-    padding: 0.625rem !important;
-    font-size: 0.8rem !important;
-  }
-  
-  .btn-pay {
-    font-size: 0.9rem !important;
-    padding: 0.875rem !important;
-  }
-  
-  /* Cart toggle button lebih besar untuk touch */
-  .cart-toggle {
-    width: 60px !important;
-    height: 60px !important;
-    bottom: 80px !important;
-    right: 1rem !important;
-    font-size: 1.5rem !important;
-  }
-  
-  .cart-toggle .badge {
-    width: 28px !important;
-    height: 28px !important;
-    font-size: 0.85rem !important;
-    top: -6px !important;
-    right: -6px !important;
-  }
-  
-  /* Product grid 2 kolom di tablet */
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
-  }
-  
-  .product-card {
-    min-height: auto !important;
-  }
-  
-  .product-card-image {
-    height: 120px !important;
-  }
-  
-  .product-card-info {
-    padding: 0.625rem !important;
-  }
-  
-  .product-card-name {
-    font-size: 0.8rem !important;
-  }
-  
-  .product-card-price {
-    font-size: 0.9rem !important;
-  }
-  
-  /* Toolbar responsive */
-  .product-toolbar {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 0.5rem !important;
-    gap: 0.5rem !important;
-  }
-  
-  .search-box {
-    min-width: 150px !important;
-    flex: 1 !important;
-  }
-  
-  .search-box input {
-    padding: 0.625rem 0.75rem 0.625rem 2.25rem !important;
-    font-size: 0.875rem !important;
-  }
-  
-  /* Quick actions bar scrollable */
-  .quick-actions-bar {
-    overflow-x: auto !important;
-    flex-wrap: nowrap !important;
-    padding: 0.625rem !important;
-    gap: 0.375rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-  
-  .quick-action-btn {
-    padding: 0.5rem 0.75rem !important;
-    font-size: 0.75rem !important;
-    flex-shrink: 0 !important;
-  }
-  
-  .quick-action-btn i {
-    font-size: 0.875rem !important;
-  }
-  
-  /* Category pills lebih kecil */
-  .category-pills {
-    gap: 0.375rem !important;
-  }
-  
-  .category-pill {
-    padding: 0.375rem 0.875rem !important;
-    font-size: 0.8rem !important;
-  }
-  
-  /* View toggle lebih kecil */
-  .view-toggle {
-    padding: 0.2rem !important;
-  }
-  
-  .view-btn {
-    width: 36px !important;
-    height: 36px !important;
-  }
-  
-  /* Sort toggle lebih kecil */
-  .sort-toggle {
-    padding: 0.2rem !important;
-  }
-  
-  .sort-btn {
-    padding: 0.4rem 0.625rem !important;
-    font-size: 0.75rem !important;
-  }
-  
-  .sort-btn span {
-    display: none !important; /* Sembunyikan text di mobile, tampilkan icon saja */
-  }
-}
-
-/* Mobile kecil (di bawah 480px) */
-@media (max-width: 480px) {
-  html {
-    font-size: 14px !important;
-  }
-  
-  :root {
-    --header-height: 55px !important;
-    --bottom-nav-height: 55px !important;
-  }
-  
-  /* Product grid super compact */
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.5rem !important;
-  }
-  
-  .product-card {
-    border-radius: 0.75rem !important;
-  }
-  
-  .product-card-image {
-    height: 100px !important;
-  }
-  
-  .product-card-image i {
-    font-size: 1.75rem !important;
-  }
-  
-  .product-stock-badge {
-    padding: 0.15rem 0.375rem !important;
-    font-size: 0.6rem !important;
-    top: 0.375rem !important;
-    right: 0.375rem !important;
-  }
-  
-  .product-card-info {
-    padding: 0.5rem !important;
-  }
-  
-  .product-card-name {
-    font-size: 0.75rem !important;
-    margin-bottom: 0.15rem !important;
-  }
-  
-  .product-card-price {
-    font-size: 0.85rem !important;
-  }
-  
-  .product-card-code {
-    font-size: 0.65rem !important;
-  }
-  
-  /* Cart lebih tinggi di mobile kecil */
-  .cart-section {
-    height: 70vh !important;
-    max-height: 70vh !important;
-    bottom: 55px !important;
-  }
-  
-  .cart-header {
-    padding: 0.75rem 0.875rem !important;
-  }
-  
-  .cart-title {
-    font-size: 0.9rem !important;
-  }
-  
-  .cart-count {
-    font-size: 0.7rem !important;
-    padding: 0.1rem 0.375rem !important;
-  }
-  
-  .cart-clear {
-    font-size: 0.7rem !important;
-  }
-  
-  .cart-item {
-    padding: 0.625rem !important;
-    gap: 0.5rem !important;
-  }
-  
-  .cart-item-image {
-    width: 40px !important;
-    height: 40px !important;
-  }
-  
-  .cart-item-name {
-    font-size: 0.75rem !important;
-  }
-  
-  .cart-item-total {
-    font-size: 0.8rem !important;
-  }
-  
-  .cart-footer {
-    padding: 0.75rem !important;
-  }
-  
-  .btn-pay {
-    font-size: 0.85rem !important;
-    padding: 0.75rem !important;
-  }
-  
-  /* Payment modal full screen di mobile kecil */
-  .modal-overlay {
-    padding: 0 !important;
-    align-items: flex-end !important;
-  }
-  
-  .modal, .modal-content {
-    max-width: 100% !important;
-    border-radius: 1rem 1rem 0 0 !important;
-    max-height: 90vh !important;
-  }
-  
-  .modal-header {
-    padding: 1rem !important;
-  }
-  
-  .modal-title {
-    font-size: 1.1rem !important;
-  }
-  
-  .modal-body {
-    padding: 1rem !important;
-  }
-  
-  .payment-methods {
-    gap: 0.5rem !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .payment-method {
-    padding: 0.75rem 0.5rem !important;
-  }
-  
-  .payment-method i {
-    font-size: 1.25rem !important;
-    margin-bottom: 0.25rem !important;
-  }
-  
-  .payment-method span {
-    font-size: 0.7rem !important;
-  }
-  
-  .amount-display {
-    padding: 1rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-  
-  .amount-label {
-    font-size: 0.75rem !important;
-  }
-  
-  .amount-value {
-    font-size: 1.5rem !important;
-  }
-  
-  .numpad {
-    gap: 0.375rem !important;
-  }
-  
-  .numpad-btn {
-    padding: 1rem !important;
-    font-size: 1.1rem !important;
-    border-radius: 0.625rem !important;
-  }
-  
-  .quick-amounts {
-    gap: 0.375rem !important;
-    margin-bottom: 0.75rem !important;
-  }
-  
-  .quick-amount {
-    padding: 0.4rem 0.875rem !important;
-    font-size: 0.8rem !important;
-  }
-  
-  /* Manual modal lebih compact */
-  .manual-modal .form-group {
-    margin-bottom: 0.875rem !important;
-  }
-  
-  .manual-modal .form-label {
-    font-size: 0.8rem !important;
-  }
-  
-  .manual-modal .form-input {
-    padding: 0.625rem 0.875rem !important;
-    font-size: 0.9rem !important;
-  }
-  
-  .manual-modal .price-display {
-    padding: 0.875rem !important;
-    margin-top: 0.75rem !important;
-  }
-  
-  .manual-modal .price-display .value {
-    font-size: 1.25rem !important;
-  }
-  
-  .manual-modal .profit-display {
-    padding: 0.625rem !important;
-    margin-top: 0.625rem !important;
-    font-size: 0.875rem !important;
-  }
-}
-
-/* iPhone SE / Very small screens */
-@media (max-width: 380px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.4rem !important;
-  }
-  
-  .product-card-image {
-    height: 90px !important;
-  }
-  
-  .quick-action-btn {
-    padding: 0.4rem 0.625rem !important;
-    font-size: 0.7rem !important;
-  }
-  
-  .category-pill {
-    padding: 0.3rem 0.75rem !important;
-    font-size: 0.75rem !important;
-  }
-  
-  .cart-section {
-    height: 75vh !important;
-  }
-}
-
-/* Landscape mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-  .cart-section {
-    height: 80vh !important;
-    max-height: 80vh !important;
-  }
-  
-  .products-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-  
-  .product-card-image {
-    height: 100px !important;
-  }
-}
-
-/* Fix untuk iPhone notch */
-@supports (padding-top: env(safe-area-inset-top)) {
-  @media (max-width: 768px) {
-    .main-header {
-      padding-top: env(safe-area-inset-top) !important;
-      height: calc(var(--header-height) + env(safe-area-inset-top)) !important;
-    }
-    
-    .cart-section {
-      bottom: calc(70px + env(safe-area-inset-bottom)) !important;
-      padding-bottom: env(safe-area-inset-bottom) !important;
-    }
-    
-    .mobile-nav {
-      padding-bottom: env(safe-area-inset-bottom) !important;
-      height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)) !important;
-    }
-  }
-}
-
-/* Disable hover effects di mobile */
-@media (max-width: 768px) {
-  .product-card:hover,
-  .quick-action-btn:hover,
-  .cart-item:hover {
-    transform: none !important;
-    box-shadow: none !important;
-  }
-  
-  .product-card:active {
-    transform: scale(0.98) !important;
-  }
-  
-  .quick-action-btn:active,
-  .cart-item-remove:active {
-    transform: scale(0.95) !important;
-  }
-  
-  /* Touch targets minimal 44px */
-  .category-pill,
-  .view-btn,
-  .sort-btn,
-  .qty-btn,
-  .numpad-btn {
-    min-height: 44px !important;
-    min-width: 44px !important;
-  }
-}
-
-/* Animasi smooth untuk cart slide */
-.cart-section {
-  will-change: transform;
-}
-
-/* Overlay gelap saat cart terbuka di mobile */
-@media (max-width: 1024px) {
-  .cart-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 99;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-  
-  .cart-overlay.active {
-    opacity: 1;
-    visibility: visible;
-  }
 }
     
 </style>
