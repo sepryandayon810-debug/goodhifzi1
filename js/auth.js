@@ -2,7 +2,22 @@
    * WebPOS Authentication Module - Enhanced
    * With Username Login, User Approval System, and Permission Management
    */
-  
+  // Inject CSS protection sebelum Auth init
+const style = document.createElement('style');
+style.textContent = `
+  .nav-item[hidden], .nav-section[hidden] { 
+    display: none !important; 
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+`;
+if (document.head) {
+  document.head.appendChild(style);
+} else {
+  document.addEventListener('DOMContentLoaded', () => document.head.appendChild(style));
+}
+
   const Auth = {
     currentUser: null,
     pendingApproval: null,
