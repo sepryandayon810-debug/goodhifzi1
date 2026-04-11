@@ -296,13 +296,35 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     gap:0.5rem !important;
   }
   .produk-card{
-    min-height:140px !important;
+    min-height:120px !important;
   }
   .produk-image{
-    height:70px !important;
+    height:60px !important;
+    position:relative !important;
   }
+  
+  /* FIX BADGE OVERLAP */
+  .produk-status{
+    position:absolute !important;
+    top:0.25rem !important;
+    right:0.25rem !important;
+    padding:0.15rem 0.4rem !important;
+    font-size:0.6rem !important;
+    z-index:2 !important;
+  }
+  .produk-stock-badge{
+    position:absolute !important;
+    bottom:0.25rem !important;
+    left:0.25rem !important;
+    right:auto !important;
+    top:auto !important;
+    padding:0.15rem 0.4rem !important;
+    font-size:0.65rem !important;
+    z-index:2 !important;
+  }
+  
   .produk-info{
-    padding:0.5rem !important;
+    padding:0.4rem !important;
   }
   .produk-name{
     font-size:0.7rem !important;
@@ -315,46 +337,57 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     margin-bottom:0.1rem !important;
   }
   .produk-code{
-    font-size:0.65rem !important;
-    margin-bottom:0.2rem !important;
+    font-size:0.6rem !important;
+    margin-bottom:0.15rem !important;
   }
   .produk-price{
-    font-size:0.8rem !important;
-  }
-  
-  /* Tombol Edit/Hapus - Icon Only */
-  .produk-actions .btn{
-    padding:0.3rem !important;
-    min-width:32px;
-    justify-content:center;
-  }
-  .produk-actions .btn span,
-  .produk-actions .btn:not(:has(i)){
-    display:none !important;
-  }
-  .produk-actions .btn i{
-    margin:0 !important;
     font-size:0.75rem !important;
   }
   
-  /* Toolbar Vertical */
+  /* Tombol Edit/Hapus - ICON ONLY */
+  .produk-actions{
+    padding:0.4rem !important;
+    gap:0.25rem !important;
+  }
+  .produk-actions .btn{
+    padding:0.25rem !important;
+    min-width:28px !important;
+    height:28px !important;
+    justify-content:center !important;
+    font-size:0 !important; /* Hide text */
+  }
+  .produk-actions .btn i{
+    font-size:0.75rem !important;
+    margin:0 !important;
+  }
+  .produk-actions .btn span{
+    display:none !important;
+  }
+  
+  /* Toolbar Vertical & Compact */
   .produk-toolbar{
     flex-direction:column !important;
     align-items:stretch !important;
-    gap:0.75rem !important;
+    gap:0.5rem !important;
   }
   .produk-search{
     min-width:100% !important;
     width:100% !important;
     order:1;
   }
+  .produk-search input{
+    padding:0.625rem 1rem 0.625rem 2.25rem !important;
+    font-size:0.8rem !important;
+  }
+  
+  /* FIX FILTERS - Lebih kecil & scrollable */
   .produk-filters{
     display:flex !important;
     flex-wrap:nowrap !important;
     overflow-x:auto !important;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
-    gap:0.5rem !important;
+    gap:0.375rem !important;
     order:2;
     padding-bottom:0.25rem;
   }
@@ -362,10 +395,12 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     display:none;
   }
   .filter-select{
-    min-width:130px !important;
-    padding:0.5rem 0.75rem !important;
-    font-size:0.75rem !important;
+    min-width:100px !important;
+    max-width:120px !important;
+    padding:0.4rem 0.75rem !important;
+    font-size:0.7rem !important;
     flex-shrink:0;
+    height:36px !important;
   }
   .view-toggle{
     display:none !important;
@@ -376,7 +411,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     padding:0 0.75rem !important;
   }
   .header-title{
-    font-size:1.1rem !important;
+    font-size:1rem !important;
   }
   .header-actions{
     gap:0.25rem !important;
@@ -392,34 +427,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   .header-actions .btn span,
   .header-actions .btn .d-md-inline{
     display:none !important;
-    width:0 !important;
-    height:0 !important;
-    opacity:0 !important;
-    visibility:hidden !important;
   }
   .header-actions .btn i{
     margin:0 !important;
     font-size:0.875rem !important;
   }
-  .header-actions .btn-icon{
-    width:36px !important;
-    height:36px !important;
-  }
   
-  /* Tab Nav */
+  /* Tab Nav - Lebih kecil */
   .tab-nav{
-    gap:0.375rem !important;
-    margin-bottom:1rem !important;
+    gap:0.25rem !important;
+    margin-bottom:0.75rem !important;
   }
   .tab-btn{
-    padding:0.5rem 1rem !important;
-    font-size:0.8rem !important;
+    padding:0.4rem 0.875rem !important;
+    font-size:0.75rem !important;
   }
-  .tab-btn span{
-    display:none !important;
+  .tab-btn i{
+    font-size:0.875rem !important;
   }
 }
-
+    
 /* Mobile Menu Toggle */
 @media(max-width:1024px){
   #mobileMenuToggle{
