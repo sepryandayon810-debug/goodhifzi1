@@ -49,13 +49,42 @@ const Auth = {
           return { error: 'suspended', message: 'Akun Anda ditangguhkan. Silakan hubungi owner.' };
         }
 
+        let userPermissions = userData.permissions;
+        if (!userPermissions) {
+          // Default berdasarkan role untuk user lama
+          if (userData.role === 'kasir') {
+            userPermissions = {
+              kasir: true, produk: true, riwayat: false, kas: false, hutang: false,
+              laporan: false, telegram: false, pelanggan: false,
+              pengguna: false, pengaturan: false, backup: false, printer: false, reset: false
+            };
+          } else if (userData.role === 'admin') {
+            userPermissions = {
+              kasir: true, produk: true, riwayat: true, kas: true, hutang: true,
+              laporan: true, telegram: true, pelanggan: true,
+              pengguna: true, pengaturan: true, backup: true, printer: true, reset: false
+            };
+          } else {
+            // Owner - semua true
+            userPermissions = {
+              kasir: true, produk: true, riwayat: true, kas: true, hutang: true,
+              laporan: true, telegram: true, pelanggan: true,
+              pengguna: true, pengaturan: true, backup: true, printer: true, reset: true
+            };
+          }
+          
+          // Simpan ke database supaya permanent
+          await database.ref(`users/${uid}/permissions`).set(userPermissions);
+          console.log('✅ Default permissions created for', userData.username);
+        }
+
         Auth.currentUser = {
           uid,
           username: userData.username,
           email: userData.email,
           name: userData.name,
           role: userData.role,
-          permissions: userData.permissions || {}, // ⭐ Load permissions
+          permissions: userPermissions || {},
           avatar: userData.avatar || null,
           status: userData.status,
           approvedBy: userData.approvedBy || null,
