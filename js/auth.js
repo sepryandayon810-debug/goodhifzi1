@@ -609,21 +609,20 @@ const Auth = {
     if (permKey && !perms[permKey]) {
       const item = link.closest('.nav-item');
       if (item) {
-        item.classList.add('no-permission'); // ⭐ Tambah class
+        item.setAttribute('hidden', ''); // ⭐ Pakai hidden attribute
         item.style.display = 'none';
       }
     }
   });
   
   document.querySelectorAll('.nav-section').forEach(sec => {
-    // Cek apakah masih ada item yang visible (bukan .no-permission)
-    const visibleItems = sec.querySelectorAll('.nav-item:not(.no-permission)');
+    const visibleItems = sec.querySelectorAll('.nav-item:not([hidden])');
     if (visibleItems.length === 0) {
-      sec.classList.add('no-permission');
-      sec.style.display = 'none';
+      sec.setAttribute('hidden', '');
     }
   });
 }
+    
   // Cek permission spesifik
   hasPermission: function(key) {
     const user = Auth.getCurrentUser();
