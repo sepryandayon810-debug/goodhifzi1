@@ -1034,12 +1034,16 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           <div class="form-group">
   <label class="form-label">Izin Akses Menu</label>
   
-  <!-- Utama -->
+    <!-- Utama -->
   <div style="margin-bottom: 1rem;">
     <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; padding-left: 0.5rem;">
       Utama
     </div>
     <div class="permission-grid">
+      <div class="permission-item">
+        <input type="checkbox" id="permDashboard" data-perm="dashboard">
+        <label for="permDashboard"><i class="fas fa-home" style="margin-right: 4px;"></i> Dashboard</label>
+      </div>
       <div class="permission-item">
         <input type="checkbox" id="permKasir" data-perm="kasir">
         <label for="permKasir"><i class="fas fa-cash-register" style="margin-right: 4px;"></i> Kasir</label>
@@ -1383,9 +1387,9 @@ document.addEventListener('click', (e) => {
           }).join('');
         }
 
-        // Mapping semua 13 permission keys
+        // Mapping semua 14 permission keys
 const ALL_PERMISSIONS = [
-  'kasir', 'produk', 'riwayat', 'kas', 'hutang',
+  'dashboard', 'kasir', 'produk', 'riwayat', 'kas', 'hutang',
   'laporan', 'telegram', 'pelanggan',
   'pengguna', 'pengaturan', 'backup', 'printer', 'reset'
 ];
