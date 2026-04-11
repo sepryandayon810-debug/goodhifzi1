@@ -599,6 +599,28 @@ const Auth = {
   }
 };
 
+// Override init untuk auto-filter setelah load
+const originalInit = Auth.init;
+Auth.init = () => {
+  originalInit(); // Panggil init asli
+  
+  // Auto-filter sidebar setelah auth state berubah
+  if (typeof auth !== 'undefined') {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Tunggu user data loaded
+        setTimeout(() => {
+          const currentUser = Auth.getCurrentUser();
+          if (currentUser && currentUser.role !== 'owner') {
+            console.log('Auto-filtering sidebar for:', currentUser.username);
+            Auth.filterSidebarMenu();
+          }
+        }, 300); // Tunggu 0.3 detik agar data siap
+      }
+    });
+  }
+};
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', Auth.init);
 
