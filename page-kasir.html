@@ -285,6 +285,32 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .cart-title{font-weight:700;font-size:1.125rem;display:flex;align-items:center;gap:.5rem}
 .cart-count{background:var(--primary);color:white;font-size:.75rem;padding:.125rem .5rem;border-radius:50px}
 .cart-clear{font-size:.75rem;color:var(--danger);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:.25rem}
+    /* Tombol Minimize Keranjang */
+.cart-minimize {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cart-minimize:hover {
+  background: var(--primary);
+  color: white;
+}
+
+/* Tampilkan tombol minimize hanya di mobile */
+@media(max-width: 1024px) {
+  .cart-minimize {
+    display: flex !important;
+  }
+}
 .cart-items{flex:1;overflow-y:auto;padding:.75rem}
 .cart-item{display:flex;gap:.75rem;padding:.875rem;background:var(--bg-secondary);border-radius:var(--radius-lg);margin-bottom:.5rem;position:relative}
 .cart-item-image{width:50px;height:50px;border-radius:var(--radius-md);background:var(--bg-card);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
@@ -769,6 +795,292 @@ html, body {
   overflow-x: hidden;
   max-width: 100vw;
 }
+
+   /* ===== MODAL PEMBAYARAN MOBILE - SUPER COMPACT v3 ===== */
+@media(max-width: 768px) {
+  #paymentModal.modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+  
+  #paymentModal .modal {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  
+  /* Header minimalis */
+  #paymentModal .modal-header {
+    padding: 0.4rem 0.75rem !important;
+    flex-shrink: 0 !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  #paymentModal .modal-title { 
+    font-size: 0.9rem !important; 
+    font-weight: 600 !important;
+  }
+  
+  #paymentModal .modal-close { 
+    width: 26px !important; 
+    height: 26px !important;
+    font-size: 0.75rem !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Body layout flex dengan numpad fleksibel */
+  #paymentModal .modal-body {
+    padding: 0.25rem 0.5rem !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    gap: 0.25rem !important;
+  }
+  
+  /* Payment methods - 1 baris sangat kecil */
+  #paymentModal .payment-methods {
+    display: flex !important;
+    gap: 0.25rem !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
+    height: 50px !important; /* Fixed height */
+  }
+  
+  #paymentModal .payment-method {
+    flex: 1 !important;
+    padding: 0.25rem 0.2rem !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-width: 1px !important;
+    border-radius: 0.4rem !important;
+    min-height: auto !important;
+  }
+  
+  #paymentModal .payment-method i { 
+    font-size: 0.8rem !important; 
+    margin-bottom: 0.1rem !important; 
+    line-height: 1 !important;
+  }
+  
+  #paymentModal .payment-method span { 
+    font-size: 0.55rem !important; 
+    font-weight: 600 !important;
+    line-height: 1 !important;
+  }
+  
+  /* Amount displays - horizontal layout untuk hemat ruang */
+  #paymentModal .modal-body > .amount-display,
+  #paymentModal .amount-display {
+    padding: 0.3rem 0.5rem !important;
+    margin-bottom: 0.15rem !important;
+    border-radius: 0.4rem !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 44px !important;
+    height: auto !important;
+  }
+  
+  #paymentModal .amount-label { 
+    font-size: 0.6rem !important; 
+    margin-bottom: 0.05rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+    opacity: 0.8 !important;
+  }
+  
+  #paymentModal .amount-value { 
+    font-size: 1.15rem !important; 
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Jumlah diterima lebih besar dikit */
+  #paymentModal .amount-display:nth-child(3) .amount-value { 
+    font-size: 1.35rem !important;
+    color: var(--primary) !important;
+  }
+  
+  /* Kembalian warna hijau */
+  #paymentModal .amount-display:nth-child(4) {
+    background: rgba(16, 185, 129, 0.08) !important;
+  }
+  
+  #paymentModal .amount-display:nth-child(4) .amount-value {
+    color: var(--success) !important;
+    font-size: 1.15rem !important;
+  }
+  
+  /* Quick amounts - paling kecil */
+  #paymentModal .quick-amounts {
+    display: flex !important;
+    gap: 0.25rem !important;
+    margin-bottom: 0.15rem !important;
+    flex-shrink: 0 !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    padding-bottom: 0.1rem !important;
+    height: 32px !important; /* Fixed height */
+    align-items: center !important;
+  }
+  
+  #paymentModal .quick-amounts::-webkit-scrollbar { 
+    display: none !important; 
+  }
+  
+  #paymentModal .quick-amount {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.65rem !important;
+    border-radius: 50px !important;
+    flex-shrink: 0 !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-secondary) !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    height: 26px !important;
+    display: flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+  }
+  
+  /* UANG PAS WARNA HIJAU */
+  #paymentModal .quick-amount[data-amount="exact"] {
+    background: linear-gradient(135deg, var(--success), #059669) !important;
+    color: white !important;
+    border-color: var(--success) !important;
+    font-weight: 600 !important;
+    order: -1 !important;
+  }
+  
+  /* Numpad - mengisi SEMUA sisa ruang */
+  #paymentModal .numpad {
+    gap: 0.15rem !important;
+    flex: 1 !important; /* Mengisi semua sisa ruang */
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(4, 1fr) !important; /* 4 baris sama rata */
+    margin-bottom: 0 !important;
+    min-height: 0 !important; /* Penting: biarkan flex yang atur */
+  }
+  
+  #paymentModal .numpad-btn {
+    padding: 0 !important;
+    font-size: 1.1rem !important;
+    border-radius: 0.35rem !important;
+    width: 100% !important;
+    height: 100% !important; /* Isi grid cell penuh */
+    min-height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-width: 1px !important;
+  }
+  
+  #paymentModal .numpad-btn.action {
+    background: var(--primary) !important;
+    color: white !important;
+    font-size: 0.9rem !important;
+  }
+  
+  #paymentModal .numpad-btn i {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Footer - fixed di bawah */
+  #paymentModal .modal-footer {
+    padding: 0.4rem 0.75rem !important;
+    flex-shrink: 0 !important;
+    gap: 0.4rem !important;
+    border-top: 1px solid var(--border-color) !important;
+    height: 52px !important; /* Fixed height */
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+    background: var(--bg-card) !important;
+  }
+  
+  #paymentModal .modal-footer .btn {
+    padding: 0.4rem 0.75rem !important;
+    font-size: 0.8rem !important;
+    flex: 1 !important;
+    border-radius: 0.4rem !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  #paymentModal .modal-footer .btn i {
+    font-size: 0.8rem !important;
+    margin-right: 0.25rem !important;
+  }
+}    /* ===== PERBAIKAN TOMBOL BAYAR MOBILE ===== */
+@media(max-width: 1024px) {
+  .cart-section {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .cart-items {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+  
+  .cart-footer {
+    flex-shrink: 0 !important;
+    padding: 1rem !important;
+    background: var(--bg-secondary) !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+  
+  .cart-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .cart-actions .btn-secondary {
+    padding: 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .btn-pay {
+    grid-column: span 2 !important;
+    width: 100% !important;
+    padding: 1rem !important;
+    font-size: 1rem !important;
+    background: linear-gradient(135deg, var(--success), #059669) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 0.75rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* Override untuk memastikan tombol bayar selalu terlihat */
+.btn-pay {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
 </style>
 </head>
 <body>
@@ -1050,19 +1362,24 @@ html, body {
             </div>
           </div>
 
-          <!-- Cart Section -->
-          <div class="cart-section" id="cartSection">
-            <div class="cart-header">
-              <div class="cart-title">
-                <i class="fas fa-shopping-cart"></i>
-                Keranjang
-                <span class="cart-count" id="cartCount">0</span>
-              </div>
+           <!-- Cart Section -->
+        <div class="cart-section" id="cartSection">
+          <div class="cart-header">
+            <div class="cart-title">
+              <i class="fas fa-shopping-cart"></i>
+              Keranjang
+              <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <div style="display:flex;gap:0.75rem;align-items:center;">
               <button class="cart-clear" id="btnClearCart">
                 <i class="fas fa-trash"></i>
                 Hapus
               </button>
+              <button class="cart-minimize" id="btnMinimizeCart" style="display:none;">
+                <i class="fas fa-chevron-down"></i>
+              </button>
             </div>
+          </div>
 
             <div class="cart-items" id="cartItems">
               <div class="cart-empty">
@@ -1934,6 +2251,7 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
         renderCart();
         updateSummary();
         paymentModal.classList.remove('active');
+        document.getElementById('cartSection').classList.remove('open');
         document.getElementById('loadingOverlay').classList.remove('active');
         showToast('Transaksi berhasil!', 'success');
 
@@ -2033,10 +2351,15 @@ manualModal.addEventListener('click', (e) => {
       }
     });
 
-    // ===== MOBILE CART TOGGLE =====
-    document.getElementById('cartToggle').addEventListener('click', () => {
-      document.getElementById('cartSection').classList.toggle('open');
-    });
+    /// ===== MOBILE CART TOGGLE =====
+document.getElementById('cartToggle').addEventListener('click', () => {
+  document.getElementById('cartSection').classList.add('open');
+});
+
+// ⭐ TOMBOL MINIMIZE KERANJANG
+document.getElementById('btnMinimizeCart').addEventListener('click', () => {
+  document.getElementById('cartSection').classList.remove('open');
+});
 
     // ===== KEYBOARD SHORTCUTS =====
     document.addEventListener('keydown', (e) => {
