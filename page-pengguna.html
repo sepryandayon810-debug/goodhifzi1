@@ -240,6 +240,44 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .mb-2{margin-bottom:1rem!important}
 .w-full{width:100%!important}
 
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all 0.15s;
+}
+
+.permission-item:hover {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.permission-item input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.permission-item label {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
   </style>
   
   <!-- Fonts -->
