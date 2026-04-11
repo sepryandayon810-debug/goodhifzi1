@@ -702,18 +702,92 @@ Auth.filterSidebarMenu = function() {
   console.log('✅ REMOVED:', removedCount, 'items from DOM');
 };
 
-// Auto-run dengan multiple trigger
-const runFilter = () => {
-  console.log('🚀 Running sidebar filter...');
-  if (typeof Auth !== 'undefined' && Auth.getCurrentUser) {
-    Auth.filterSidebarMenu();
-  } else {
-    console.log('⏳ Waiting for Auth...');
-    setTimeout(runFilter, 500);
+// ==========================================
+// ⭐ OBSERVER & AUTO-FILTER SYSTEM (FIXED)
+// ==========================================
+
+// Filter dengan retry sampai sidebar benar-benar stabil
+const runFilter = (attempt = 1, force = false) => {
+  console.log(`🚀 Running sidebar filter... (attempt ${attempt})`);
+  
+  if (typeof Auth === 'undefined' || !Auth.getCurrentUser) {
+    if (attempt < 10) setTimeout(() => runFilter(attempt + 1), 300);
+    return;
   }
+  
+  const user = Auth.getCurrentUser();
+  if (!user || user.role === 'owner') return;
+  
+  const sidebar = document.getElementById('sidebar') || 
+                  document.querySelector('.sidebar') || 
+                  document.querySelector('aside');
+  
+  if (!sidebar) {
+    if (attempt < 10) setTimeout(() => runFilter(attempt + 1), 300);
+    return;
+  }
+  
+  // Hitung link sebelum filter
+  const linksBefore = sidebar.querySelectorAll('a[href]').length;
+  
+  Auth.filterSidebarMenu();
+  
+  // Cek apakah masih ada link yang harusnya dihapus tapi masih ada
+  setTimeout(() => {
+    const linksAfter = sidebar.querySelectorAll('a[href]').length;
+    
+    console.log(`📊 Links: ${linksBefore} → ${linksAfter}`);
+    
+    // Jika masih ada banyak link, re-run
+    if (linksAfter > 2 && attempt < 3) {
+      console.log('🔄 Re-running filter...');
+      Auth.filterSidebarMenu();
+    }
+  }, 500);
 };
 
-// Trigger 1: Saat auth state change
+// MutationObserver untuk tangkap perubahan dinamis (dropdown expand, dll)
+const setupSidebarObserver = () => {
+  const sidebar = document.getElementById('sidebar') || 
+                  document.querySelector('.sidebar');
+  
+  if (!sidebar) {
+    setTimeout(setupSidebarObserver, 500);
+    return;
+  }
+  
+  const observer = new MutationObserver((mutations) => {
+    let shouldFilter = false;
+    
+    mutations.forEach(mutation => {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1) { // Element node
+            if (node.querySelector && node.querySelector('a[href]')) {
+              shouldFilter = true;
+            }
+            if (node.tagName === 'A' && node.getAttribute('href')) {
+              shouldFilter = true;
+            }
+          }
+        });
+      }
+    });
+    
+    if (shouldFilter) {
+      setTimeout(() => runFilter(1, true), 100);
+    }
+  });
+  
+  observer.observe(sidebar, {
+    childList: true,
+    subtree: true
+  });
+  
+  console.log('👁️ Sidebar observer active');
+};
+
+// Trigger 1: Auth state change
 const originalInit = Auth.init;
 Auth.init = function() {
   originalInit();
@@ -721,37 +795,30 @@ Auth.init = function() {
   if (typeof auth !== 'undefined') {
     auth.onAuthStateChanged((user) => {
       if (user) {
-        setTimeout(runFilter, 800); // Delay lebih lama untuk pastikan DOM ready
+        setTimeout(() => runFilter(1, true), 500);
+        setTimeout(setupSidebarObserver, 600);
       }
     });
   }
 };
 
-// Trigger 2: Saat DOM ready (untuk page refresh)
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('📄 DOM Ready, checking session...');
-  const session = Utils.getStorage('webpos_session');
-  if (session && session.user && session.user.role !== 'owner') {
-    setTimeout(runFilter, 1000); // Delay 1 detik untuk pastikan semua render
-  }
-});
-
-// Trigger 3: Saat window load (fallback)
-window.addEventListener('load', () => {
-  console.log('🖼️ Window loaded');
-  setTimeout(runFilter, 500);
-});
-
+// Trigger 2: DOM Ready (hanya 1 kali!)
 document.addEventListener('DOMContentLoaded', () => {
   console.log('📄 DOM Ready, initializing...');
-  Auth.init(); // ⭐ TAMBAH INI
+  Auth.init();
   
   const session = Utils.getStorage('webpos_session');
   if (session && session.user && session.user.role !== 'owner') {
-    setTimeout(runFilter, 1000);
+    setTimeout(() => runFilter(1, true), 800);
+    setTimeout(setupSidebarObserver, 1000);
   }
 });
 
+// Trigger 3: Window Load (double check)
+window.addEventListener('load', () => {
+  setTimeout(() => runFilter(1, true), 1000);
+  setTimeout(() => runFilter(1, true), 2500); // Re-check setelah 2.5 detik
+});
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Auth;
