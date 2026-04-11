@@ -537,9 +537,6 @@ const Auth = {
 };
 
 // ==========================================
-// ⭐ TAMBAHAN: CSS PROTECTION UNTUK SIDEBAR
-// ==========================================
-// ==========================================
 // ⭐ CSS SUPER AGRESSIVE - PASTI WORK
 // ==========================================
 const sidebarStyle = document.createElement('style');
@@ -586,6 +583,7 @@ document.head.appendChild(sidebarStyle);
 // ==========================================
 // ⭐ TAMBAHAN: PERMISSION SYSTEM
 // ==========================================
+
 Auth.PAGE_PERMISSIONS = {
   'index.html': 'dashboard',
   'page-kasir.html': 'kasir',
@@ -609,8 +607,7 @@ Auth.PAGE_PERMISSIONS = {
   'page-reset.html': 'reset'
 };
 
-// Override hasPermission untuk cek dari permissions object
-const originalHasPermission = Auth.canAccess;
+// Override hasPermission
 Auth.hasPermission = function(key) {
   const user = Auth.getCurrentUser();
   if (!user) return false;
@@ -618,95 +615,142 @@ Auth.hasPermission = function(key) {
   return user.permissions?.[key] === true;
 };
 
-// Tambahan fungsi filter - SUPER AGRESSIVE VERSION
+// Filter function - FINAL FIXED VERSION
 Auth.filterSidebarMenu = function() {
   const currentUser = Auth.getCurrentUser();
-  if (!currentUser || currentUser.role === 'owner') return;
+  if (!currentUser || currentUser.role === 'owner') {
+    console.log('Skip filter: owner or no user');
+    return;
+  }
   
   const perms = currentUser.permissions || {};
   console.log('🔒 Filtering for:', currentUser.username, perms);
   
+  // Cari sidebar dengan berbagai kemungkinan selector
+  const sidebar = document.getElementById('sidebar') || 
+                  document.querySelector('.sidebar') || 
+                  document.querySelector('aside') ||
+                  document.querySelector('[class*="sidebar"]');
+  
+  if (!sidebar) {
+    console.log('❌ Sidebar not found!');
+    return;
+  }
+  
+  console.log('📁 Sidebar found:', sidebar.className || sidebar.id);
+  
+  // Cari SEMUA link di sidebar (tanpa filter selector keras)
+  const allLinks = sidebar.querySelectorAll('a[href]');
+  console.log('🔗 Total links in sidebar:', allLinks.length);
+  
   let removedCount = 0;
   
-  // Cari semua link di sidebar
-  document.querySelectorAll('#sidebar a[href], .sidebar a[href], aside a[href], li a[href]').forEach(link => {
+  allLinks.forEach(link => {
     const href = link.getAttribute('href') || '';
     const cleanHref = href.split('?')[0].split('#')[0].split('/').pop();
     const text = link.textContent.trim();
     
+    // Cek permission
     let permKey = Auth.PAGE_PERMISSIONS[cleanHref];
     
-    // Fallback text matching
+    // Fallback berdasarkan text
     if (!permKey) {
-      const lowerText = text.toLowerCase();
-      if (lowerText.includes('kasir')) permKey = 'kasir';
-      else if (lowerText.includes('produk')) permKey = 'produk';
-      else if (lowerText.includes('riwayat')) permKey = 'riwayat';
-      else if (lowerText.includes('kas') || lowerText.includes('modal')) permKey = 'kas';
-      else if (lowerText.includes('hutang')) permKey = 'hutang';
-      else if (lowerText.includes('laporan')) permKey = 'laporan';
-      else if (lowerText.includes('telegram')) permKey = 'telegram';
-      else if (lowerText.includes('pelanggan')) permKey = 'pelanggan';
-      else if (lowerText.includes('pengguna')) permKey = 'pengguna';
-      else if (lowerText.includes('pengaturan') || lowerText.includes('setting')) permKey = 'pengaturan';
-      else if (lowerText.includes('backup')) permKey = 'backup';
-      else if (lowerText.includes('printer')) permKey = 'printer';
-      else if (lowerText.includes('reset')) permKey = 'reset';
-      else if (lowerText.includes('dashboard')) permKey = 'dashboard';
+      const lower = text.toLowerCase();
+      if (lower.includes('dashboard')) permKey = 'dashboard';
+      else if (lower.includes('kasir')) permKey = 'kasir';
+      else if (lower.includes('produk')) permKey = 'produk';
+      else if (lower.includes('riwayat')) permKey = 'riwayat';
+      else if (lower.includes('kas') || lower.includes('modal')) permKey = 'kas';
+      else if (lower.includes('hutang')) permKey = 'hutang';
+      else if (lower.includes('laporan')) permKey = 'laporan';
+      else if (lower.includes('telegram')) permKey = 'telegram';
+      else if (lower.includes('pelanggan')) permKey = 'pelanggan';
+      else if (lower.includes('pengguna')) permKey = 'pengguna';
+      else if (lower.includes('pengaturan') || lower.includes('setting')) permKey = 'pengaturan';
+      else if (lower.includes('backup')) permKey = 'backup';
+      else if (lower.includes('printer')) permKey = 'printer';
+      else if (lower.includes('reset')) permKey = 'reset';
     }
     
+    console.log(`Checking: "${text}" (${cleanHref}) -> ${permKey}: ${perms[permKey]}`);
+    
     if (permKey && !perms[permKey]) {
-      console.log(`❌ REMOVING: ${text} (${cleanHref})`);
+      console.log(`❌ REMOVING: ${text}`);
       
-      // CARA PALING AMPUH: Hapus parent LI dari DOM!
-      let parent = link.closest('li') || link.parentElement;
-      if (parent) {
-        parent.remove(); // ⭐ HAPUS TOTAL DARI DOM!
+      // Hapus parent element (li, div, atau a itu sendiri jika tidak ada parent)
+      let parent = link.closest('li') || link.closest('.nav-item') || link.closest('div[class*="item"]') || link;
+      
+      if (parent && parent.parentNode) {
+        parent.parentNode.removeChild(parent);
         removedCount++;
       }
     }
   });
   
   // Hapus section headers yang sudah kosong
-  document.querySelectorAll('#sidebar li, #sidebar .nav-item, .sidebar li').forEach(li => {
-    if (li.querySelectorAll('a[href]').length === 0) {
-      li.remove();
+  sidebar.querySelectorAll('li, .nav-item, div[class*="section"]').forEach(el => {
+    // Jika tidak punya link anak lagi, hapus
+    if (el.querySelectorAll('a[href]').length === 0 && el.textContent.trim().length > 0) {
+      // Cek apakah ini section header (hanya teks, tidak ada link)
+      const hasLink = el.querySelector('a');
+      if (!hasLink) {
+        el.parentNode.removeChild(el);
+      }
     }
   });
   
   console.log('✅ REMOVED:', removedCount, 'items from DOM');
 };
-// Auto-run filter saat login dan setup observer
+
+// Auto-run dengan multiple trigger
+const runFilter = () => {
+  console.log('🚀 Running sidebar filter...');
+  if (typeof Auth !== 'undefined' && Auth.getCurrentUser) {
+    Auth.filterSidebarMenu();
+  } else {
+    console.log('⏳ Waiting for Auth...');
+    setTimeout(runFilter, 500);
+  }
+};
+
+// Trigger 1: Saat auth state change
 const originalInit = Auth.init;
 Auth.init = function() {
   originalInit();
   
   if (typeof auth !== 'undefined') {
-    auth.onAuthStateChanged(async (user) => {
+    auth.onAuthStateChanged((user) => {
       if (user) {
-        // Tunggu user data load
-        setTimeout(() => {
-          const currentUser = Auth.getCurrentUser();
-          if (currentUser && currentUser.role !== 'owner') {
-            Auth.filterSidebarMenu();
-            
-            // Observer untuk dropdown
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-              const observer = new MutationObserver(() => {
-                Auth.filterSidebarMenu();
-              });
-              observer.observe(sidebar, { childList: true, subtree: true });
-            }
-          }
-        }, 500);
+        setTimeout(runFilter, 800); // Delay lebih lama untuk pastikan DOM ready
       }
     });
   }
 };
 
-// Initialize on load
-document.addEventListener('DOMContentLoaded', Auth.init);
+// Trigger 2: Saat DOM ready (untuk page refresh)
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 DOM Ready, checking session...');
+  const session = Utils.getStorage('webpos_session');
+  if (session && session.user && session.user.role !== 'owner') {
+    setTimeout(runFilter, 1000); // Delay 1 detik untuk pastikan semua render
+  }
+});
+
+// Trigger 3: Saat window load (fallback)
+window.addEventListener('load', () => {
+  console.log('🖼️ Window loaded');
+  setTimeout(runFilter, 500);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('📄 DOM Ready, initializing...');
+  Auth.init(); // ⭐ TAMBAH INI
+  
+  const session = Utils.getStorage('webpos_session');
+  if (session && session.user && session.user.role !== 'owner') {
+    setTimeout(runFilter, 1000);
+  }
+});
 
 // Export for module usage
 if (typeof module !== 'undefined' && module.exports) {
