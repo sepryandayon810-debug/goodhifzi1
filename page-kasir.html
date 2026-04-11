@@ -135,8 +135,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 @media(max-width:640px){.header-stats{display:none}}
 
 /* ===== PAGE CONTENT ===== */
-.page-content{flex:1;padding:1.5rem;overflow-y:auto}
-@media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+.page-content{flex:1;padding:1.5rem;overflow-y:auto;overflow-x:hidden} /* Tambah overflow-x:hidden */
+@media(max-width:768px){.page-content{padding:0.75rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
 
 /* ===== BUTTONS ===== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
@@ -220,7 +220,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .d-none{display:none!important}
 .d-block{display:block!important}
 .d-flex{display:flex!important}
-@media(max-width:1024px){.d-md-none{display:none!important}}
+@media(min-width:1024px){.d-md-none{display:none!important}} /* GANTI: min-width bukan max-width */
 .text-center{text-align:center!important}
 .text-primary{color:var(--primary)!important}
 .text-success{color:var(--success)!important}
@@ -232,7 +232,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 /* ===== KASIR LAYOUT ===== */
 .kasir-layout{display:grid;grid-template-columns:1fr 400px;gap:1.5rem;height:calc(100vh - 140px)}
 @media(max-width:1200px){.kasir-layout{grid-template-columns:1fr 360px}}
-@media(max-width:1024px){.kasir-layout{grid-template-columns:1fr;height:auto}}
+@media(max-width:1024px){.kasir-layout{grid-template-columns:1fr;height:auto;gap:1rem}}
 
 /* Product Section */
 .product-section{display:flex;flex-direction:column;gap:1rem;overflow:hidden}
