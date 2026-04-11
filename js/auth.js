@@ -539,17 +539,46 @@ const Auth = {
 // ==========================================
 // ⭐ TAMBAHAN: CSS PROTECTION UNTUK SIDEBAR
 // ==========================================
+// ==========================================
+// ⭐ CSS SUPER AGRESSIVE - PASTI WORK
+// ==========================================
 const sidebarStyle = document.createElement('style');
 sidebarStyle.textContent = `
-  .perm-hidden, .nav-item[hidden], li[hidden] {
+  /* Semua kemungkinan selector sidebar */
+  #sidebar .perm-hidden, 
+  #sidebar [hidden],
+  .sidebar .perm-hidden,
+  .sidebar [hidden],
+  aside .perm-hidden,
+  aside [hidden],
+  .nav-item.perm-hidden,
+  .nav-item[hidden],
+  li.perm-hidden,
+  li[hidden],
+  .menu-item.perm-hidden,
+  .menu-item[hidden] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     height: 0 !important;
+    max-height: 0 !important;
+    min-height: 0 !important;
     overflow: hidden !important;
     pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    width: 0 !important;
   }
-  .nav-section[hidden], .sidebar-section[hidden] {
+  
+  /* Section yang kosong juga dihide */
+  .nav-section:has(.perm-hidden:only-child),
+  .nav-section:has(.perm-hidden:last-child),
+  .nav-section[hidden] {
+    display: none !important;
+  }
+  
+  /* Force hide untuk semua child yang terhidden */
+  .perm-hidden * {
     display: none !important;
   }
 `;
@@ -589,7 +618,7 @@ Auth.hasPermission = function(key) {
   return user.permissions?.[key] === true;
 };
 
-// Tambahan fungsi filter
+// Tambahan fungsi filter - AGRESSIVE VERSION
 Auth.filterSidebarMenu = function() {
   const currentUser = Auth.getCurrentUser();
   if (!currentUser || currentUser.role === 'owner') return;
@@ -597,34 +626,39 @@ Auth.filterSidebarMenu = function() {
   const perms = currentUser.permissions || {};
   console.log('🔒 Filtering for:', currentUser.username, perms);
   
-  // Cari semua link di sidebar
-  const links = document.querySelectorAll('#sidebar a[href], .sidebar a[href], .nav-link[href]');
-  let hiddenCount = 0;
+  const selectors = ['#sidebar a[href]', '.sidebar a[href]', 'aside a[href]', '.nav-link[href]'];
+  let allLinks = [];
+  selectors.forEach(sel => {
+    try { allLinks = [...allLinks, ...document.querySelectorAll(sel)]; } catch(e){}
+  });
+  allLinks = [...new Set(allLinks)];
   
-  links.forEach(link => {
+  let hiddenCount = 0;
+  allLinks.forEach(link => {
     const href = link.getAttribute('href') || '';
     const cleanHref = href.split('?')[0].split('#')[0].split('/').pop();
     const permKey = Auth.PAGE_PERMISSIONS[cleanHref];
     
     if (permKey && !perms[permKey]) {
-      // Cari parent container (nav-item atau li)
-      let item = link.closest('.nav-item');
-      if (!item) item = link.closest('li');
-      if (!item) item = link.parentElement;
-      
+      let item = link.closest('.nav-item') || link.closest('li') || link.parentElement;
       if (item) {
-        item.setAttribute('hidden', '');
         item.classList.add('perm-hidden');
-        item.style.display = 'none';
-        item.style.visibility = 'hidden';
+        item.setAttribute('hidden', '');
+        item.style.setProperty('display', 'none', 'important');
+        item.style.setProperty('visibility', 'hidden', 'important');
         hiddenCount++;
       }
     }
   });
   
+  document.querySelectorAll('.nav-section').forEach(sec => {
+    if (sec.querySelectorAll('.nav-item:not(.perm-hidden)').length === 0) {
+      sec.style.setProperty('display', 'none', 'important');
+    }
+  });
+  
   console.log('✅ Hidden:', hiddenCount, 'items');
 };
-
 // Auto-run filter saat login dan setup observer
 const originalInit = Auth.init;
 Auth.init = function() {
