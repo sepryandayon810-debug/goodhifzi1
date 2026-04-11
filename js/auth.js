@@ -1,6 +1,6 @@
 /**
  * WebPOS Authentication Module - Enhanced
- * With Username Login and User Approval System
+ * With Username Login, User Approval System, and Permission Management
  */
 
 const Auth = {
@@ -9,13 +9,11 @@ const Auth = {
 
   // Initialize authentication
   init: () => {
-    // Check for existing session
     const session = Utils.getStorage('webpos_session');
     if (session && session.user) {
       Auth.currentUser = session.user;
     }
 
-    // Listen for auth state changes
     if (typeof auth !== 'undefined') {
       auth.onAuthStateChanged((user) => {
         if (user) {
@@ -35,7 +33,6 @@ const Auth = {
       const userData = snapshot.val();
       
       if (userData) {
-        // Check if user is approved
         if (userData.status === 'pending') {
           Auth.pendingApproval = { uid, ...userData };
           await auth.signOut();
@@ -58,19 +55,18 @@ const Auth = {
           email: userData.email,
           name: userData.name,
           role: userData.role,
+          permissions: userData.permissions || {}, // ⭐ Load permissions
           avatar: userData.avatar || null,
           status: userData.status,
           approvedBy: userData.approvedBy || null,
           approvedAt: userData.approvedAt || null
         };
 
-        // Save session
         Utils.setStorage('webpos_session', {
           user: Auth.currentUser,
           loginTime: Date.now()
         });
 
-        // Update last login
         await database.ref(`users/${uid}`).update({
           lastLogin: firebase.database.ServerValue.TIMESTAMP,
           isOnline: true
@@ -89,7 +85,6 @@ const Auth = {
     try {
       Utils.showLoading('Logging in...');
       
-      // Format username
       const formattedUsername = Utils.formatUsername(username);
       
       if (!formattedUsername) {
@@ -98,7 +93,6 @@ const Auth = {
         return { success: false, error: 'Username tidak valid' };
       }
       
-      // Find user by username
       const usersSnapshot = await database.ref('users')
         .orderByChild('username')
         .equalTo(formattedUsername)
@@ -112,11 +106,9 @@ const Auth = {
         return { success: false, error: 'Username tidak ditemukan' };
       }
       
-      // Get the first user (username should be unique)
       const userId = Object.keys(users)[0];
       const userData = users[userId];
       
-      // Check status
       if (userData.status === 'pending') {
         Utils.hideLoading();
         Utils.showToast('Akun Anda masih menunggu persetujuan owner', 'warning');
@@ -135,7 +127,6 @@ const Auth = {
         return { success: false, error: 'suspended', message: 'Akun Anda ditangguhkan' };
       }
       
-      // Sign in with email
       const result = await auth.signInWithEmailAndPassword(userData.email, password);
       const user = await Auth.loadUserData(result.user.uid);
       
@@ -143,6 +134,7 @@ const Auth = {
       
       if (user && !user.error) {
         Utils.showToast(`Selamat datang, ${user.name || user.username}!`, 'success');
+        setTimeout(() => Auth.filterSidebarMenu(), 100);
         return { success: true, user };
       }
       
@@ -179,21 +171,19 @@ const Auth = {
     }
   },
 
-  // Register new user
-  register: async (username, password, name, email, role = 'kasir') => {
+  // Register new user WITH PERMISSIONS ⭐
+  register: async (username, password, name, email, role = 'kasir', permissions = null) => {
     try {
       Utils.showLoading('Mendaftarkan akun...');
       
-      // Format and validate username
       const formattedUsername = Utils.formatUsername(username);
       
       if (!formattedUsername || formattedUsername.length < 3) {
         Utils.hideLoading();
-        Utils.showToast('Username minimal 3 karakter (huruf, angka, underscore)', 'error');
+        Utils.showToast('Username minimal 3 karakter', 'error');
         return { success: false, error: 'Username tidak valid' };
       }
       
-      // Check if username exists
       const usernameCheck = await database.ref('users')
         .orderByChild('username')
         .equalTo(formattedUsername)
@@ -205,7 +195,6 @@ const Auth = {
         return { success: false, error: 'Username sudah digunakan' };
       }
       
-      // Check if email exists
       if (email) {
         const emailCheck = await database.ref('users')
           .orderByChild('email')
@@ -219,23 +208,27 @@ const Auth = {
         }
       }
       
-      // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
       
-      // Determine status based on role
-      // Owner auto-approved, others need approval
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
       
-      // Create user data in database
+      // ⭐ Default permissions kalau tidak dikirim
+      const defaultPermissions = permissions || {
+        kasir: true, produk: true, riwayat: false, kas: false, hutang: false,
+        laporan: false, telegram: false, pelanggan: false,
+        pengguna: false, pengaturan: false, backup: false, printer: false, reset: false
+      };
+      
       await database.ref(`users/${uid}`).set({
         uid,
         username: formattedUsername,
         email: userEmail,
         name: name || formattedUsername,
         role,
+        permissions: defaultPermissions, // ⭐ Simpan permissions
         status,
         createdAt: firebase.database.ServerValue.TIMESTAMP,
         lastLogin: firebase.database.ServerValue.TIMESTAMP,
@@ -249,12 +242,7 @@ const Auth = {
       if (status === 'pending') {
         await auth.signOut();
         Utils.showToast('Pendaftaran berhasil! Menunggu persetujuan owner.', 'success');
-        return { 
-          success: true, 
-          uid, 
-          pendingApproval: true,
-          message: 'Akun berhasil dibuat dan menunggu persetujuan owner'
-        };
+        return { success: true, uid, pendingApproval: true, message: 'Akun berhasil dibuat dan menunggu persetujuan owner' };
       }
       
       Utils.showToast('Akun berhasil dibuat!', 'success');
@@ -281,18 +269,17 @@ const Auth = {
     }
   },
 
-  // Approve user (Owner/Admin only)
+  // Approve user
   approveUser: async (uid, approverUid) => {
     try {
       Utils.showLoading('Menyetujui pengguna...');
       
-      // Check if approver is owner/admin
       const approverSnapshot = await database.ref(`users/${approverUid}`).once('value');
       const approverData = approverSnapshot.val();
       
       if (!approverData || (approverData.role !== 'owner' && approverData.role !== 'admin')) {
         Utils.hideLoading();
-        Utils.showToast('Anda tidak memiliki izin untuk menyetujui pengguna', 'error');
+        Utils.showToast('Anda tidak memiliki izin', 'error');
         return { success: false, error: 'Unauthorized' };
       }
       
@@ -313,12 +300,11 @@ const Auth = {
     }
   },
 
-  // Reject user (Owner/Admin only)
+  // Reject user
   rejectUser: async (uid, approverUid, reason = '') => {
     try {
       Utils.showLoading('Menolak pengguna...');
       
-      // Check if approver is owner/admin
       const approverSnapshot = await database.ref(`users/${approverUid}`).once('value');
       const approverData = approverSnapshot.val();
       
@@ -403,7 +389,7 @@ const Auth = {
     if (!Auth.currentUser) return false;
     
     const permissions = {
-      owner: ['*'], // Owner can access everything
+      owner: ['*'],
       admin: ['kasir', 'produk', 'riwayat', 'modal', 'kas', 'hutang', 
               'laporan', 'pelanggan', 'pengguna', 'setting', 'backup', 'printer', 'reset'],
       kasir: ['kasir', 'produk', 'riwayat', 'modal', 'hutang', 'pelanggan']
@@ -424,7 +410,7 @@ const Auth = {
     return !!Auth.currentUser || !!session;
   },
 
-  // Require authentication (redirect if not logged in)
+  // Require authentication
   requireAuth: () => {
     if (!Auth.isAuthenticated()) {
       window.location.href = 'login.html';
@@ -458,7 +444,6 @@ const Auth = {
         updatedAt: firebase.database.ServerValue.TIMESTAMP
       });
       
-      // Update session if current user
       if (Auth.currentUser && Auth.currentUser.uid === uid) {
         Auth.currentUser = { ...Auth.currentUser, ...updates };
         Utils.setStorage('webpos_session', {
@@ -532,6 +517,85 @@ const Auth = {
       Utils.showToast(message, 'error');
       return { success: false, error: message };
     }
+  },
+
+  // ==========================================
+  // ⭐ PERMISSION SYSTEM - TAMBAHAN BARU
+  // ==========================================
+  
+  // Mapping halaman ke permission key
+  PAGE_PERMISSIONS: {
+    'index.html': 'dashboard',
+    'page-kasir.html': 'kasir',
+    'page-produk.html': 'produk',
+    'page-riwayat.html': 'riwayat',
+    'page-kas.html': 'kas',
+    'page-modal-harian.html': 'kas',
+    'page-kas-masuk.html': 'kas',
+    'page-kas-keluar.html': 'kas',
+    'page-kas-shift.html': 'kas',
+    'page-kas-topup.html': 'kas',
+    'page-kas-tarik.html': 'kas',
+    'page-hutang.html': 'hutang',
+    'page-laporan.html': 'laporan',
+    'page-saldo-telegram.html': 'telegram',
+    'page-data-pelanggan.html': 'pelanggan',
+    'page-pengguna.html': 'pengguna',
+    'page-setting.html': 'pengaturan',
+    'page-backup.html': 'backup',
+    'page-printer.html': 'printer',
+    'page-reset.html': 'reset'
+  },
+
+  // Cek permission untuk halaman saat ini
+  checkPagePermission: async function() {
+    const currentUser = Auth.getCurrentUser();
+    if (currentUser?.role === 'owner') return true;
+    
+    const page = window.location.pathname.split('/').pop() || 'index.html';
+    const requiredPerm = Auth.PAGE_PERMISSIONS[page];
+    
+    if (!requiredPerm) return true;
+    
+    const hasPerm = currentUser?.permissions?.[requiredPerm] === true;
+    
+    if (!hasPerm) {
+      Utils.showToast('⛔ Akses ditolak: Anda tidak memiliki izin', 'error');
+      setTimeout(() => window.location.href = 'index.html', 2000);
+      return false;
+    }
+    return true;
+  },
+
+  // Filter sidebar menu
+  filterSidebarMenu: function() {
+    const currentUser = Auth.getCurrentUser();
+    if (!currentUser || currentUser.role === 'owner') return;
+    
+    const perms = currentUser.permissions || {};
+    
+    document.querySelectorAll('.nav-link[href]').forEach(link => {
+      const href = link.getAttribute('href');
+      const permKey = Auth.PAGE_PERMISSIONS[href];
+      if (permKey && !perms[permKey]) {
+        const item = link.closest('.nav-item');
+        if (item) item.style.display = 'none';
+      }
+    });
+    
+    document.querySelectorAll('.nav-section').forEach(sec => {
+      if (sec.querySelectorAll('.nav-item:not([style*="none"])').length === 0) {
+        sec.style.display = 'none';
+      }
+    });
+  },
+
+  // Cek permission spesifik
+  hasPermission: function(key) {
+    const user = Auth.getCurrentUser();
+    if (!user) return false;
+    if (user.role === 'owner') return true;
+    return user.permissions?.[key] === true;
   }
 };
 
