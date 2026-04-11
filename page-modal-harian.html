@@ -221,6 +221,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .theme-red{background:linear-gradient(135deg,#ef4444,#f97316)}
 .theme-pink{background:linear-gradient(135deg,#ec4899,#8b5cf6)}
 .theme-teal{background:linear-gradient(135deg,#14b8a6,#06b6d4)}
+    
 
 /* Utilities */
 .d-none{display:none!important}
@@ -239,6 +240,31 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .mb-0{margin-bottom:0!important}
 .mb-2{margin-bottom:1rem!important}
 .w-full{width:100%!important}
+    /* Mobile User Profile Fix */
+@media (max-width: 768px) {
+  .sidebar-footer {
+    display: none;
+  }
+  
+  .modal-harian-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .summary-value {
+    font-size: 1.75rem;
+  }
+  
+  .history-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar.mobile-open .sidebar-footer {
+    display: block;
+  }
+}
 
   </style>
   
@@ -761,22 +787,43 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
-          return;
-        }
-        
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        initModalHarian();
-      });
+  auth.onAuthStateChanged(async (user) => {  // ⭐ Tambah async
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    if (user) {
+      await Auth.loadUserData(user.uid);  // ⭐ Tambah await
+    }
+    
+    initModalHarian();
+  });
 
       function initModalHarian() {
-        // Set today's date as default
-        document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
+  // ⭐ Update user profile dengan data lengkap
+  const user = Auth.getCurrentUser();
+  if (user) {
+    document.getElementById('userName').textContent = user.name || user.email || 'User';
+    
+    let roleText = user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
+    
+    // ⭐ Cek shift aktif
+    const activeShift = Utils.getStorage('active_shift') || user.shift || 'Pagi';
+    if (activeShift) {
+      roleText += ` • Shift ${activeShift}`;
+    }
+    
+    // ⭐ Badge owner
+    if (user.role === 'owner') {
+      roleText += ' 👑';
+    }
+    
+    document.getElementById('userRole').textContent = roleText;
+  }
+
+  // Set today's date as default
+  document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
         
         // Format currency input
         const amountInput = document.getElementById('modalAmount');
