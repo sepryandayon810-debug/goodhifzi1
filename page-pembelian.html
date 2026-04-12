@@ -221,6 +221,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .total-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.9rem}
 .total-row.grand{font-size:1.125rem;font-weight:700;color:var(--text-primary);border-top:2px solid var(--border-color);padding-top:.75rem;margin-top:.75rem}
 
+/* Animation for form reset */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.form-reset-animation {
+  animation: pulse-green 0.6s ease-out;
+}
+
 /* Mobile Responsive */
 @media(max-width:768px){
   .pembelian-layout{grid-template-columns:1fr}
@@ -354,14 +365,17 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         </div>
         <div class="header-actions">
           <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
-          <button class="btn btn-primary" id="btnNewPembelian"><i class="fas fa-plus"></i> <span class="d-md-none d-sm-none">Pembelian Baru</span></button>
+          <button class="btn btn-primary" id="btnNewPembelian" title="Reset Form / Pembelian Baru">
+            <i class="fas fa-plus"></i> 
+            <span class="d-md-none d-sm-none">Pembelian Baru</span>
+          </button>
         </div>
       </header>
 
       <div class="page-content">
         <div class="pembelian-layout">
           <!-- Form Pembelian -->
-          <div class="card" style="height:fit-content">
+          <div class="card" id="formCard" style="height:fit-content">
             <div class="card-header">
               <h3 class="card-title"><i class="fas fa-cart-plus" style="color:var(--primary)"></i> Input Pembelian</h3>
             </div>
@@ -590,7 +604,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       document.addEventListener("click", function(e){
         if(window.innerWidth <= 1024 && !sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)){
-          sidebar.classList.remove("mobile-open");
+          sidebar.classList.remove('mobile-open');
         }
       });
 
@@ -655,6 +669,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               document.getElementById("hargaBeli").value = selectedProduct.costPrice;
               calculateTotal();
               productList.classList.remove("active");
+              // Focus ke qty setelah pilih produk
+              document.getElementById("qty").focus();
             });
           });
         } else {
@@ -675,7 +691,27 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
       document.getElementById("btnTambahItem").addEventListener("click", tambahItem);
       document.getElementById("btnSimpanPembelian").addEventListener("click", simpanPembelian);
-      document.getElementById("btnNewPembelian").addEventListener("click", resetForm);
+      
+      // ⭐ PERBAIKAN: Tambahkan event listener dengan logging dan feedback
+      document.getElementById("btnNewPembelian").addEventListener("click", function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("Tombol Pembelian Baru diklik");
+        
+        // Tambah animasi visual
+        const formCard = document.getElementById("formCard");
+        formCard.classList.add("form-reset-animation");
+        setTimeout(() => formCard.classList.remove("form-reset-animation"), 600);
+        
+        // Panggil fungsi reset
+        resetForm();
+        
+        // Toast notification
+        Utils.showToast("Form pembelian telah direset", "info");
+        
+        // Focus ke supplier input
+        document.getElementById("supplierName").focus();
+      });
 
       // Set tanggal
       const today = new Date();
@@ -719,6 +755,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       if(existingIndex >= 0){
         pembelianList[existingIndex].qty += qty;
         pembelianList[existingIndex].total = pembelianList[existingIndex].qty * pembelianList[existingIndex].harga;
+        Utils.showToast(`Qty ${selectedProduct.name} diperbarui menjadi ${pembelianList[existingIndex].qty}`, "success");
       } else {
         pembelianList.push({
           productId: selectedProduct.id,
@@ -727,11 +764,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           harga: harga,
           total: qty * harga
         });
+        Utils.showToast(`${selectedProduct.name} ditambahkan (${qty} pcs)`, "success");
       }
       
       renderPembelianList();
       resetInputForm();
-      Utils.showToast("Item ditambahkan", "success");
+      // Focus kembali ke search product
+      document.getElementById("searchProduct").focus();
     }
 
     function renderPembelianList(){
@@ -773,9 +812,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     }
 
     window.hapusItem = function(index){
+      const itemName = pembelianList[index].productName;
       pembelianList.splice(index, 1);
       renderPembelianList();
-      Utils.showToast("Item dihapus", "info");
+      Utils.showToast(`${itemName} dihapus dari daftar`, "info");
     };
 
     function updateTotal(){
@@ -800,6 +840,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       resetInputForm();
       document.getElementById("supplierName").value = "";
       document.getElementById("catatan").value = "";
+      console.log("Form direset lengkap");
     }
 
     function simpanPembelian(){
