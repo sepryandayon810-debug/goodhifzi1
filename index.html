@@ -1555,6 +1555,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         }
       }
 
+      
       // Toggle sidebar
       menuToggle.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
@@ -1619,35 +1620,44 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           
           // Calculate stats
           Object.values(transactions).forEach(trans => {
-            if (trans.status !== 'cancelled' && trans.status !== 'voided') {
-              switch (trans.type) {
-                case 'penjualan':
-                  todayStats.penjualan += trans.total || 0;
-                  todayStats.laba += trans.profit || 0;
-                  break;
-                case 'topup':
-                  todayStats.topup += trans.amount || 0;
-                  todayStats.topupAdminFee += trans.adminFee || 0;
-                  // Admin fee dari top up masuk ke laba
-                  todayStats.laba += trans.adminFee || 0;
-                  break;
-                case 'tarik':
-                  todayStats.tarik += trans.amount || 0;
-                  todayStats.tarikAdminFee += trans.adminFee || 0;
-                  // Admin fee dari tarik masuk ke laba
-                  todayStats.laba += trans.adminFee || 0;
-                  break;
-                case 'kas_masuk':
-                  todayStats.kasMasuk += trans.amount || 0;
-                  break;
-                case 'kas_keluar':
-                  todayStats.kasKeluar += trans.amount || 0;
-                  break;
-              }
-              todayStats.transaksiCount++;
-            }
-          });
-
+  if (trans.status !== 'cancelled' && trans.status !== 'voided') {
+    switch (trans.type) {
+      case 'penjualan':
+        todayStats.penjualan += trans.total || 0;
+        todayStats.laba += trans.profit || 0;
+        todayStats.transaksiCount++; // ✅ Transaksi bisnis dihitung
+        break;
+        
+      case 'topup':
+        todayStats.topup += trans.amount || 0;
+        todayStats.laba += trans.adminFee || 0;
+        todayStats.transaksiCount++; // ✅ Transaksi bisnis dihitung
+        break;
+        
+      case 'tarik':
+        todayStats.tarik += trans.amount || 0;
+        todayStats.laba += trans.adminFee || 0;
+        todayStats.transaksiCount++; // ✅ Transaksi bisnis dihitung
+        break;
+        
+      case 'kas_masuk':
+        todayStats.kasMasuk += trans.amount || 0;
+        // ❌ Jangan todayStats.transaksiCount++
+        // Ini termasuk Kas Masuk biasa + Hutang (yang dicentang)
+        break;
+        
+      case 'kas_keluar':
+        todayStats.kasKeluar += trans.amount || 0;
+         break;
+      
+      case 'hutang':
+      case 'piutang':
+        // Tidak menambah transaksiCount, hanya log untuk debug
+        console.log('Transaksi hutang/piutang ditemukan (tidak dihitung):', trans);
+        break;
+    }
+  }
+});
           // Load modal
           const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
           const modalData = modalSnapshot.val();
@@ -1683,7 +1693,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           document.getElementById('kasGlobal').textContent = Utils.formatRupiah(uangGlobal);
 
           // Check shift status
-          checkShiftStatus();
+        
 
         } catch (error) {
           console.error('Error loading dashboard data:', error);
@@ -1694,94 +1704,105 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
 
       // Check shift status
-      async function checkShiftStatus() {
+     function listenShiftStatus() {
         const today = Utils.getTodayString();
         const user = Auth.getCurrentUser();
-        
-        try {
-          const snapshot = await database.ref('shifts/' + today + '/' + user.uid).once('value');
-          const shift = snapshot.val();
-          isShiftOpen = shift && shift.status === 'open';
-          updateShiftUI();
-        } catch (error) {
-          console.error('Error checking shift:', error);
-        }
-      }
 
-      // Update shift UI
+       console.log('Attaching shift listener for:', today, user.uid);
+        
+        database.ref('shifts/' + today + '/' + user.uid).on('value', (snapshot) => {
+          const shift = snapshot.val();
+          console.log('Shift data received:', shift);
+          isShiftOpen = shift && shift.status === 'open';
+          updateShiftUI(); // ⭐ PINDAHKAN KE SINI
+        }, (error) => {
+          console.error('Shift listener error:', error);
+        });
+      }
+        
+            // Update shift UI
       function updateShiftUI() {
         const shiftStatus = document.getElementById('shiftStatus');
         const shiftText = document.getElementById('shiftText');
         const shiftInfo = document.getElementById('shiftInfo');
         const shiftBtnText = document.getElementById('shiftBtnText');
-        const btnToggleShift = document.getElementById('btnToggleShift');
+        const btnIcon = btnToggleShift.querySelector('i');
         
         if (isShiftOpen) {
           shiftStatus.classList.remove('closed');
           shiftStatus.classList.add('open');
           shiftText.textContent = 'Buka';
-          shiftInfo.textContent = 'Shift 1';
+          shiftInfo.textContent = 'Shift Aktif';
           shiftBtnText.textContent = 'Tutup Shift';
-          btnToggleShift.querySelector('i').className = 'fas fa-store-slash';
+          btnIcon.className = 'fas fa-store-slash';
         } else {
           shiftStatus.classList.remove('open');
           shiftStatus.classList.add('closed');
           shiftText.textContent = 'Tutup';
           shiftInfo.textContent = '-';
           shiftBtnText.textContent = 'Buka Shift';
-          btnToggleShift.querySelector('i').className = 'fas fa-store';
+          btnIcon.className = 'fas fa-store';
         }
       }
 
-      // Toggle shift
+              // Toggle shift
       async function toggleShift() {
         const today = Utils.getTodayString();
         const user = Auth.getCurrentUser();
         
         if (isShiftOpen) {
-          Utils.confirm('Apakah Anda yakin ingin menutup shift?', async () => {
-            try {
-              await database.ref('shifts/' + today + '/' + user.uid).update({
-                status: 'closed',
-                closedAt: firebase.database.ServerValue.TIMESTAMP,
-                closedBy: user.uid
-              });
-              isShiftOpen = false;
-              updateShiftUI();
-              Utils.showToast('Shift berhasil ditutup', 'success');
-            } catch (error) {
-              Utils.showToast('Gagal menutup shift', 'error');
-            }
-          });
+          // Jika buka, arahkan ke halaman Kas Shift untuk tutup lengkap
+          window.location.href = 'page-kas-shift.html';
         } else {
+          // Buka shift
+          Utils.showLoading();
+          
           try {
+            // Cek modal dulu
             const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
-            const modal = modalSnapshot.val();
+            const modalData = modalSnapshot.val();
             
-            if (!modal || !modal.amount) {
+            if (!modalData || !modalData.amount) {
+              Utils.hideLoading();
               Utils.showToast('Silakan set modal awal terlebih dahulu', 'warning');
-              window.location.href = 'page-modal.html';
+              window.location.href = 'page-modal-harian.html';
               return;
             }
             
+            // Cek apakah sudah ada shift terbuka
+            const shiftSnapshot = await database.ref('shifts/' + today + '/' + user.uid).once('value');
+            if (shiftSnapshot.val() && shiftSnapshot.val().status === 'open') {
+              Utils.hideLoading();
+              Utils.showToast('Shift sudah terbuka', 'info');
+              return;
+            }
+            
+            const shiftId = 'shift_' + Date.now();
+            
             await database.ref('shifts/' + today + '/' + user.uid).set({
+              id: shiftId,
               status: 'open',
+              openTime: Date.now(),
               openedAt: firebase.database.ServerValue.TIMESTAMP,
-              openedBy: user.uid,
-              modalAwal: modal.amount
+              userId: user.uid,
+              userName: user.name || user.email,
+              modalAwal: modalData.amount
             });
             
-            isShiftOpen = true;
-            updateShiftUI();
             Utils.showToast('Shift berhasil dibuka', 'success');
+            
           } catch (error) {
+            console.error('Error opening shift:', error);
             Utils.showToast('Gagal membuka shift', 'error');
+          } finally {
+            Utils.hideLoading();
           }
         }
       }
 
+      // Event listener untuk tombol toggle shift
       btnToggleShift.addEventListener('click', toggleShift);
-
+        
       // Prevent links from opening in new tab - ULTRA FIX
       function fixLinks() {
         document.querySelectorAll('a').forEach(link => {
@@ -1817,11 +1838,27 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       });
       observer.observe(document.body, { childList: true, subtree: true });
 
-      // Initialize
+            // Initialize
       loadUserData();
       loadDashboardData();
-      }
-    });
+      listenShiftStatus();  // ✅ Hanya 1 kali di sini
+      
+            // Re-check shift status saat halaman kembali visible (hanya 1 kali di sini)
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          console.log('Page visible, re-checking shift status...');
+          const today = Utils.getTodayString();
+          const user = Auth.getCurrentUser();
+          database.ref('shifts/' + today + '/' + user.uid).once('value').then((snapshot) => {
+            const shift = snapshot.val();
+            isShiftOpen = shift && shift.status === 'open';
+            console.log('Shift status checked:', isShiftOpen, shift);
+            updateShiftUI();
+          });
+        }
+      });
+    }  
+   });   
   </script>
 </body>
 </html>
