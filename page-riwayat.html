@@ -236,6 +236,25 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .trx-id{font-family:monospace;font-size:.8rem;color:var(--text-muted)}
 .trx-desc{font-size:.85rem;font-weight:600;color:var(--text-primary)}
 
+    /* ===== GLOBAL: HIDE TRX ID IN MAIN LIST (ALL SCREENS) ===== */
+.trx-id {
+  display: none !important; /* Sembunyikan ID di desktop & mobile */
+}
+
+/* Perbesar deskripsi produk karena ID sudah tidak ada */
+.trx-desc {
+  font-size: 0.95rem !important;
+  max-width: 300px; /* Batasi agar tidak terlalu panjang */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.trx-id-cell {
+  gap: 0; /* Hapus gap karena hanya ada 1 elemen */
+}
+
 /* ===== EXPAND/COLLAPSE ROW ===== */
 .expand-btn{
   width:28px;height:28px;border:none;background:var(--bg-secondary);
@@ -569,12 +588,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     /* ==========================================
    HIDE TRX ID ON MOBILE & COMPACT LAYOUT
    ========================================== */
-
-@media (max-width: 768px) {
-  /* Sembunyikan ID transaksi di tampilan utama mobile */
-  .trx-id {
-    display: none !important;
-  }
   
   /* Naikkan font deskripsi produk agar tetap readable */
   .trx-desc {
