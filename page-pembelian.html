@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366f1">
+  <title>WebPOS - Pembelian</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+:root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+[data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
+[data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
+[data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
+[data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
+[data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
+[data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
+[data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+
+:root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+
+[data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg-secondary)}
+::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
+
+.app-container{display:flex;min-height:100vh}
+
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
+.sidebar.collapsed{width:var(--sidebar-collapsed)}
+@media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
+
+.sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
+.logo-container{display:flex;align-items:center;gap:.5rem}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
+.logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sidebar.collapsed .logo-text{opacity:0;width:0}
+
+.menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
+.menu-toggle:hover{background:var(--primary-dark)}
+.sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
+
+.sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
+.search-input-wrapper{position:relative;display:flex;align-items:center}
+.search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
+.search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
+.search-input:focus{outline:none;border-color:var(--primary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
+.nav-section{margin-bottom:1.5rem}
+.nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
+.sidebar.collapsed .nav-section-title{display:none}
+
+.nav-menu{list-style:none}
+.nav-item{margin-bottom:2px}
+.nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
+.nav-link::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--primary);transform:scaleY(0);transition:transform .15s;border-radius:0 .25rem .25rem 0}
+.nav-link:hover{background:rgba(99,102,241,.05);color:var(--primary)}
+.nav-link.active{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600}
+.nav-link.active::before{transform:scaleY(1)}
+.nav-link i{width:22px;text-align:center;font-size:1.05rem}
+.nav-link span{white-space:nowrap}
+.sidebar.collapsed .nav-link span{display:none}
+
+.nav-dropdown{position:relative}
+.nav-dropdown-toggle{cursor:pointer;justify-content:space-between}
+.nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto;flex-shrink:0}
+.nav-dropdown.open .nav-dropdown-toggle .dropdown-arrow{transform:rotate(180deg)}
+.nav-submenu{list-style:none;padding-left:0;max-height:0;overflow:hidden;transition:max-height .3s ease, padding .3s ease;background:var(--bg-secondary);border-radius:var(--radius-md);margin-top:0.25rem}
+.nav-dropdown.open .nav-submenu{max-height:500px;padding:0.5rem 0;padding-left:2.75rem}
+.sidebar.collapsed .nav-submenu{display:none}
+.nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
+.nav-submenu .nav-link:hover{background:rgba(99,102,241,.1)}
+
+.sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
+.user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
+.user-profile:hover{opacity:.8}
+.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
+.user-info{flex:1;overflow:hidden}
+.sidebar.collapsed .user-info{display:none}
+.user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
+
+.main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
+.sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
+@media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
+
+.main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:1rem}
+.header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
+.header-actions{display:flex;align-items:center;gap:.5rem}
+
+.page-content{flex:1;padding:1.5rem;overflow-y:auto}
+@media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:white}
+.btn-primary:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
+.btn-secondary{background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border-color)}
+.btn-secondary:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.btn-success{background:var(--success);color:white}
+.btn-success:hover:not(:disabled){filter:brightness(0.9)}
+.btn-danger{background:var(--danger);color:white}
+.btn-danger:hover:not(:disabled){filter:brightness(0.9)}
+.btn-warning{background:var(--warning);color:white}
+.btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
+.btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:.4rem .875rem;font-size:.8rem}
+.btn-block{width:100%}
+
+.btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
+
+.card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
+.card:hover{box-shadow:var(--shadow-lg)}
+.card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
+.card-body{padding:1.5rem}
+.card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
+
+.form-group{margin-bottom:1.25rem}
+.form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
+.form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+.form-input::placeholder{color:var(--text-muted)}
+.form-textarea{min-height:100px;resize:vertical}
+.form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+
+.input-group{display:flex;align-items:center}
+.input-group-text{padding:.75rem 1rem;background:var(--bg-secondary);border:1.5px solid var(--border-color);border-right:none;border-radius:.75rem 0 0 .75rem;color:var(--text-muted);font-size:.95rem}
+.input-group .form-input{border-radius:0 .75rem .75rem 0}
+
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:.35rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+.badge-primary{background:rgba(99,102,241,.1);color:var(--primary)}
+.badge-success{background:rgba(16,185,129,.1);color:var(--success)}
+.badge-warning{background:rgba(245,158,11,.1);color:var(--warning)}
+.badge-danger{background:rgba(239,68,68,.1);color:var(--danger)}
+
+.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
+.toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.toast.success{border-left-color:var(--success)}
+.toast.error{border-left-color:var(--danger)}
+.toast.warning{border-left-color:var(--warning)}
+.toast.info{border-left-color:var(--info)}
+
+.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
+.loading-overlay.active{opacity:1;visibility:visible}
+.spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
+.mobile-nav-item i{font-size:1.25rem}
+.mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
+@media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
+.modal-overlay.active{opacity:1;visibility:visible}
+.modal{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
+.modal-overlay.active .modal{transform:scale(1) translateY(0)}
+.modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+.modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.modal-close:hover{background:var(--danger);color:white}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
+
+.empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
+.empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
+.empty-state-title{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem}
+
+.d-none{display:none!important}
+.d-block{display:block!important}
+.d-flex{display:flex!important}
+@media(max-width:768px){.d-md-none{display:inline-flex!important}.d-sm-none{display:none!important}}
+.d-lg-none{display:none!important}
+@media(max-width:1024px){.d-lg-none{display:inline-flex!important}}
+.text-left{text-align:left!important}
+.text-center{text-align:center!important}
+.text-right{text-align:right!important}
+.text-primary{color:var(--primary)!important}
+.text-success{color:var(--success)!important}
+.text-danger{color:var(--danger)!important}
+.font-bold{font-weight:700!important}
+.text-sm{font-size:.875rem!important}
+.mb-0{margin-bottom:0!important}
+.mb-2{margin-bottom:1rem!important}
+.w-full{width:100%!important}
+
+/* Pembelian Specific Styles */
+.pembelian-layout{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;height:calc(100vh - 180px)}
+@media(max-width:1024px){.pembelian-layout{grid-template-columns:1fr;height:auto}}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr}}
+
+.product-search-wrapper{position:relative;margin-bottom:1rem}
+.product-search-list{position:absolute;top:100%;left:0;right:0;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);max-height:200px;overflow-y:auto;z-index:100;display:none}
+.product-search-list.active{display:block}
+.product-search-item{padding:.75rem 1rem;cursor:pointer;border-bottom:1px solid var(--border-color);transition:all .15s}
+.product-search-item:hover{background:var(--bg-secondary)}
+.product-search-item:last-child{border-bottom:none}
+
+.pembelian-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.pembelian-table th,.pembelian-table td{padding:.875rem 1rem;text-align:left;border-bottom:1px solid var(--border-color)}
+.pembelian-table th{font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0}
+.pembelian-table tbody tr:hover{background:rgba(99,102,241,.05)}
+
+.total-section{background:var(--bg-secondary);padding:1rem;border-radius:var(--radius-lg);margin-top:1rem}
+.total-row{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.9rem}
+.total-row.grand{font-size:1.125rem;font-weight:700;color:var(--text-primary);border-top:2px solid var(--border-color);padding-top:.75rem;margin-top:.75rem}
+
+/* Mobile Responsive */
+@media(max-width:768px){
+  .pembelian-layout{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .pembelian-table{font-size:.8rem}
+  .pembelian-table th,.pembelian-table td{padding:.625rem}
+  .header-actions .btn span{display:none}
+  .header-actions .btn{padding:.5rem}
+}
+
+@media(max-width:1024px){
+  #mobileMenuToggle{display:flex!important;width:44px;height:44px;background:var(--bg-card);border:2px solid var(--border-color);border-radius:.75rem;align-items:center;justify-content:center}
+  #mobileMenuToggle i{font-size:1.25rem;color:var(--text-primary)}
+}
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyD9XyvgofyFyX5aUMARcA_GO-N2Tcw725Q",
+      authDomain: "goodhifzicell.firebaseapp.com",
+      databaseURL: "https://goodhifzicell-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "goodhifzicell",
+      storageBucket: "goodhifzicell.firebasestorage.app",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
+    var auth = firebase.auth();
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-container">
+          <div class="logo-icon"><i class="fas fa-cash-register"></i></div>
+          <span class="logo-text">WebPOS</span>
+        </div>
+      </div>
+      <button class="menu-toggle" id="menuToggle"><i class="fas fa-chevron-left"></i></button>
+      <div class="sidebar-search">
+        <div class="search-input-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" id="menuSearch" placeholder="Cari menu...">
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Utama</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="index.html" class="nav-link" data-menu="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+            <li class="nav-item"><a href="page-kasir.html" class="nav-link" data-menu="kasir"><i class="fas fa-cash-register"></i><span>Kasir</span></a></li>
+            <li class="nav-item"><a href="page-produk.html" class="nav-link" data-menu="produk"><i class="fas fa-box"></i><span>Produk</span></a></li>
+          </ul>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Transaksi</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="page-riwayat.html" class="nav-link" data-menu="riwayat"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
+            <li class="nav-item nav-dropdown" data-dropdown>
+              <div class="nav-link nav-dropdown-toggle" data-menu="kas">
+                <div style="display:flex;align-items:center;gap:0.75rem;"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+              </div>
+              <ul class="nav-submenu">
+                <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
+                <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
+                <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
+                <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
+                <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
+                <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a href="page-pembelian.html" class="nav-link active" data-menu="pembelian">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Pembelian</span>
+              </a>
+            </li>
+            <li class="nav-item"><a href="page-hutang.html" class="nav-link" data-menu="hutang"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a></li>
+          </ul>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Laporan</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
+          </ul>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Integrasi</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="page-saldo-telegram.html" class="nav-link" data-menu="telegram"><i class="fab fa-telegram"></i><span>Saldo Telegram</span></a></li>
+            <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
+          </ul>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Sistem</div>
+          <ul class="nav-menu">
+            <li class="nav-item"><a href="page-pengguna.html" class="nav-link" data-menu="pengguna"><i class="fas fa-user-cog"></i><span>Pengguna</span></a></li>
+            <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
+            <li class="nav-item"><a href="page-backup.html" class="nav-link" data-menu="backup"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a></li>
+            <li class="nav-item"><a href="page-printer.html" class="nav-link" data-menu="printer"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
+            <li class="nav-item"><a href="page-reset.html" class="nav-link" data-menu="reset"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
+          </ul>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-profile" id="userProfile">
+          <div class="user-avatar" id="userAvatar"><i class="fas fa-user"></i></div>
+          <div class="user-info">
+            <div class="user-name" id="userName">Loading...</div>
+            <div class="user-role" id="userRole">-</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <button class="btn-icon d-lg-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+          <h1 class="header-title">Pembelian</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+          <button class="btn btn-primary" id="btnNewPembelian"><i class="fas fa-plus"></i> <span class="d-md-none d-sm-none">Pembelian Baru</span></button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="pembelian-layout">
+          <!-- Form Pembelian -->
+          <div class="card" style="height:fit-content">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-cart-plus" style="color:var(--primary)"></i> Input Pembelian</h3>
+            </div>
+            <div class="card-body">
+              <form id="pembelianForm">
+                <div class="form-group">
+                  <label class="form-label">Supplier</label>
+                  <input type="text" class="form-input" id="supplierName" placeholder="Nama supplier (opsional)">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label">Cari Produk <span style="color:var(--danger)">*</span></label>
+                  <div class="product-search-wrapper">
+                    <input type="text" class="form-input" id="searchProduct" placeholder="Ketik nama produk..." autocomplete="off">
+                    <div class="product-search-list" id="productList"></div>
+                  </div>
+                  <input type="hidden" id="selectedProductId">
+                </div>
+
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label class="form-label">Qty <span style="color:var(--danger)">*</span></label>
+                    <input type="number" class="form-input" id="qty" value="1" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Harga Beli (pcs) <span style="color:var(--danger)">*</span></label>
+                    <div class="input-group">
+                      <span class="input-group-text">Rp</span>
+                      <input type="number" class="form-input" id="hargaBeli" placeholder="0">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Total</label>
+                  <div class="input-group">
+                    <span class="input-group-text">Rp</span>
+                    <input type="number" class="form-input" id="totalHarga" readonly style="background:var(--bg-primary);font-weight:700">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Catatan</label>
+                  <textarea class="form-textarea" id="catatan" rows="2" placeholder="Catatan tambahan..."></textarea>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-block" id="btnTambahItem" style="margin-top:1rem">
+                  <i class="fas fa-plus"></i> Tambah ke Daftar
+                </button>
+              </form>
+
+              <div class="total-section">
+                <div class="total-row">
+                  <span>Total Item:</span>
+                  <span id="totalItem">0</span>
+                </div>
+                <div class="total-row grand">
+                  <span>Total Pembelian:</span>
+                  <span id="grandTotal">Rp 0</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn btn-success btn-block" id="btnSimpanPembelian" style="margin-top:1rem" disabled>
+                <i class="fas fa-save"></i> Simpan Pembelian
+              </button>
+            </div>
+          </div>
+
+          <!-- List Pembelian -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fas fa-list" style="color:var(--info)"></i> Daftar Item</h3>
+              <span class="badge badge-primary" id="tanggalHariIni">Hari Ini</span>
+            </div>
+            <div class="card-body" style="padding:0;max-height:calc(100vh - 250px);overflow-y:auto">
+              <table class="pembelian-table">
+                <thead>
+                  <tr>
+                    <th>Produk</th>
+                    <th>Qty</th>
+                    <th>Harga</th>
+                    <th>Total</th>
+                    <th style="width:50px"></th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyPembelian">
+                  <tr>
+                    <td colspan="5" class="empty-state" style="padding:3rem 1rem">
+                      <i class="fas fa-shopping-basket"></i>
+                      <div class="empty-state-title">Belum ada item</div>
+                      <p style="font-size:.875rem">Tambahkan produk dari form di samping</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Riwayat Pembelian Hari Ini -->
+        <div class="card" style="margin-top:1.5rem">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history" style="color:var(--success)"></i> Riwayat Pembelian Hari Ini</h3>
+          </div>
+          <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
+            <table class="pembelian-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Supplier</th>
+                  <th>Item</th>
+                  <th>Total</th>
+                  <th>User</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyRiwayat">
+                <tr>
+                  <td colspan="5" class="empty-state" style="padding:2rem">
+                    <i class="fas fa-inbox"></i>
+                    <p>Belum ada pembelian hari ini</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="mobile-nav">
+      <a href="index.html" class="mobile-nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+      <a href="page-kasir.html" class="mobile-nav-item"><i class="fas fa-cash-register"></i><span>Kasir</span></a>
+      <a href="page-produk.html" class="mobile-nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
+      <a href="page-riwayat.html" class="mobile-nav-item"><i class="fas fa-history"></i><span>Riwayat</span></a>
+      <a href="page-setting.html" class="mobile-nav-item"><i class="fas fa-cog"></i><span>Setting</span></a>
+    </nav>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem;color:var(--text-secondary)">Loading...</p>
+  </div>
+
+  <script>
+  (function(){
+    "use strict";
+
+    window.Utils = {
+      showLoading: function(){
+        document.getElementById("loadingOverlay").classList.add("active");
+      },
+      hideLoading: function(){
+        document.getElementById("loadingOverlay").classList.remove("active");
+      },
+      showToast: function(msg, type){
+        const icon = type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : type === "warning" ? "exclamation-triangle" : "info-circle";
+        const borderColor = type === "success" ? "var(--success)" : type === "error" ? "var(--danger)" : type === "warning" ? "var(--warning)" : "var(--info)";
+        const toast = document.createElement("div");
+        toast.style.cssText = "position:fixed;top:1rem;right:1rem;background:var(--bg-card);color:var(--text-primary);padding:1rem 1.5rem;border-radius:.75rem;box-shadow:0 10px 25px rgba(0,0,0,0.15);border-left:4px solid " + borderColor + ";z-index:9999;display:flex;align-items:center;gap:0.75rem;animation:slideIn 0.3s ease;max-width:380px;font-family:inherit;font-size:0.9rem;font-weight:500";
+        toast.innerHTML = '<i class="fas fa-' + icon + '" style="color:' + borderColor + ';font-size:1.1rem"></i><span>' + msg + '</span>';
+        document.body.appendChild(toast);
+        setTimeout(function(){ toast.style.opacity="0"; toast.style.transform="translateX(100%)"; toast.style.transition="all 0.3s ease"; setTimeout(function(){ toast.remove(); }, 300); }, 3500);
+      },
+      formatRupiah: function(num){
+        return "Rp " + (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      },
+      getTodayString: function(){
+        const d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+      }
+    };
+
+    let products = [];
+    let pembelianList = [];
+    let selectedProduct = null;
+
+    function init(){
+      if(typeof firebase === "undefined" || !firebase.apps.length){
+        setTimeout(init, 100);
+        return;
+      }
+
+      auth.onAuthStateChanged(function(user){
+        if(!user){
+          window.location.href = "login.html";
+          return;
+        }
+        
+        // Load user data
+        database.ref("users/" + user.uid).once("value").then(function(snap){
+          const userData = snap.val() || {};
+          document.getElementById("userName").textContent = userData.name || user.email || "User";
+          document.getElementById("userRole").textContent = userData.role ? (userData.role.charAt(0).toUpperCase() + userData.role.slice(1)) : "Kasir";
+          if(userData.name){
+            document.getElementById("userAvatar").textContent = userData.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+          }
+        });
+
+        initPage();
+        loadProducts();
+        loadRiwayat();
+      });
+    }
+
+    function initPage(){
+      const sidebar = document.getElementById("sidebar");
+      const menuToggle = document.getElementById("menuToggle");
+      const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+
+      menuToggle.addEventListener("click", function(){
+        sidebar.classList.toggle("collapsed");
+      });
+
+      mobileMenuToggle.addEventListener("click", function(e){
+        e.stopPropagation();
+        sidebar.classList.toggle("mobile-open");
+      });
+
+      document.querySelectorAll('.nav-link').forEach(function(link){
+        link.addEventListener('click', function(){
+          if(window.innerWidth <= 1024){
+            sidebar.classList.remove('mobile-open');
+          }
+        });
+      });
+
+      document.addEventListener("click", function(e){
+        if(window.innerWidth <= 1024 && !sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)){
+          sidebar.classList.remove("mobile-open");
+        }
+      });
+
+      // Dropdown
+      document.querySelectorAll("[data-dropdown]").forEach(function(dropdown){
+        const toggle = dropdown.querySelector(".nav-dropdown-toggle");
+        if(toggle){
+          toggle.addEventListener("click", function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            dropdown.classList.toggle("open");
+          });
+        }
+      });
+
+      // Theme
+      const btnTheme = document.getElementById("btnTheme");
+      const isDark = localStorage.getItem('webpos_dark_mode') === 'true';
+      if(isDark){
+        document.documentElement.setAttribute('data-theme', 'dark');
+        btnTheme.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
+      }
+      
+      btnTheme.addEventListener("click", function(){
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        localStorage.setItem('webpos_dark_mode', !isDark);
+        btnTheme.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun" style="color:var(--warning)"></i>';
+      });
+
+      // Product search
+      const searchInput = document.getElementById("searchProduct");
+      const productList = document.getElementById("productList");
+      
+      searchInput.addEventListener("input", function(){
+        const q = this.value.toLowerCase();
+        if(q.length < 1){
+          productList.classList.remove("active");
+          return;
+        }
+        
+        const filtered = products.filter(p => p.name.toLowerCase().includes(q) || (p.code && p.code.toLowerCase().includes(q)));
+        
+        if(filtered.length > 0){
+          productList.innerHTML = filtered.map(p => `
+            <div class="product-search-item" data-id="${p.id}" data-name="${p.name}" data-cost="${p.costPrice || 0}">
+              <div style="font-weight:600">${p.name}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">Stok: ${p.stock || 0} | Harga Beli: ${Utils.formatRupiah(p.costPrice || 0)}</div>
+            </div>
+          `).join("");
+          productList.classList.add("active");
+          
+          productList.querySelectorAll(".product-search-item").forEach(item => {
+            item.addEventListener("click", function(){
+              selectedProduct = {
+                id: this.dataset.id,
+                name: this.dataset.name,
+                costPrice: parseInt(this.dataset.cost) || 0
+              };
+              searchInput.value = this.dataset.name;
+              document.getElementById("selectedProductId").value = this.dataset.id;
+              document.getElementById("hargaBeli").value = selectedProduct.costPrice;
+              calculateTotal();
+              productList.classList.remove("active");
+            });
+          });
+        } else {
+          productList.innerHTML = '<div class="product-search-item" style="color:var(--text-muted)">Produk tidak ditemukan</div>';
+          productList.classList.add("active");
+        }
+      });
+
+      document.addEventListener("click", function(e){
+        if(!e.target.closest(".product-search-wrapper")){
+          productList.classList.remove("active");
+        }
+      });
+
+      // Calculate total
+      document.getElementById("qty").addEventListener("input", calculateTotal);
+      document.getElementById("hargaBeli").addEventListener("input", calculateTotal);
+
+      document.getElementById("btnTambahItem").addEventListener("click", tambahItem);
+      document.getElementById("btnSimpanPembelian").addEventListener("click", simpanPembelian);
+      document.getElementById("btnNewPembelian").addEventListener("click", resetForm);
+
+      // Set tanggal
+      const today = new Date();
+      document.getElementById("tanggalHariIni").textContent = today.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+    }
+
+    function calculateTotal(){
+      const qty = parseInt(document.getElementById("qty").value) || 0;
+      const harga = parseInt(document.getElementById("hargaBeli").value) || 0;
+      document.getElementById("totalHarga").value = qty * harga;
+    }
+
+    function loadProducts(){
+      Utils.showLoading();
+      database.ref("products").once("value").then(function(snapshot){
+        const data = snapshot.val() || {};
+        products = Object.entries(data).map(([id, d]) => ({id, ...d}));
+        Utils.hideLoading();
+      }).catch(function(err){
+        console.error("Error load products:", err);
+        Utils.hideLoading();
+        Utils.showToast("Gagal memuat produk", "error");
+      });
+    }
+
+    function tambahItem(){
+      if(!selectedProduct){
+        Utils.showToast("Pilih produk terlebih dahulu", "warning");
+        return;
+      }
+      
+      const qty = parseInt(document.getElementById("qty").value) || 0;
+      const harga = parseInt(document.getElementById("hargaBeli").value) || 0;
+      
+      if(qty < 1 || harga < 1){
+        Utils.showToast("Qty dan harga harus lebih dari 0", "warning");
+        return;
+      }
+      
+      const existingIndex = pembelianList.findIndex(item => item.productId === selectedProduct.id);
+      if(existingIndex >= 0){
+        pembelianList[existingIndex].qty += qty;
+        pembelianList[existingIndex].total = pembelianList[existingIndex].qty * pembelianList[existingIndex].harga;
+      } else {
+        pembelianList.push({
+          productId: selectedProduct.id,
+          productName: selectedProduct.name,
+          qty: qty,
+          harga: harga,
+          total: qty * harga
+        });
+      }
+      
+      renderPembelianList();
+      resetInputForm();
+      Utils.showToast("Item ditambahkan", "success");
+    }
+
+    function renderPembelianList(){
+      const tbody = document.getElementById("tbodyPembelian");
+      
+      if(pembelianList.length === 0){
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="empty-state" style="padding:3rem 1rem">
+              <i class="fas fa-shopping-basket"></i>
+              <div class="empty-state-title">Belum ada item</div>
+              <p style="font-size:.875rem">Tambahkan produk dari form di samping</p>
+            </td>
+          </tr>`;
+        document.getElementById("btnSimpanPembelian").disabled = true;
+        updateTotal();
+        return;
+      }
+      
+      tbody.innerHTML = pembelianList.map((item, index) => `
+        <tr>
+          <td>
+            <div style="font-weight:600">${item.productName}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">ID: ${item.productId.substr(-6)}</div>
+          </td>
+          <td>${item.qty}</td>
+          <td>${Utils.formatRupiah(item.harga)}</td>
+          <td style="font-weight:600">${Utils.formatRupiah(item.total)}</td>
+          <td>
+            <button class="btn-icon btn-sm btn-danger" onclick="hapusItem(${index})" style="width:32px;height:32px">
+              <i class="fas fa-trash" style="font-size:0.75rem"></i>
+            </button>
+          </td>
+        </tr>
+      `).join("");
+      
+      document.getElementById("btnSimpanPembelian").disabled = false;
+      updateTotal();
+    }
+
+    window.hapusItem = function(index){
+      pembelianList.splice(index, 1);
+      renderPembelianList();
+      Utils.showToast("Item dihapus", "info");
+    };
+
+    function updateTotal(){
+      const totalItem = pembelianList.reduce((sum, item) => sum + item.qty, 0);
+      const grandTotal = pembelianList.reduce((sum, item) => sum + item.total, 0);
+      document.getElementById("totalItem").textContent = totalItem;
+      document.getElementById("grandTotal").textContent = Utils.formatRupiah(grandTotal);
+    }
+
+    function resetInputForm(){
+      selectedProduct = null;
+      document.getElementById("searchProduct").value = "";
+      document.getElementById("selectedProductId").value = "";
+      document.getElementById("qty").value = "1";
+      document.getElementById("hargaBeli").value = "";
+      document.getElementById("totalHarga").value = "";
+    }
+
+    function resetForm(){
+      pembelianList = [];
+      renderPembelianList();
+      resetInputForm();
+      document.getElementById("supplierName").value = "";
+      document.getElementById("catatan").value = "";
+    }
+
+    function simpanPembelian(){
+      if(pembelianList.length === 0){
+        Utils.showToast("Tidak ada item untuk disimpan", "warning");
+        return;
+      }
+      
+      Utils.showLoading();
+      
+      const user = auth.currentUser;
+      const today = Utils.getTodayString();
+      const supplier = document.getElementById("supplierName").value || "Supplier Umum";
+      const catatan = document.getElementById("catatan").value || "";
+      const timestamp = Date.now();
+      const purchaseId = "PUR" + timestamp;
+      
+      const grandTotal = pembelianList.reduce((sum, item) => sum + item.total, 0);
+      const totalItem = pembelianList.reduce((sum, item) => sum + item.qty, 0);
+      
+      const purchaseData = {
+        id: purchaseId,
+        type: "pembelian",
+        supplier: supplier,
+        items: pembelianList,
+        totalItem: totalItem,
+        grandTotal: grandTotal,
+        catatan: catatan,
+        timestamp: timestamp,
+        date: today,
+        userId: user.uid,
+        userName: document.getElementById("userName").textContent,
+        status: "completed"
+      };
+      
+      // Save purchase
+      database.ref("purchases/" + today + "/" + purchaseId).set(purchaseData)
+      .then(function(){
+        // Update stock products
+        const updates = [];
+        pembelianList.forEach(function(item){
+          const ref = database.ref("products/" + item.productId);
+          updates.push(
+            ref.once("value").then(function(snap){
+              const prod = snap.val();
+              if(prod){
+                const newStock = (prod.stock || 0) + item.qty;
+                return ref.update({
+                  stock: newStock,
+                  costPrice: item.harga, // Update harga beli terbaru
+                  updatedAt: timestamp
+                });
+              }
+            })
+          );
+        });
+        return Promise.all(updates);
+      })
+      .then(function(){
+        Utils.hideLoading();
+        Utils.showToast("Pembelian berhasil disimpan! Stok produk bertambah.", "success");
+        resetForm();
+        loadRiwayat();
+      })
+      .catch(function(err){
+        Utils.hideLoading();
+        console.error("Error save purchase:", err);
+        Utils.showToast("Gagal menyimpan pembelian", "error");
+      });
+    }
+
+    function loadRiwayat(){
+      const today = Utils.getTodayString();
+      const tbody = document.getElementById("tbodyRiwayat");
+      
+      database.ref("purchases/" + today).once("value").then(function(snapshot){
+        const data = snapshot.val();
+        if(!data){
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="empty-state" style="padding:2rem">
+                <i class="fas fa-inbox"></i>
+                <p>Belum ada pembelian hari ini</p>
+              </td>
+            </tr>`;
+          return;
+        }
+        
+        const purchases = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
+        
+        tbody.innerHTML = purchases.map(p => `
+          <tr>
+            <td>${new Date(p.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+            <td>${p.supplier}</td>
+            <td>${p.totalItem} item</td>
+            <td style="font-weight:600">${Utils.formatRupiah(p.grandTotal)}</td>
+            <td>${p.userName}</td>
+          </tr>
+        `).join("");
+      }).catch(function(err){
+        console.error("Error load riwayat:", err);
+      });
+    }
+
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
