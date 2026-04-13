@@ -1298,11 +1298,11 @@ html, body {
       <div class="page-content">
         <!-- Quick Actions -->
         <div class="quick-actions-bar">
-           <button class="quick-action-btn" id="btnTopup" onclick="window.location.href='page-kas-topup.html'">
+<button class="quick-action-btn" id="btnTopup" onclick="goToTopup()">
             <i class="fas fa-arrow-up"></i>
             <span>Top Up</span>
           </button>
-          <button class="quick-action-btn" id="btnTarik" onclick="window.location.href='page-kas-tarik.html'">
+<button class="quick-action-btn" id="btnTarik" onclick="goToTarik()">
             <i class="fas fa-arrow-down"></i>
             <span>Tarik Tunai</span>
           </button>
@@ -2342,6 +2342,15 @@ function confirmManualInput() {
 
 // Event listener tombol manual
 document.getElementById('btnManual').addEventListener('click', openManualModal);
+    function goToTopup() {
+  localStorage.setItem('fromKasir', 'true');
+  window.location.href = 'page-kas-topup.html';
+}
+
+function goToTarik() {
+  localStorage.setItem('fromKasir', 'true');
+  window.location.href = 'page-kas-tarik.html';
+}
 
 // Tutup modal saat klik overlay
 manualModal.addEventListener('click', (e) => {
