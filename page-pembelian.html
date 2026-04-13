@@ -1,9 +1,59 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light">
+<html lang="id" data-theme="light" data-theme-color="indigo">
+  
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366f1">
+  <script>
+  // Theme System - Sinkron dengan Utils.Theme di halaman Setting
+  (function() {
+    // Coba ambil dari Utils.Theme (jika sudah load utils.js) atau fallback ke localStorage
+    const getTheme = function() {
+      // Utils.Theme bisa pakai berbagai key untuk dark mode
+      let mode = localStorage.getItem('webpos_theme_mode');
+      
+      // Jika tidak ada, cek key lain untuk dark mode
+      if(!mode) {
+        const darkMode = localStorage.getItem('webpos_dark_mode') || 
+                         localStorage.getItem('dark_mode');
+        if(darkMode === 'true' || darkMode === '1') {
+          mode = 'dark';
+        } else {
+          mode = localStorage.getItem('webpos_theme') || 'light';
+        }
+      }
+      
+      const color = localStorage.getItem('webpos_theme_color') || 
+                    localStorage.getItem('theme_color') || 
+                    'indigo';
+      return { color, mode };
+    };
+    
+    const theme = getTheme();
+    document.documentElement.setAttribute('data-theme', theme.mode);
+    document.documentElement.setAttribute('data-theme-color', theme.color);
+    
+    const colorMap = {
+      'indigo': {p: '#6366f1', pd: '#4f46e5', s: '#ec4899'},
+      'orange': {p: '#f97316', pd: '#ea580c', s: '#f59e0b'},
+      'blue': {p: '#3b82f6', pd: '#2563eb', s: '#06b6d4'},
+      'green': {p: '#10b981', pd: '#059669', s: '#84cc16'},
+      'purple': {p: '#8b5cf6', pd: '#7c3aed', s: '#d946ef'},
+      'red': {p: '#ef4444', pd: '#dc2626', s: '#f97316'},
+      'pink': {p: '#ec4899', pd: '#db2777', s: '#8b5cf6'},
+      'teal': {p: '#14b8a6', pd: '#0d9488', s: '#06b6d4'}
+    };
+    
+    const c = colorMap[theme.color] || colorMap['indigo'];
+    document.documentElement.style.setProperty('--primary', c.p);
+    document.documentElement.style.setProperty('--primary-dark', c.pd);
+    document.documentElement.style.setProperty('--secondary', c.s);
+    
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if(metaTheme) metaTheme.setAttribute('content', c.p);
+  })();
+  </script>
   <title>WebPOS - Pembelian</title>
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,6 +70,7 @@
 [data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
 [data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
 [data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+[data-theme-color="indigo"]{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899}
 
 :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
 
@@ -199,9 +250,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .w-full{width:100%!important}
 
 /* Pembelian Specific Styles */
-.pembelian-layout{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;height:calc(100vh - 180px)}
+.pembelian-layout{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;height:auto;min-height:calc(100vh - 250px)}
 @media(max-width:1024px){.pembelian-layout{grid-template-columns:1fr;height:auto}}
-
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:640px){.form-grid{grid-template-columns:1fr}}
 
@@ -232,6 +282,37 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   animation: pulse-green 0.6s ease-out;
 }
 
+/* Filter Buttons - CSS Only, No Inline Styles */
+.filter-btn {
+  padding: .5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 2rem;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: .8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.filter-btn.active {
+  background: var(--primary) !important;
+  color: white !important;
+  border-color: var(--primary) !important;
+}
+
+[data-theme="dark"] .filter-btn {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
 /* Mobile Responsive */
 @media(max-width:768px){
   .pembelian-layout{grid-template-columns:1fr}
@@ -245,6 +326,231 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 @media(max-width:1024px){
   #mobileMenuToggle{display:flex!important;width:44px;height:44px;background:var(--bg-card);border:2px solid var(--border-color);border-radius:.75rem;align-items:center;justify-content:center}
   #mobileMenuToggle i{font-size:1.25rem;color:var(--text-primary)}
+}
+
+/* Fix scroll horizontal mobile - PERBAIKAN LENGKAP */
+@media(max-width:768px){
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+  
+  /* Page content full width */
+  .page-content {
+    padding: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Card full width tanpa margin */
+  .card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .card-header {
+    padding: 1rem !important;
+  }
+  
+  /* Container tabel bisa scroll tapi full width */
+  .card-body[style*="padding:0"] {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Tabel riwayat pembelian - perkecil ukuran */
+  #tbodyRiwayat,
+  #tbodyRiwayat ~ * {
+    font-size: 0.75rem;
+  }
+  
+  .pembelian-table {
+    min-width: unset !important;
+    width: 100% !important;
+    font-size: 0.75rem !important;
+    table-layout: fixed !important; /* Penting: memaksa kolom mengikuti lebar */
+  }
+  
+  .pembelian-table th,
+  .pembelian-table td {
+    padding: 0.5rem 0.25rem !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Atur lebar kolom spesifik untuk mobile */
+  .pembelian-table th:nth-child(1), /* Tanggal */
+  .pembelian-table td:nth-child(1) {
+    width: 70px !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .pembelian-table th:nth-child(2), /* Waktu */
+  .pembelian-table td:nth-child(2) {
+    width: 45px !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .pembelian-table th:nth-child(3), /* Supplier */
+  .pembelian-table td:nth-child(3) {
+    width: 80px !important;
+    max-width: 80px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .pembelian-table th:nth-child(4), /* Item */
+  .pembelian-table td:nth-child(4) {
+    width: 50px !important;
+    text-align: center !important;
+  }
+  
+  .pembelian-table th:nth-child(5), /* Total */
+  .pembelian-table td:nth-child(5) {
+    width: 80px !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Sembunyikan kolom User di mobile untuk menghemat space */
+  .pembelian-table th:nth-child(6), 
+  .pembelian-table td:nth-child(6) {
+    display: none !important;
+  }
+  
+  .pembelian-table th:nth-child(7), /* Aksi */
+  .pembelian-table td:nth-child(7) {
+    width: 40px !important;
+    text-align: center !important;
+  }
+  
+  /* Filter buttons area */
+  .card-header[style*="flex-direction:column"] {
+    padding: 1rem 0.5rem !important;
+  }
+  
+  .card-header > div[style*="overflow-x:auto"] {
+    width: 100% !important;
+    padding: 0.25rem 0 !important;
+  }
+  
+  .filter-btn {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.7rem !important;
+    white-space: nowrap;
+  }
+  
+  /* Form card di atas */
+  #formCard {
+    margin-bottom: 1rem !important;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* GANTI selector yang ada menjadi lebih spesifik untuk Riwayat saja */
+#tbodyRiwayat .pembelian-table {
+  table-layout: fixed !important;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(1),
+#tbodyRiwayat .pembelian-table td:nth-child(1) {
+  width: 70px !important;
+  font-size: 0.7rem !important;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(2),
+#tbodyRiwayat .pembelian-table td:nth-child(2) {
+  width: 45px !important;
+  font-size: 0.7rem !important;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(3),
+#tbodyRiwayat .pembelian-table td:nth-child(3) {
+  width: 80px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(4),
+#tbodyRiwayat .pembelian-table td:nth-child(4) {
+  width: 50px !important;
+  text-align: center !important;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(5),
+#tbodyRiwayat .pembelian-table td:nth-child(5) {
+  width: 80px !important;
+  font-weight: 600 !important;
+}
+
+/* Sembunyikan kolom User (ke-6) di tabel Riwayat */
+#tbodyRiwayat .pembelian-table th:nth-child(6), 
+#tbodyRiwayat .pembelian-table td:nth-child(6) {
+  display: none !important;
+}
+
+#tbodyRiwayat .pembelian-table th:nth-child(7),
+#tbodyRiwayat .pembelian-table td:nth-child(7) {
+  width: 40px !important;
+  text-align: center !important;
+}
+
+/* Untuk tabel Daftar Item (tbodyPembelian) - biarkan auto layout atau atur beda */
+#tbodyPembelian .pembelian-table {
+  table-layout: auto !important;
+}
+
+#tbodyPembelian .pembelian-table th,
+#tbodyPembelian .pembelian-table td {
+  padding: 0.625rem 0.5rem !important;
+}
+
+/* Custom Date Modal Styles */
+.custom-date-modal .modal {
+  max-width: 400px;
+}
+
+.date-input-wrapper {
+  position: relative;
+}
+
+.date-input-wrapper input[type="date"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--border-color);
+  border-radius: 0.75rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.date-input-wrapper input[type="date"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+
+/* Dark mode support for date inputs */
+[data-theme="dark"] .date-input-wrapper input[type="date"] {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
 }
   </style>
 
@@ -267,6 +573,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     var database = firebase.database();
     var auth = firebase.auth();
   </script>
+
 </head>
 <body>
   <div class="app-container">
@@ -453,14 +760,14 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <div class="card-body" style="padding:0;max-height:calc(100vh - 250px);overflow-y:auto">
               <table class="pembelian-table">
                 <thead>
-                  <tr>
-                    <th>Produk</th>
-                    <th>Qty</th>
-                    <th>Harga</th>
-                    <th>Total</th>
-                    <th style="width:50px"></th>
-                  </tr>
-                </thead>
+  <tr>
+    <th>Produk</th>
+    <th>Qty</th>
+    <th>Harga/pcs</th>
+    <th>Total</th>
+    <th style="width:50px">Aksi</th>
+  </tr>
+</thead>
                 <tbody id="tbodyPembelian">
                   <tr>
                     <td colspan="5" class="empty-state" style="padding:3rem 1rem">
@@ -475,34 +782,47 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           </div>
         </div>
 
-        <!-- Riwayat Pembelian Hari Ini -->
-        <div class="card" style="margin-top:1.5rem">
-          <div class="card-header">
-            <h3 class="card-title"><i class="fas fa-history" style="color:var(--success)"></i> Riwayat Pembelian Hari Ini</h3>
-          </div>
-          <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
-            <table class="pembelian-table">
-              <thead>
-                <tr>
-                  <th>Waktu</th>
-                  <th>Supplier</th>
-                  <th>Item</th>
-                  <th>Total</th>
-                  <th>User</th>
-                </tr>
-              </thead>
-              <tbody id="tbodyRiwayat">
-                <tr>
-                  <td colspan="5" class="empty-state" style="padding:2rem">
-                    <i class="fas fa-inbox"></i>
-                    <p>Belum ada pembelian hari ini</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+       <!-- Riwayat Pembelian dengan Filter -->
+<div class="card" style="margin-top:1.5rem">
+  <div class="card-header" style="flex-direction:column;align-items:flex-start;gap:1rem">
+    <h3 class="card-title"><i class="fas fa-history" style="color:var(--success)"></i> Riwayat Pembelian</h3>
+    
+    <div style="display:flex;gap:.5rem;overflow-x:auto;width:100%;padding:0;background:none;border:none;">
+      <button class="filter-btn active" data-filter="today">Hari Ini</button>
+<button class="filter-btn" data-filter="yesterday">Kemarin</button>
+<button class="filter-btn" data-filter="week">Minggu Ini</button>
+<button class="filter-btn" data-filter="month">Bulan Ini</button>
+<button class="filter-btn" data-filter="year">Tahun ini</button>
+<button class="filter-btn" data-filter="costum">Costum</button>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto">
+    <div style="overflow-x:auto;">
+<table class="pembelian-table" style="width:100%;">
+                <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Supplier</th>
+            <th>Item</th>
+            <th>Total</th>
+            <th>User</th>
+            <th style="width:80px">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyRiwayat">
+          <tr>
+            <td colspan="7" class="empty-state" style="padding:2rem">
+              <i class="fas fa-inbox"></i>
+              <p>Belum ada pembelian</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+        </div> 
     </main>
 
     <nav class="mobile-nav">
@@ -517,6 +837,36 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <p style="margin-top:1rem;color:var(--text-secondary)">Loading...</p>
+  </div>
+
+  <!-- Custom Date Modal -->
+  <div class="modal-overlay custom-date-modal" id="customDateModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:0.5rem;"></i>Pilih Range Tanggal</h3>
+        </div>
+        <button class="modal-close" onclick="closeCustomDateModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Dari Tanggal</label>
+          <div class="date-input-wrapper">
+            <input type="date" class="form-input" id="customStartDate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sampai Tanggal</label>
+          <div class="date-input-wrapper">
+            <input type="date" class="form-input" id="customEndDate">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCustomDateModal()">Batal</button>
+        <button class="btn btn-primary" onclick="applyCustomDate()">Tampilkan</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -576,7 +926,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 
         initPage();
         loadProducts();
-        loadRiwayat();
+        loadRiwayat('today');
       });
     }
 
@@ -620,21 +970,46 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         }
       });
 
-      // Theme
+      // Fix: Pastikan link tidak buka tab baru
+      document.querySelectorAll('.nav-link[href]').forEach(function(link){
+        link.removeAttribute('target');
+        link.addEventListener('click', function(e){
+          // Biarkan navigasi normal berjalan
+          if(window.innerWidth <= 1024){
+            sidebar.classList.remove('mobile-open');
+          }
+        });
+      });
+
+      // Theme Toggle - Sinkron dengan Utils.Theme
       const btnTheme = document.getElementById("btnTheme");
-      const isDark = localStorage.getItem('webpos_dark_mode') === 'true';
-      if(isDark){
-        document.documentElement.setAttribute('data-theme', 'dark');
-        btnTheme.innerHTML = '<i class="fas fa-sun" style="color:var(--warning)"></i>';
-      }
+      
+      // Set initial icon
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      btnTheme.innerHTML = currentTheme === 'dark' 
+        ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' 
+        : '<i class="fas fa-moon"></i>';
       
       btnTheme.addEventListener("click", function(){
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        localStorage.setItem('webpos_dark_mode', !isDark);
-        btnTheme.innerHTML = isDark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun" style="color:var(--warning)"></i>';
+        const newTheme = isDark ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        
+        // Simpan dengan key yang sama seperti Utils.Theme
+        // Utils.Theme biasanya pakai webpos_theme_mode atau webpos_dark_mode
+        localStorage.setItem('webpos_theme_mode', newTheme);
+        localStorage.setItem('webpos_dark_mode', newTheme === 'dark' ? 'true' : 'false');
+        localStorage.setItem('webpos_theme', newTheme); // fallback
+        
+        btnTheme.innerHTML = newTheme === 'dark' 
+          ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' 
+          : '<i class="fas fa-moon"></i>';
+        
+        // Broadcast ke tab lain (Utils.Theme biasanya pakai timestamp)
+        localStorage.setItem('webpos_theme_broadcast', Date.now().toString());
       });
-
+      
       // Product search
       const searchInput = document.getElementById("searchProduct");
       const productList = document.getElementById("productList");
@@ -692,7 +1067,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       document.getElementById("btnTambahItem").addEventListener("click", tambahItem);
       document.getElementById("btnSimpanPembelian").addEventListener("click", simpanPembelian);
       
-      // ⭐ PERBAIKAN: Tambahkan event listener dengan logging dan feedback
+      // Tombol Pembelian Baru
       document.getElementById("btnNewPembelian").addEventListener("click", function(e){
         e.preventDefault();
         e.stopPropagation();
@@ -713,6 +1088,31 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         document.getElementById("supplierName").focus();
       });
 
+      // Filter buttons - Hanya pakai class, NO inline style
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const filter = this.dataset.filter;
+          
+          // Hapus semua active class
+          document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active');
+          });
+          
+          // Tambah active ke yang diklik
+          this.classList.add('active');
+          
+          // Jika custom, buka modal
+          if(filter === 'costum') {
+            openCustomDateModal();
+          } else {
+            loadRiwayat(filter);
+            // Reset badge label ke default
+            const today = new Date();
+            document.getElementById("tanggalHariIni").textContent = today.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+          }
+        });
+      });
+
       // Set tanggal
       const today = new Date();
       document.getElementById("tanggalHariIni").textContent = today.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
@@ -724,6 +1124,91 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       document.getElementById("totalHarga").value = qty * harga;
     }
 
+    // Theme Sync - Sinkron dengan Utils.Theme
+    function syncGlobalTheme(){
+      // Cek semua kemungkinan key untuk dark mode
+      // Utils.Theme bisa pakai: webpos_theme_mode, webpos_dark_mode, dark_mode, webpos_theme
+      let savedTheme = localStorage.getItem('webpos_theme_mode');
+      
+      // Jika tidak ada, cek key lain
+      if(!savedTheme) {
+        const darkMode = localStorage.getItem('webpos_dark_mode') || 
+                         localStorage.getItem('dark_mode');
+        if(darkMode === 'true' || darkMode === '1') {
+          savedTheme = 'dark';
+        } else {
+          savedTheme = localStorage.getItem('webpos_theme') || 'light';
+        }
+      }
+      
+      const savedColor = localStorage.getItem('webpos_theme_color') || 
+                         localStorage.getItem('theme_color') || 
+                         'indigo';
+      
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.documentElement.setAttribute('data-theme-color', savedColor);
+      
+      // Apply CSS variables langsung
+      const colorMap = {
+        'indigo': {p: '#6366f1', pd: '#4f46e5', s: '#ec4899'},
+        'orange': {p: '#f97316', pd: '#ea580c', s: '#f59e0b'},
+        'blue': {p: '#3b82f6', pd: '#2563eb', s: '#06b6d4'},
+        'green': {p: '#10b981', pd: '#059669', s: '#84cc16'},
+        'purple': {p: '#8b5cf6', pd: '#7c3aed', s: '#d946ef'},
+        'red': {p: '#ef4444', pd: '#dc2626', s: '#f97316'},
+        'pink': {p: '#ec4899', pd: '#db2777', s: '#8b5cf6'},
+        'teal': {p: '#14b8a6', pd: '#0d9488', s: '#06b6d4'}
+      };
+      const c = colorMap[savedColor] || colorMap['indigo'];
+      document.documentElement.style.setProperty('--primary', c.p);
+      document.documentElement.style.setProperty('--primary-dark', c.pd);
+      document.documentElement.style.setProperty('--secondary', c.s);
+      
+      // Update meta theme color
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if(metaTheme) metaTheme.setAttribute('content', c.p);
+      
+      // Update icon tema
+      const btnTheme = document.getElementById('btnTheme');
+      if(btnTheme) {
+        btnTheme.innerHTML = savedTheme === 'dark' 
+          ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' 
+          : '<i class="fas fa-moon"></i>';
+      }
+      
+      console.log('Theme synced:', savedColor, savedTheme);
+    }
+    
+    // Panggil sync theme saat load
+    syncGlobalTheme();
+
+    // Listen perubahan dari tab lain (Setting/Kasir/Utils.Theme)
+    window.addEventListener('storage', function(e) {
+      // Utils.Theme keys: webpos_theme_mode, webpos_theme_color, webpos_theme_broadcast
+      // Fallback keys: webpos_theme, theme_color
+      // Dark mode keys: webpos_dark_mode, dark_mode
+      const themeKeys = [
+        'webpos_theme_mode', 'webpos_theme_color', 
+        'webpos_theme', 'theme_color', 
+        'webpos_dark_mode', 'dark_mode',
+        'webpos_theme_broadcast'
+      ];
+      
+      if(themeKeys.includes(e.key)) {
+        console.log('Theme changed from other page:', e.key, e.newValue);
+        syncGlobalTheme();
+        
+        // Update icon tema juga
+        const btnTheme = document.getElementById('btnTheme');
+        if(btnTheme) {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          btnTheme.innerHTML = isDark 
+            ? '<i class="fas fa-sun" style="color:var(--warning)"></i>' 
+            : '<i class="fas fa-moon"></i>';
+        }
+      }
+    });
+    
     function loadProducts(){
       Utils.showLoading();
       database.ref("products").once("value").then(function(snapshot){
@@ -890,7 +1375,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
                 const newStock = (prod.stock || 0) + item.qty;
                 return ref.update({
                   stock: newStock,
-                  costPrice: item.harga, // Update harga beli terbaru
+                  costPrice: item.harga,
                   updatedAt: timestamp
                 });
               }
@@ -903,7 +1388,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
         Utils.hideLoading();
         Utils.showToast("Pembelian berhasil disimpan! Stok produk bertambah.", "success");
         resetForm();
-        loadRiwayat();
+        loadRiwayat('today');
       })
       .catch(function(err){
         Utils.hideLoading();
@@ -912,45 +1397,309 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       });
     }
 
-    function loadRiwayat(){
-      const today = Utils.getTodayString();
+    let currentFilter = 'today';
+
+    function loadRiwayat(filter = 'today') {
+      currentFilter = filter;
       const tbody = document.getElementById("tbodyRiwayat");
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></td></tr>';
       
-      database.ref("purchases/" + today).once("value").then(function(snapshot){
-        const data = snapshot.val();
-        if(!data){
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="5" class="empty-state" style="padding:2rem">
-                <i class="fas fa-inbox"></i>
-                <p>Belum ada pembelian hari ini</p>
-              </td>
-            </tr>`;
-          return;
-        }
-        
-        const purchases = Object.values(data).sort((a,b) => b.timestamp - a.timestamp);
-        
-        tbody.innerHTML = purchases.map(p => `
-          <tr>
-            <td>${new Date(p.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
-            <td>${p.supplier}</td>
-            <td>${p.totalItem} item</td>
-            <td style="font-weight:600">${Utils.formatRupiah(p.grandTotal)}</td>
-            <td>${p.userName}</td>
-          </tr>
-        `).join("");
-      }).catch(function(err){
-        console.error("Error load riwayat:", err);
+      const dates = getDatesByFilter(filter);
+      let allPurchases = [];
+      
+      // Load per tanggal
+      const promises = dates.map(date => 
+        database.ref("purchases/" + date).once("value")
+          .then(snapshot => {
+            const data = snapshot.val();
+            if (data) {
+              Object.values(data).forEach(p => {
+                p.dateStr = date;
+                allPurchases.push(p);
+              });
+            }
+          })
+          .catch(err => console.error("Error load " + date, err))
+      );
+      
+      Promise.all(promises).then(() => {
+        allPurchases.sort((a, b) => b.timestamp - a.timestamp);
+        renderRiwayatTable(allPurchases);
       });
     }
 
-    if(document.readyState === "loading"){
-      document.addEventListener("DOMContentLoaded", init);
-    } else {
-      init();
+    function getDatesByFilter(filter) {
+      const dates = [];
+      const today = new Date();
+      const formatDate = (d) => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+      
+      switch(filter) {
+        case 'today':
+          dates.push(formatDate(today));
+          break;
+        case 'yesterday':
+          const y = new Date(today); y.setDate(y.getDate()-1);
+          dates.push(formatDate(y));
+          break;
+        case 'week':
+          for(let i=0; i<7; i++) {
+            const d = new Date(today); d.setDate(d.getDate()-i);
+            dates.push(formatDate(d));
+          }
+          break;
+        case 'month':
+          for(let i=0; i<30; i++) {
+            const d = new Date(today); d.setDate(d.getDate()-i);
+            dates.push(formatDate(d));
+          }
+          break;
+        case 'last-month':
+          const lastMonth = new Date(today.getFullYear(), today.getMonth()-1, 1);
+          const daysInMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+          for(let i=0; i<daysInMonth; i++) {
+            const d = new Date(lastMonth); d.setDate(d.getDate()+i);
+            dates.push(formatDate(d));
+          }
+          break;
+        case 'year':
+          for(let i=0; i<365; i++) {
+            const d = new Date(today); d.setDate(d.getDate()-i);
+            dates.push(formatDate(d));
+          }
+          break;
+        case 'costum':
+          // Custom akan di-handle oleh modal, return kosong
+          return [];
+      }
+      return dates;
     }
+
+    // ===== CUSTOM DATE FUNCTIONS =====
+    window.openCustomDateModal = function() {
+      const today = new Date();
+      const lastWeek = new Date(today); 
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      
+      const formatInputDate = (d) => d.toISOString().split('T')[0];
+      
+      document.getElementById('customEndDate').value = formatInputDate(today);
+      document.getElementById('customStartDate').value = formatInputDate(lastWeek);
+      document.getElementById('customDateModal').classList.add('active');
+    };
+
+    window.closeCustomDateModal = function() {
+      document.getElementById('customDateModal').classList.remove('active');
+    };
+
+    window.applyCustomDate = function() {
+      const start = document.getElementById('customStartDate').value;
+      const end = document.getElementById('customEndDate').value;
+      
+      if(!start || !end) {
+        Utils.showToast("Pilih tanggal terlebih dahulu", "warning");
+        return;
+      }
+      
+      if(start > end) {
+        Utils.showToast("Tanggal mulai tidak boleh lebih besar dari tanggal akhir", "error");
+        return;
+      }
+      
+      // Generate array tanggal
+      const dates = [];
+      let current = new Date(start);
+      const endDate = new Date(end);
+      
+      while(current <= endDate) {
+        const d = new Date(current);
+        dates.push(d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0'));
+        current.setDate(current.getDate() + 1);
+      }
+      
+      // Update badge label
+      const startFormatted = new Date(start).toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+      const endFormatted = new Date(end).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'});
+      document.getElementById('tanggalHariIni').textContent = startFormatted + ' - ' + endFormatted;
+      
+      // Load dengan custom dates
+      loadCustomRiwayat(dates);
+      closeCustomDateModal();
+    };
+
+    function loadCustomRiwayat(dates) {
+      currentFilter = 'custom';
+      const tbody = document.getElementById("tbodyRiwayat");
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Memuat...</p></td></tr>';
+      
+      let allPurchases = [];
+      
+      const promises = dates.map(date => 
+        database.ref("purchases/" + date).once("value")
+          .then(snapshot => {
+            const data = snapshot.val();
+            if(data) {
+              Object.values(data).forEach(p => { 
+                p.dateStr = date; 
+                allPurchases.push(p); 
+              });
+            }
+          })
+      );
+      
+      Promise.all(promises).then(() => {
+        allPurchases.sort((a, b) => b.timestamp - a.timestamp);
+        renderRiwayatTable(allPurchases);
+      });
+    }
+
+    function showPurchaseDetail(index) {
+      const p = window.purchasesData[index];
+      if(!p) return;
+      
+      document.getElementById("detailTitle").textContent = "Pembelian " + (p.id || "");
+      document.getElementById("detailSubtitle").textContent = "ID: " + (p.id || "-");
+      document.getElementById("detailSupplier").textContent = p.supplier || "-";
+      document.getElementById("detailUser").textContent = p.userName || "-";
+      document.getElementById("detailDate").textContent = p.dateStr || "-";
+      document.getElementById("detailTime").textContent = new Date(p.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      document.getElementById("detailGrandTotal").textContent = Utils.formatRupiah(p.grandTotal);
+      
+      const itemsTbody = document.getElementById("detailItems");
+      if(p.items && p.items.length > 0) {
+        itemsTbody.innerHTML = p.items.map(item => `
+          <tr>
+            <td style="padding:0.625rem">
+              <div style="font-weight:500">${item.productName}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">ID: ${item.productId ? item.productId.substr(-6) : '-'}</div>
+            </td>
+            <td style="text-align:center;padding:0.625rem">${item.qty}</td>
+            <td style="text-align:right;padding:0.625rem">${Utils.formatRupiah(item.harga)}</td>
+            <td style="text-align:right;padding:0.625rem;font-weight:500">${Utils.formatRupiah(item.total)}</td>
+          </tr>
+        `).join("");
+      } else {
+        itemsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:1rem;color:var(--text-muted)">Tidak ada detail item</td></tr>';
+      }
+      
+      const catatanDiv = document.getElementById("detailCatatan");
+      if(p.catatan && p.catatan.trim() !== "") {
+        document.getElementById("detailCatatanText").textContent = p.catatan;
+        catatanDiv.style.display = "block";
+      } else {
+        catatanDiv.style.display = "none";
+      }
+      
+      document.getElementById("detailModal").classList.add("active");
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detailModal").classList.remove("active");
+    }
+
+    // Close modal ketika klik di luar
+    document.addEventListener("click", function(e) {
+      const modal = document.getElementById("detailModal");
+      if(e.target === modal) {
+        closeDetailModal();
+      }
+    });
+
+    // Expose fungsi ke global scope
+    window.showPurchaseDetail = showPurchaseDetail;
+    window.closeDetailModal = closeDetailModal;
+
+    function renderRiwayatTable(purchases) {
+      const tbody = document.getElementById("tbodyRiwayat");
+      if(purchases.length === 0){
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state" style="padding:2rem"><i class="fas fa-inbox"></i><p>Belum ada pembelian untuk periode ini</p></td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = purchases.map((p, index) => `
+        <tr style="cursor:pointer" onclick="showPurchaseDetail(${index})">
+          <td>${p.dateStr}</td>
+          <td>${new Date(p.timestamp).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+          <td>${p.supplier}</td>
+          <td>${p.totalItem} item</td>
+          <td style="font-weight:600">${Utils.formatRupiah(p.grandTotal)}</td>
+          <td>${p.userName}</td>
+          <td>
+            <button class="btn-icon btn-sm" style="width:32px;height:32px" onclick="event.stopPropagation();showPurchaseDetail(${index})" title="Lihat Detail">
+              <i class="fas fa-eye" style="color:var(--info)"></i>
+            </button>
+          </td>
+        </tr>
+      `).join("");
+      
+      window.purchasesData = purchases;
+    }
+
+    setTimeout(function(){
+      Utils.hideLoading();
+    }, 1000);
+    init();
   })();
   </script>
+
+  <!-- Detail Pembelian Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal" style="max-width:600px">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="detailTitle">Detail Pembelian</h3>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-top:0.25rem" id="detailSubtitle">ID: -</p>
+        </div>
+        <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:var(--bg-secondary);border-radius:0.75rem">
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase">Supplier</div>
+            <div style="font-weight:600" id="detailSupplier">-</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase">User</div>
+            <div style="font-weight:600" id="detailUser">-</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase">Tanggal</div>
+            <div style="font-weight:600" id="detailDate">-</div>
+          </div>
+          <div>
+            <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase">Waktu</div>
+            <div style="font-weight:600" id="detailTime">-</div>
+          </div>
+        </div>
+        
+        <h4 style="margin-bottom:1rem;font-size:1rem">Daftar Item</h4>
+        <table class="pembelian-table" style="font-size:0.9rem">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th style="text-align:center">Qty</th>
+              <th style="text-align:right">Harga/pcs</th>
+              <th style="text-align:right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="detailItems"></tbody>
+          <tfoot style="border-top:2px solid var(--border-color)">
+            <tr>
+              <td colspan="3" style="text-align:right;font-weight:700;padding:0.75rem">Grand Total:</td>
+              <td style="text-align:right;font-weight:700;padding:0.75rem;color:var(--primary)" id="detailGrandTotal">-</td>
+            </tr>
+          </tfoot>
+        </table>
+        
+        <div id="detailCatatan" style="margin-top:1.5rem;padding:1rem;background:rgba(255,193,7,0.1);border-left:3px solid var(--warning);border-radius:0.5rem;display:none">
+          <div style="font-size:0.75rem;color:var(--warning);font-weight:600;margin-bottom:0.25rem"><i class="fas fa-sticky-note"></i> Catatan</div>
+          <div style="font-size:0.9rem" id="detailCatatanText">-</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDetailModal()">Tutup</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
