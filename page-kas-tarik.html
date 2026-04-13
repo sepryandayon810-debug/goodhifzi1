@@ -415,6 +415,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </ul>
             </li>
             <li class="nav-item">
+  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+    <i class="fas fa-shopping-cart"></i>
+    <span>Pembelian / Restock</span>
+  </a>
+</li>
+            <li class="nav-item">
               <a href="page-hutang.html" class="nav-link" data-menu="hutang">
                 <i class="fas fa-hand-holding-usd"></i>
                 <span>Hutang & Piutang</span>
@@ -597,6 +603,23 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     document.addEventListener('DOMContentLoaded', () => {
       // Wait for Firebase auth to be ready
       auth.onAuthStateChanged((user) => {
+
+        // ===== FUNGSI KEMBALI KE KASIR =====
+function isFromKasir() {
+  return localStorage.getItem('fromKasir') === 'true';
+}
+
+function goBack() {
+  const dariKasir = isFromKasir();
+  localStorage.removeItem('fromKasir');
+  
+  if (dariKasir) {
+    window.location.href = 'page-kasir.html';
+  } else {
+    window.location.href = 'page-kas.html';
+  }
+}
+        
         if (!user && !Utils.getStorage('webpos_session')) {
           window.location.href = '../login.html';
           return;
@@ -761,23 +784,25 @@ document.addEventListener('click', (e) => {
           const transactionId = Utils.generateId('TRK');
           
           await database.ref(`transactions/${today}/${transactionId}`).set({
-            id: transactionId,
-            type: 'tarik',
-            amount: amount,              // Jumlah yang customer tarik
-            adminFee: adminFee,          // Biaya admin (pendapatan)
-            note: note || 'Tarik Tunai', // Default jika kosong
-            cashierId: user.uid,
-            cashierName: user.name,
-            timestamp: Date.now(),
-            status: 'completed'
-          });
+  id: transactionId,
+  type: 'tarik',
+  amount: amount,              // ⭐ Kas keluar (customer terima)
+  total: amount,               // ⭐ Total transaksi (untuk konsistensi)
+  adminFee: adminFee,          // Biaya admin
+  profit: adminFee,            // ⭐ Laba dari fee (penting untuk laporan!)
+  note: note || 'Tarik Tunai',
+  cashierId: user.uid,
+  cashierName: user.name,
+  timestamp: Date.now(),
+  status: 'completed'
+});
           
           Utils.hideLoading();
           Utils.showToast('Tarik tunai berhasil!', 'success');
           
           setTimeout(() => {
-            window.location.href = 'page-kas.html';
-          }, 1500);
+  goBack();  // ✅ Kembali ke kasir jika dari kasir
+}, 1500);
           
         } catch (error) {
           Utils.hideLoading();
