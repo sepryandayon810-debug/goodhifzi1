@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#6366f1">
-  <title>WebPOS - Top Up Kas</title>
+  <title>WebPOS - Kas Management</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -226,8 +226,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .d-none{display:none!important}
 .d-block{display:block!important}
 .d-flex{display:flex!important}
-.d-md-none{display:none!important}
-@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}}
+@media(max-width:768px){.d-md-none{display:none!important}.d-sm-none{display:none!important}} /* ← INI JUGA REDUNDANT */
 .text-left{text-align:left!important}
 .text-center{text-align:center!important}
 .text-right{text-align:right!important}
@@ -250,77 +249,193 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>  
   
   <style>
-    .topup-card {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .amount-display {
-      font-size: 3rem;
-      font-weight: 700;
-      color: var(--success);
-      text-align: center;
-      padding: 2rem;
-      background: rgba(16, 185, 129, 0.1);
-      border-radius: var(--radius-xl);
-      margin-bottom: 1.5rem;
-      border: 2px solid rgba(16, 185, 129, 0.2);
-    }
-
-    .numpad {
+    .kas-stats {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kas-stat {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 1.25rem;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .kas-stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .kas-stat-value.success { color: var(--success); }
+    .kas-stat-value.danger { color: var(--danger); }
+    .kas-stat-value.primary { color: var(--primary); }
+
+    .kas-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .kas-actions {
+      display: flex;
       gap: 0.75rem;
       margin-bottom: 1.5rem;
     }
 
-    .numpad-btn {
-      padding: 1.5rem;
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
-      border-radius: var(--radius-lg);
-      font-size: 1.5rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
+    .kas-actions .btn {
+  flex: 1 1 auto;  /* Allow shrink */
+  min-width: 0;     /* Prevent overflow */
+}
 
-    .numpad-btn:hover {
-      background: var(--bg-secondary);
-    }
-
-    .numpad-btn.action {
-      background: var(--success);
-      color: white;
-      border-color: var(--success);
-    }
-
-    .quick-amounts {
-      display: flex;
+    .transaction-type-badge {
+      display: inline-flex;
+      align-items: center;
       gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .quick-amount {
-      padding: 0.5rem 1rem;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.75rem;
       border-radius: 50px;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all var(--transition-fast);
+      font-size: 0.75rem;
+      font-weight: 600;
     }
 
-    .quick-amount:hover {
-      background: var(--success);
-      color: white;
-      border-color: var(--success);
+    .transaction-type-badge.income {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
     }
+
+    .transaction-type-badge.expense {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+   /* ===== MOBILE RESPONSIVE FIXES (< 768px) ===== */
+@media (max-width: 768px) {
+  /* Stats: 1 kolom default di mobile */
+  .kas-stats { 
+    grid-template-columns: 1fr; 
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .kas-stat {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+  
+  .kas-stat-value {
+    font-size: 1.35rem;
+    margin-bottom: 0;
+  }
+  
+  .kas-stat-label {
+    font-size: 0.7rem;
+  }
+
+  /* Action Buttons: Stack vertikal full width */
+  .kas-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .kas-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Table: Compact */
+  .table-container {
+    margin: 0 -0.75rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .table {
+    font-size: 0.8rem;
+  }
+  
+  .table th, 
+  .table td {
+    padding: 0.625rem 0.5rem;
+    white-space: nowrap;
+  }
+  
+  .table th {
+    font-size: 0.7rem;
+  }
+  
+  /* Card padding lebih kecil */
+  .card-body {
+    padding: 1rem 0.75rem;
+  }
+  
+  .card-header {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet: 2 kolom stats (480px - 768px) */
+@media (min-width: 480px) and (max-width: 768px) {
+  .kas-stats { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .kas-stat {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Extra small devices (< 375px) */
+@media (max-width: 375px) {
+  .kas-stat-value {
+    font-size: 1.15rem;
+  }
+  
+  .kas-stat-label {
+    font-size: 0.65rem;
+  }
+  
+  .kas-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.6rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem 0.375rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Pastikan tidak ada horizontal scroll */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Container table scroll */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+    
   </style>
 </head>
 <body>
@@ -362,8 +477,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     <i class="fas fa-box"></i>
     <span>Produk</span>
   </a>
-</li>
-          </ul>
+</li>          </ul>
         </div>
 
         <!-- Transaksi -->
@@ -385,12 +499,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
               </div>
               <ul class="nav-submenu">
-                <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
+                <li><a href="page-kas.html" class="nav-link active"><span>Ringkasan Kas</span></a></li>
                 <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
-                 <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
-    <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
+                <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
+                <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
                 <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
-                <li><a href="page-kas-topup.html" class="nav-link active"><span>Top Up</span></a></li>
+                <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
             </li>
@@ -493,7 +607,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       <header class="main-header">
         <div class="header-left">
 <button class="btn-icon" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
-          <h1 class="header-title">Top Up Kas</h1>
+          <h1 class="header-title">Kas Management</h1>
         </div>
         <div class="header-actions">
           <button class="btn-icon" id="btnLogout"><i class="fas fa-sign-out-alt"></i></button>
@@ -501,77 +615,63 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       </header>
 
       <div class="page-content">
-        <div class="topup-card">
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-arrow-up" style="color: var(--success);"></i> Top Up Kas</h3>
-            </div>
-            <div class="card-body">
-              <div class="amount-display" id="topupAmount">Rp 0</div>
+        <!-- Kas Stats -->
+        <div class="kas-stats">
+          <div class="kas-stat">
+            <div class="kas-stat-value primary" id="kasDitangan">Rp 0</div>
+            <div class="kas-stat-label">Kas di Tangan</div>
+          </div>
+          <div class="kas-stat">
+            <div class="kas-stat-value success" id="kasMasuk">Rp 0</div>
+            <div class="kas-stat-label">Kas Masuk</div>
+          </div>
+          <div class="kas-stat">
+            <div class="kas-stat-value danger" id="kasKeluar">Rp 0</div>
+            <div class="kas-stat-label">Kas Keluar</div>
+          </div>
+        </div>
 
-              <div class="quick-amounts">
-                <button class="quick-amount" data-amount="50000">50.000</button>
-                <button class="quick-amount" data-amount="100000">100.000</button>
-                <button class="quick-amount" data-amount="200000">200.000</button>
-                <button class="quick-amount" data-amount="500000">500.000</button>
-                <button class="quick-amount" data-amount="1000000">1.000.000</button>
-              </div>
+        <!-- Quick Actions -->
+        <div class="kas-actions">
+          <a href="page-kas-topup.html" class="btn btn-success">
+            <i class="fas fa-arrow-up"></i> Top Up
+          </a>
+          <a href="page-kas-tarik.html" class="btn btn-danger">
+            <i class="fas fa-arrow-down"></i> Tarik Tunai
+          </a>
+          <a href="page-modal.html" class="btn btn-primary">
+            <i class="fas fa-coins"></i> Set Modal
+          </a>
+        </div>
 
-              <div class="numpad">
-                <button class="numpad-btn" data-num="1">1</button>
-                <button class="numpad-btn" data-num="2">2</button>
-                <button class="numpad-btn" data-num="3">3</button>
-                <button class="numpad-btn" data-num="4">4</button>
-                <button class="numpad-btn" data-num="5">5</button>
-                <button class="numpad-btn" data-num="6">6</button>
-                <button class="numpad-btn" data-num="7">7</button>
-                <button class="numpad-btn" data-num="8">8</button>
-                <button class="numpad-btn" data-num="9">9</button>
-                <button class="numpad-btn action" data-action="clear">C</button>
-                <button class="numpad-btn" data-num="0">0</button>
-                <button class="numpad-btn action" data-action="backspace"><i class="fas fa-backspace"></i></button>
-              </div>
-
-              <!-- Admin Fee Section -->
-              <div class="form-group">
-                <label class="form-label">Admin Fee (Masuk ke Laba)</label>
-                <div class="input-group">
-                  <span class="input-group-text">Rp</span>
-                  <input type="number" class="form-input" id="adminFee" value="0" min="0" placeholder="0">
-                </div>
-                <small style="color: var(--text-muted); font-size: 0.75rem;">
-                  <i class="fas fa-info-circle"></i> Admin fee akan masuk ke perhitungan laba
-                </small>
-              </div>
-
-              <!-- Summary -->
-              <div class="card" style="background: var(--bg-secondary); margin-bottom: 1rem;">
-                <div class="card-body" style="padding: 1rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: var(--text-muted);">Nominal Top Up</span>
-                    <span id="summaryTopup">Rp 0</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span style="color: var(--text-muted);">Admin Fee</span>
-                    <span id="summaryAdminFee">Rp 0</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
-                    <span style="font-weight: 600;">Total</span>
-                    <span style="font-weight: 700; color: var(--success);" id="summaryTotal">Rp 0</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Keterangan (Opsional)</label>
-                <input type="text" class="form-input" id="topupNote" placeholder="Contoh: Setoran modal tambahan">
-              </div>
-
-              <button class="btn btn-success btn-block btn-lg" id="btnSimpanTopup">
-                <i class="fas fa-save"></i>
-                Simpan Top Up
-              </button>
-            </div>
+        <!-- Recent Transactions -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-history"></i> Riwayat Kas</h3>
+          </div>
+          <div class="card-body" style="padding: 0;">
+  <div class="table-container">
+    <table class="table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Tipe</th>
+                  <th>Keterangan</th>
+                  <th>Jumlah</th>
+                  <th>Kasir</th>
+                </tr>
+              </thead>
+              <tbody id="kasHistory">
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 3rem;">
+                    <div class="empty-state">
+                      <div class="empty-state-icon"><i class="fas fa-wallet"></i></div>
+                      <p>Belum ada transaksi kas</p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -604,62 +704,50 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           window.location.href = '../login.html';
           return;
         }
+
+        document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
+  toggle.addEventListener('click', function(e) {
+    e.preventDefault();
+    const parent = this.closest('.nav-dropdown');
+    
+    // Tutup dropdown lain yang sedang terbuka (opsional - single open)
+    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
+      if (openDropdown !== parent) {
+        openDropdown.classList.remove('open');
+      }
+    });
+    
+    // Toggle current dropdown
+    parent.classList.toggle('open');
+  });
+});
         
         // Load user data if available
         if (user) {
           Auth.loadUserData(user.uid);
         }
         
-        // Initialize topup
-        initTopup();
+        // Initialize kas
+        initKas();
       });
 
-      // ===== FUNGSI CEK DAN KEMBALI =====
-function isFromKasir() {
-  return localStorage.getItem('fromKasir') === 'true';
-}
-
-function goBack() {
-  const dariKasir = isFromKasir();        // ✅ Cek dulu statusnya
-  localStorage.removeItem('fromKasir');   // ✅ Baru hapus setelah dicek
-  
-  if (dariKasir) {
-    window.location.href = 'page-kasir.html';
-  } else {
-    window.location.href = 'page-kas.html';
-  }
-}
-
-      function initTopup() {
+      function initKas() {
       const user = Auth.getCurrentUser();
       document.getElementById('userName').textContent = user?.name || user?.email || 'User';
       document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
 
-      let amount = 0;
-      let adminFee = 0;
-
-      // Update summary display
-      function updateSummary() {
-        adminFee = parseInt(document.getElementById('adminFee').value) || 0;
-        const total = amount + adminFee;
-        
-        document.getElementById('summaryTopup').textContent = Utils.formatRupiah(amount);
-        document.getElementById('summaryAdminFee').textContent = Utils.formatRupiah(adminFee);
-        document.getElementById('summaryTotal').textContent = Utils.formatRupiah(total);
-      }
-
       // Sidebar toggle
-      // Sidebar toggle - Desktop (collapse/expand)
-document.getElementById('menuToggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
 
-// Sidebar toggle - Mobile (burger menu) - VERSI BARU
 const mobileToggle = document.getElementById('mobileMenuToggle');
 const sidebar = document.getElementById('sidebar');
 
 if (mobileToggle) {
+  // Hapus inline style lama jika ada
   mobileToggle.removeAttribute('style');
+  
   mobileToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     sidebar.classList.toggle('mobile-open');
@@ -675,7 +763,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
   });
 });
 
-// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
+// Tutup sidebar saat klik overlay (area gelap)
 document.addEventListener('click', (e) => {
   if (window.innerWidth <= 1024 && 
       sidebar.classList.contains('mobile-open') &&
@@ -689,96 +777,110 @@ document.addEventListener('click', (e) => {
         Utils.confirm('Yakin ingin logout?', () => Auth.logout());
       });
 
-        document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
-  toggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    const parent = this.closest('.nav-dropdown');
-    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
-      if (openDropdown !== parent) openDropdown.classList.remove('open');
-    });
-    parent.classList.toggle('open');
-  });
-});
-
-      // Update display
-      function updateDisplay() {
-        document.getElementById('topupAmount').textContent = Utils.formatRupiah(amount);
-        updateSummary();
-      }
-
-      // Admin fee change
-      document.getElementById('adminFee').addEventListener('input', () => {
-        updateSummary();
-      });
-
-      // Numpad
-      document.querySelectorAll('.numpad-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const num = btn.dataset.num;
-          const action = btn.dataset.action;
-          
-          if (num !== undefined) {
-            amount = amount * 10 + parseInt(num);
-          } else if (action === 'clear') {
-            amount = 0;
-          } else if (action === 'backspace') {
-            amount = Math.floor(amount / 10);
-          }
-          
-          updateDisplay();
-        });
-      });
-
-      // Quick amounts
-      document.querySelectorAll('.quick-amount').forEach(btn => {
-        btn.addEventListener('click', () => {
-          amount = parseInt(btn.dataset.amount);
-          updateDisplay();
-        });
-      });
-
-      // Save topup
-      document.getElementById('btnSimpanTopup').addEventListener('click', async () => {
-        if (amount <= 0) {
-          Utils.showToast('Masukkan jumlah top up terlebih dahulu', 'warning');
-          return;
-        }
-
-        const adminFeeValue = parseInt(document.getElementById('adminFee').value) || 0;
-        const total = amount + adminFeeValue;
-
+      // Load kas data
+      async function loadKasData() {
         try {
-          Utils.showLoading('Menyimpan...');
+          Utils.showLoading();
           
           const today = Utils.getTodayString();
-          const transactionId = Utils.generateId('TOP');
+          const transSnapshot = await database.ref(`transactions/${today}`).once('value');
+          const transactions = transSnapshot.val() || {};
           
-          await database.ref(`transactions/${today}/${transactionId}`).set({
-            id: transactionId,
-            type: 'topup',
-            amount: amount,
-            adminFee: adminFeeValue,
-            total: total,
-            profit: adminFeeValue, // Admin fee masuk ke laba
-            note: document.getElementById('topupNote').value,
-            cashierId: user.uid,
-            cashierName: user.name,
-            timestamp: Date.now(),
-            status: 'completed'
+          let kasMasuk = 0;
+          let kasKeluar = 0;
+          let kasHistory = [];
+          
+          Object.entries(transactions).forEach(([id, data]) => {
+            if (data.status === 'cancelled') return;
+            
+            if (data.type === 'topup' || data.type === 'kas_masuk') {
+              kasMasuk += data.total || data.amount || 0;
+            } else if (data.type === 'tarik' || data.type === 'kas_keluar') {
+              kasKeluar += data.total || data.amount || 0;
+            }
+            
+            kasHistory.push({ id, ...data });
           });
           
-          Utils.hideLoading();
-Utils.showToast('Top up berhasil!', 'success');
-
-setTimeout(() => {
-  goBack();  // ✅ BENAR - otomatis ke kasir jika dari kasir
-}, 1500);
+          // Get modal
+          const modalSnapshot = await database.ref(`modal/${today}/${user?.uid}`).once('value');
+          const modal = modalSnapshot.val();
+          const modalAmount = modal ? modal.amount : 0;
           
-        } catch (error) {
+          // Calculate kas ditangan
+          let kasDitangan = modalAmount;
+          Object.entries(transactions).forEach(([id, data]) => {
+            if (data.status === 'cancelled') return;
+            
+            if (data.type === 'penjualan') {
+              kasDitangan += data.total || 0;
+            } else if (data.type === 'topup' || data.type === 'kas_masuk') {
+              kasDitangan += data.total || data.amount || 0;
+            } else if (data.type === 'tarik' || data.type === 'kas_keluar') {
+              kasDitangan -= data.total || data.amount || 0;
+            }
+          });
+          
+          // Update UI
+          document.getElementById('kasDitangan').textContent = Utils.formatRupiah(kasDitangan);
+          document.getElementById('kasMasuk').textContent = Utils.formatRupiah(kasMasuk);
+          document.getElementById('kasKeluar').textContent = Utils.formatRupiah(kasKeluar);
+          
+          // Render history
+          kasHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          const tbody = document.getElementById('kasHistory');
+          if (kasHistory.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem;">
+                  <div class="empty-state">
+                    <div class="empty-state-icon"><i class="fas fa-wallet"></i></div>
+                    <p>Belum ada transaksi kas</p>
+                  </div>
+                </td>
+              </tr>
+            `;
+          } else {
+            tbody.innerHTML = kasHistory.slice(0, 20).map(t => {
+              const isIncome = ['topup', 'kas_masuk', 'penjualan'].includes(t.type);
+              const typeLabels = {
+                topup: 'Top Up',
+                tarik: 'Tarik Tunai',
+                kas_masuk: 'Kas Masuk',
+                kas_keluar: 'Kas Keluar',
+                penjualan: 'Penjualan'
+              };
+              
+              const adminFeeInfo = t.adminFee > 0 ? `<br><small style="color: var(--success);">+Admin: ${Utils.formatRupiah(t.adminFee)}</small>` : '';
+              
+              return `
+                <tr>
+                  <td>${Utils.formatDateTime(t.timestamp)}</td>
+                  <td>
+                    <span class="transaction-type-badge ${isIncome ? 'income' : 'expense'}">
+                      <i class="fas fa-${isIncome ? 'arrow-up' : 'arrow-down'}"></i>
+                      ${typeLabels[t.type] || t.type}
+                    </span>
+                  </td>
+                  <td>${t.note || '-'}${adminFeeInfo}</td>
+                  <td style="color: ${isIncome ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                    ${isIncome ? '+' : '-'} ${Utils.formatRupiah(t.total || t.amount || 0)}
+                  </td>
+                  <td>${t.cashierName || '-'}</td>
+                </tr>
+              `;
+            }).join('');
+          }
+          
           Utils.hideLoading();
-          Utils.showToast('Gagal menyimpan top up', 'error');
+        } catch (error) {
+          console.error('Error loading kas data:', error);
+          Utils.hideLoading();
         }
-      });
+      }
+
+      loadKasData();
       }
     });
   </script>
