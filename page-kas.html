@@ -290,8 +290,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }
 
     .kas-actions .btn {
-      flex: 1;
-    }
+  flex: 1 1 auto;  /* Allow shrink */
+  min-width: 0;     /* Prevent overflow */
+}
 
     .transaction-type-badge {
       display: inline-flex;
@@ -312,6 +313,129 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       background: rgba(239, 68, 68, 0.1);
       color: var(--danger);
     }
+
+   /* ===== MOBILE RESPONSIVE FIXES (< 768px) ===== */
+@media (max-width: 768px) {
+  /* Stats: 1 kolom default di mobile */
+  .kas-stats { 
+    grid-template-columns: 1fr; 
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .kas-stat {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+  
+  .kas-stat-value {
+    font-size: 1.35rem;
+    margin-bottom: 0;
+  }
+  
+  .kas-stat-label {
+    font-size: 0.7rem;
+  }
+
+  /* Action Buttons: Stack vertikal full width */
+  .kas-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .kas-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Table: Compact */
+  .table-container {
+    margin: 0 -0.75rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+  
+  .table {
+    font-size: 0.8rem;
+  }
+  
+  .table th, 
+  .table td {
+    padding: 0.625rem 0.5rem;
+    white-space: nowrap;
+  }
+  
+  .table th {
+    font-size: 0.7rem;
+  }
+  
+  /* Card padding lebih kecil */
+  .card-body {
+    padding: 1rem 0.75rem;
+  }
+  
+  .card-header {
+    padding: 1rem;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet: 2 kolom stats (480px - 768px) */
+@media (min-width: 480px) and (max-width: 768px) {
+  .kas-stats { 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+  
+  .kas-stat {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Extra small devices (< 375px) */
+@media (max-width: 375px) {
+  .kas-stat-value {
+    font-size: 1.15rem;
+  }
+  
+  .kas-stat-label {
+    font-size: 0.65rem;
+  }
+  
+  .kas-actions .btn {
+    font-size: 0.8rem;
+    padding: 0.6rem;
+  }
+  
+  .table th,
+  .table td {
+    padding: 0.5rem 0.375rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Pastikan tidak ada horizontal scroll */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Container table scroll */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+    
   </style>
 </head>
 <body>
@@ -384,6 +508,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
             </li>
+            <li class="nav-item">
+  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+    <i class="fas fa-shopping-cart"></i>
+    <span>Pembelian / Restock</span>
+  </a>
+</li>
             <li class="nav-item">
               <a href="page-hutang.html" class="nav-link" data-menu="hutang">
                 <i class="fas fa-hand-holding-usd"></i>
@@ -519,8 +649,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           <div class="card-header">
             <h3 class="card-title"><i class="fas fa-history"></i> Riwayat Kas</h3>
           </div>
-          <div class="card-body" style="padding: 0; overflow-x: auto;">
-            <table class="table">
+          <div class="card-body" style="padding: 0;">
+  <div class="table-container">
+    <table class="table">
               <thead>
                 <tr>
                   <th>Tanggal</th>
