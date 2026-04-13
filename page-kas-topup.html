@@ -395,6 +395,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </ul>
             </li>
             <li class="nav-item">
+  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+    <i class="fas fa-shopping-cart"></i>
+    <span>Pembelian / Restock</span>
+  </a>
+</li>
+            <li class="nav-item">
               <a href="page-hutang.html" class="nav-link" data-menu="hutang">
                 <i class="fas fa-hand-holding-usd"></i>
                 <span>Hutang & Piutang</span>
@@ -608,6 +614,22 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         initTopup();
       });
 
+      // ===== FUNGSI CEK DAN KEMBALI =====
+function isFromKasir() {
+  return localStorage.getItem('fromKasir') === 'true';
+}
+
+function goBack() {
+  const dariKasir = isFromKasir();        // ✅ Cek dulu statusnya
+  localStorage.removeItem('fromKasir');   // ✅ Baru hapus setelah dicek
+  
+  if (dariKasir) {
+    window.location.href = 'page-kasir.html';
+  } else {
+    window.location.href = 'page-kas.html';
+  }
+}
+
       function initTopup() {
       const user = Auth.getCurrentUser();
       document.getElementById('userName').textContent = user?.name || user?.email || 'User';
@@ -746,11 +768,11 @@ document.addEventListener('click', (e) => {
           });
           
           Utils.hideLoading();
-          Utils.showToast('Top up berhasil!', 'success');
-          
-          setTimeout(() => {
-            window.location.href = 'page-kas.html';
-          }, 1500);
+Utils.showToast('Top up berhasil!', 'success');
+
+setTimeout(() => {
+  goBack();  // ✅ BENAR - otomatis ke kasir jika dari kasir
+}, 1500);
           
         } catch (error) {
           Utils.hideLoading();
