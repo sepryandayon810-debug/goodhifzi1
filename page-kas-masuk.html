@@ -1,177 +1,227 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="light" data-theme-color="green">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#10b981">
-  <title>WebPOS - Kas Masuk</title>
-
+  <meta name="theme-color" content="#f97316">
+  <script>
+    (function() {
+      const themeColor = localStorage.getItem('theme_color') || 
+                         localStorage.getItem('theme') || 
+                         localStorage.getItem('webpos_color') || 
+                         'orange';
+      const themeMode = localStorage.getItem('webpos_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', themeMode);
+      document.documentElement.setAttribute('data-theme-color', themeColor);
+      const colorMap = {
+        'orange': {p: '#f97316', pd: '#ea580c', s: '#f59e0b'},
+        'blue': {p: '#3b82f6', pd: '#2563eb', s: '#06b6d4'},
+        'green': {p: '#10b981', pd: '#059669', s: '#84cc16'},
+        'purple': {p: '#8b5cf6', pd: '#7c3aed', s: '#d946ef'},
+        'red': {p: '#ef4444', pd: '#dc2626', s: '#f97316'},
+        'pink': {p: '#ec4899', pd: '#db2777', s: '#8b5cf6'},
+        'teal': {p: '#14b8a6', pd: '#0d9488', s: '#06b6d4'},
+        'indigo': {p: '#6366f1', pd: '#4f46e5', s: '#ec4899'}
+      };
+      const c = colorMap[themeColor] || colorMap['orange'];
+      document.documentElement.style.setProperty('--primary', c.p);
+      document.documentElement.style.setProperty('--primary-dark', c.pd);
+      document.documentElement.style.setProperty('--secondary', c.s);
+      const metaColor = document.querySelector('meta[name="theme-color"]');
+      if (metaColor) metaColor.setAttribute('content', c.p);
+    })();
+  </script>
+  <title>WebPOS - Kas & Shift</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+    [data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
+    [data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
+    [data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
+    [data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
+    [data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
+    [data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
+    [data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
+    :root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
+    [data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+    body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
+    ::-webkit-scrollbar{width:8px}
+    ::-webkit-scrollbar-track{background:var(--bg-secondary)}
+    ::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
+    .app-container{display:flex;min-height:100vh}
+    .sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
+    .sidebar.collapsed{width:var(--sidebar-collapsed)}
+    @media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
+    .sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
+    .logo-container{display:flex;align-items:center;gap:.5rem}
+    .logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
+    .logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .sidebar.collapsed .logo-text{opacity:0;width:0}
+    .menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
+    .menu-toggle:hover{background:var(--primary-dark)}
+    .sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
+    .sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
+    .search-input-wrapper{position:relative;display:flex;align-items:center}
+    .search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
+    .search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
+    .search-input:focus{outline:none;border-color:var(--primary)}
+    .sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
+    .nav-section{margin-bottom:1.5rem}
+    .nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
+    .sidebar.collapsed .nav-section-title{display:none}
+    .nav-menu{list-style:none}
+    .nav-item{margin-bottom:2px}
+    .nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
+    .nav-link::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--primary);transform:scaleY(0);transition:transform .15s;border-radius:0 .25rem .25rem 0}
+    .nav-link:hover{background:rgba(99,102,241,.05);color:var(--primary)}
+    .nav-link.active{background:rgba(99,102,241,.1);color:var(--primary);font-weight:600}
+    .nav-link.active::before{transform:scaleY(1)}
+    .nav-link i{width:22px;text-align:center;font-size:1.05rem}
+    .nav-link span{white-space:nowrap}
+    .sidebar.collapsed .nav-link span{display:none}
+    .nav-dropdown{position:relative}
+    .nav-dropdown-toggle{justify-content:space-between}
+    .nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto}
+    .nav-dropdown.open .nav-dropdown-toggle .dropdown-arrow{transform:rotate(180deg)}
+    .nav-submenu{list-style:none;padding-left:2.75rem;max-height:0;overflow:hidden;transition:max-height .25s}
+    .sidebar.collapsed .nav-submenu{display:none}
+    .nav-dropdown.open .nav-submenu{max-height:500px}
+    .nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
+    .sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
+    .user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
+    .user-profile:hover{opacity:.8}
+    .user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
+    .user-info{flex:1;overflow:hidden}
+    .sidebar.collapsed .user-info{display:none}
+    .user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
+    .main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
+    .sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
+    @media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
+    .main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
+    .header-left{display:flex;align-items:center;gap:1rem}
+    .header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
+    .header-actions{display:flex;align-items:center;gap:.5rem}
+    .page-content{flex:1;padding:1.5rem;overflow-y:auto}
+    @media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-primary{background:var(--primary);color:white}
+    .btn-primary:hover:not(:disabled){background:var(--primary-dark);transform:translateY(-2px)}
+    .btn-success{background:var(--success);color:white}
+    .btn-success:hover:not(:disabled){filter:brightness(0.9)}
+    .btn-danger{background:var(--danger);color:white}
+    .btn-danger:hover:not(:disabled){filter:brightness(0.9)}
+    .btn-warning{background:var(--warning);color:white}
+    .btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
+    .btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+    .btn-sm{padding:.4rem .875rem;font-size:.8rem}
+    .btn-block{width:100%}
+    .btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .btn-icon:hover{background:rgba(99,102,241,.05);color:var(--primary);border-color:var(--primary)}
+    .card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
+    .card:hover{box-shadow:var(--shadow-lg)}
+    .card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
+    .card-body{padding:1.5rem}
+    .card-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);background:var(--bg-secondary)}
+    .form-group{margin-bottom:1.25rem}
+    .form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
+    .form-input,.form-select,.form-textarea{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
+    .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+    .form-input::placeholder{color:var(--text-muted)}
+    .form-textarea{min-height:100px;resize:vertical}
+    .form-select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg ' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+    .table-container{overflow-x:auto;border-radius:1rem;border:1px solid var(--border-color)}
+    .table{width:100%;border-collapse:collapse;font-size:.9rem}
+    .table th,.table td{padding:.875rem 1rem;text-align:left;border-bottom:1px solid var(--border-color)}
+    .table th{font-weight:600;color:var(--text-secondary);background:var(--bg-secondary);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+    .table tbody tr:hover{background:rgba(99,102,241,.05)}
+    .badge{display:inline-flex;align-items:center;gap:.25rem;padding:.35rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600}
+    .badge-primary{background:rgba(99,102,241,.1);color:var(--primary)}
+    .badge-success{background:rgba(16,185,129,.1);color:var(--success)}
+    .badge-warning{background:rgba(245,158,11,.1);color:var(--warning)}
+    .badge-danger{background:rgba(239,68,68,.1);color:var(--danger)}
+    .toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
+    .toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.success{border-left-color:var(--success)}
+    .toast.error{border-left-color:var(--danger)}
+    .toast.warning{border-left-color:var(--warning)}
+    .toast.info{border-left-color:var(--info)}
+    .loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
+    .loading-overlay.active{opacity:1;visibility:visible}
+    .spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
+    .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
+    .mobile-nav-item i{font-size:1.25rem}
+    .mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
+    @media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem}
+    .modal-overlay.active{opacity:1;visibility:visible}
+    .modal-content{background:var(--bg-card);border-radius:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(.9) translateY(20px);transition:all .25s}
+    .modal-overlay.active .modal-content{transform:scale(1) translateY(0)}
+    .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between}
+    .modal-title{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+    .modal-close{width:36px;height:36px;border:none;border-radius:.75rem;background:var(--bg-secondary);color:var(--text-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+    .modal-close:hover{background:var(--danger);color:white}
+    .modal-body{padding:1.5rem}
+    .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border-color);display:flex;gap:.75rem;justify-content:flex-end}
+    .empty-state{text-align:center;padding:3rem 1.5rem;color:var(--text-muted)}
+    .empty-state i{font-size:3rem;margin-bottom:1rem;opacity:.5}
+    .empty-state-title{font-size:1.1rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem}
+    .shift-container{display:grid;grid-template-columns:1fr 2fr;gap:1.5rem}
+    @media(max-width:768px){.shift-container{grid-template-columns:1fr}}
+    .status-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);padding:1.5rem;text-align:center}
+    .status-indicator-large{width:100px;height:100px;border-radius:50%;margin:0 auto 1.5rem;display:flex;align-items:center;justify-content:center;font-size:2.5rem;transition:all .25s}
+    .status-indicator-large.open{background:linear-gradient(135deg,var(--success),#059669);color:white;box-shadow:0 0 30px rgba(16,185,129,.4)}
+    .status-indicator-large.closed{background:linear-gradient(135deg,var(--danger),#dc2626);color:white;box-shadow:0 0 30px rgba(239,68,68,.4)}
+    .status-text{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+    .status-text.open{color:var(--success)}
+    .status-text.closed{color:var(--danger)}
+    .status-time{color:var(--text-muted);font-size:.875rem;margin-bottom:1.5rem}
+    .btn-shift{width:100%;padding:1rem;border-radius:var(--radius-lg);font-size:1rem;font-weight:600;border:none;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.5rem}
+    .btn-shift.open{background:var(--success);color:white}
+    .btn-shift.close{background:var(--danger);color:white}
+    .btn-shift:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:1.5rem}
+    .summary-item{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:1rem;text-align:center}
+    .summary-label{font-size:.75rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:.25rem}
+    .summary-value{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+    .summary-value.positive{color:var(--success)}
+    .summary-value.negative{color:var(--danger)}
+    .history-card{background:var(--bg-card);border-radius:var(--radius-xl);border:1px solid var(--border-color);overflow:hidden}
+    .history-list{max-height:500px;overflow-y:auto}
+    .shift-item{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);transition:background .15s}
+    .shift-item:hover{background:var(--bg-secondary)}
+    .shift-item:last-child{border-bottom:none}
+    .shift-info{display:flex;flex-direction:column;gap:.25rem}
+    .shift-date{font-weight:600;color:var(--text-primary)}
+    .shift-time{font-size:.75rem;color:var(--text-muted)}
+    .shift-user{font-size:.75rem;color:var(--text-secondary)}
+    .shift-status{display:flex;flex-direction:column;align-items:flex-end;gap:.25rem}
+    .shift-badge{padding:.25rem .75rem;border-radius:50px;font-size:.75rem;font-weight:600}
+    .shift-badge.open{background:rgba(16,185,129,.1);color:var(--success)}
+    .shift-badge.closed{background:rgba(239,68,68,.1);color:var(--danger)}
+    .shift-duration{font-size:.75rem;color:var(--text-muted)}
+    .filter-bar{display:flex;gap:.5rem;padding:1rem 1.5rem;border-bottom:1px solid var(--border-color);overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--bg-secondary)}
+    .filter-btn{flex:0 0 auto;padding:.5rem 1rem;border:1px solid var(--border-color);border-radius:2rem;background:var(--bg-card);color:var(--text-secondary);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .filter-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .filter-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
+    .date-range-info{padding:.75rem 1.5rem;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);font-size:.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:.5rem}
+    .date-range-info i{color:var(--primary)}
+    .filter-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;padding:1rem 1.5rem;background:var(--bg-secondary);border-bottom:1px solid var(--border-color)}
+    .filter-stat-item{text-align:center;padding:.75rem;background:var(--bg-card);border-radius:.75rem;border:1px solid var(--border-color)}
+    .filter-stat-value{font-size:1.1rem;font-weight:700;color:var(--primary)}
+    .filter-stat-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;margin-top:.25rem}
+    @media(max-width:768px){.filter-bar{padding:.75rem 1rem;gap:.4rem}.filter-btn{padding:.4rem .875rem;font-size:.75rem}.date-range-info,.period-selector{padding:.75rem 1rem}.filter-stats{grid-template-columns:repeat(2,1fr);padding:.75rem 1rem;gap:.75rem}.filter-stat-item{padding:.625rem}.filter-stat-value{font-size:1rem}}
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-/* Theme Colors - Green for Kas Masuk */
-:root{--primary:#10b981;--primary-dark:#059669;--secondary:#34d399;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
-[data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
-[data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
-[data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
-[data-theme-color="purple"]{--primary:#8b5cf6;--primary-dark:#7c3aed;--secondary:#d946ef}
-[data-theme-color="red"]{--primary:#ef4444;--primary-dark:#dc2626;--secondary:#f97316}
-[data-theme-color="pink"]{--primary:#ec4899;--primary-dark:#db2777;--secondary:#8b5cf6}
-[data-theme-color="teal"]{--primary:#14b8a6;--primary-dark:#0d9488;--secondary:#06b6d4}
-
-/* Base */
-:root{--bg-primary:#f8fafc;--bg-secondary:#f1f5f9;--bg-card:#fff;--text-primary:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;--border-color:#e2e8f0;--shadow-sm:0 1px 2px rgba(0,0,0,0.05);--shadow-md:0 4px 6px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px rgba(0,0,0,0.1);--radius-sm:0.375rem;--radius-md:0.5rem;--radius-lg:0.75rem;--radius-xl:1rem;--sidebar-width:280px;--sidebar-collapsed:76px;--header-height:70px;--bottom-nav-height:70px}
-
-[data-theme="dark"]{--bg-primary:#0f172a;--bg-secondary:#1e293b;--bg-card:#1e293b;--text-primary:#f8fafc;--text-secondary:#cbd5e1;--text-muted:#64748b;--border-color:#334155}
-
-*{margin:0;padding:0;box-sizing:border-box}
-html{font-size:16px;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
-body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-height:100vh}
-
-::-webkit-scrollbar{width:8px}
-::-webkit-scrollbar-track{background:var(--bg-secondary)}
-::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:9999px}
-
-.app-container{display:flex;min-height:100vh}
-
-/* Sidebar */
-.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-width);height:100vh;background:var(--bg-card);border-right:1px solid var(--border-color);z-index:1000;display:flex;flex-direction:column;transition:all .25s}
-.sidebar.collapsed{width:var(--sidebar-collapsed)}
-@media(max-width:1024px){.sidebar{transform:translateX(-100%)}.sidebar.mobile-open{transform:translateX(0)}}
-
-.sidebar-header{padding:1.25rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:1rem;min-height:var(--header-height)}
-.logo-container{display:flex;align-items:center;gap:.5rem}
-.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:.75rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:1.25rem}
-.logo-text{font-size:1.35rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.sidebar.collapsed .logo-text{opacity:0;width:0}
-
-.menu-toggle{position:absolute;right:-14px;top:24px;width:28px;height:28px;background:var(--primary);border:none;border-radius:50%;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1001;font-size:.75rem}
-.menu-toggle:hover{background:var(--primary-dark)}
-.sidebar.collapsed .menu-toggle{transform:rotate(180deg)}
-
-.sidebar-search{padding:1rem;border-bottom:1px solid var(--border-color)}
-.search-input-wrapper{position:relative;display:flex;align-items:center}
-.search-input-wrapper i{position:absolute;left:1rem;color:var(--text-muted);font-size:.875rem}
-.search-input{width:100%;padding:.5rem 1rem .5rem 2.5rem;border:1px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.875rem}
-.search-input:focus{outline:none;border-color:var(--primary)}
-
-.sidebar-nav{flex:1;overflow-y:auto;padding:1rem}
-.nav-section{margin-bottom:1.5rem}
-.nav-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);padding:.5rem 1rem;margin-bottom:.25rem}
-.sidebar.collapsed .nav-section-title{display:none}
-
-.nav-menu{list-style:none}
-.nav-item{margin-bottom:2px}
-.nav-link{display:flex;align-items:center;gap:1rem;padding:.625rem 1rem;border-radius:.75rem;color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .15s;position:relative}
-.nav-link::before{content:'';position:absolute;left:0;top:0;height:100%;width:3px;background:var(--primary);transform:scaleY(0);transition:transform .15s;border-radius:0 .25rem .25rem 0}
-.nav-link:hover{background:rgba(16,185,129,.05);color:var(--primary)}
-.nav-link.active{background:rgba(16,185,129,.1);color:var(--primary);font-weight:600}
-.nav-link.active::before{transform:scaleY(1)}
-.nav-link i{width:22px;text-align:center;font-size:1.05rem}
-.nav-link span{white-space:nowrap}
-.sidebar.collapsed .nav-link span{display:none}
-
-.nav-dropdown{position:relative}
-.nav-dropdown-toggle{justify-content:space-between}
-.nav-dropdown-toggle .dropdown-arrow{transition:transform .2s;font-size:.75rem;margin-left:auto}
-.nav-dropdown.open .nav-dropdown-toggle .dropdown-arrow{transform:rotate(180deg)}
-.nav-submenu{list-style:none;padding-left:2.75rem;max-height:0;overflow:hidden;transition:max-height .25s}
-.sidebar.collapsed .nav-submenu{display:none}
-.nav-dropdown.open .nav-submenu{max-height:500px}
-.nav-submenu .nav-link{padding:.5rem 1rem;font-size:.85rem}
-
-.sidebar-footer{padding:1rem;border-top:1px solid var(--border-color);background:var(--bg-card)}
-.user-profile{display:flex;align-items:center;gap:1rem;cursor:pointer}
-.user-profile:hover{opacity:.8}
-.user-avatar{width:40px;height:40px;background:linear-gradient(135deg,var(--primary),var(--secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:.875rem}
-.user-info{flex:1;overflow:hidden}
-.sidebar.collapsed .user-info{display:none}
-.user-name{font-weight:600;font-size:.9rem;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.user-role{font-size:.75rem;color:var(--text-muted);text-transform:capitalize}
-
-/* Main Content */
-.main-content{flex:1;margin-left:var(--sidebar-width);min-height:100vh;display:flex;flex-direction:column;transition:margin-left .25s}
-.sidebar.collapsed~.main-content{margin-left:var(--sidebar-collapsed)}
-@media(max-width:1024px){.main-content{margin-left:0}.sidebar.collapsed~.main-content{margin-left:0}}
-
-/* Header */
-.main-header{height:var(--header-height);background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:100}
-.header-left{display:flex;align-items:center;gap:1rem}
-.header-title{font-size:1.35rem;font-weight:700;color:var(--text-primary)}
-.header-actions{display:flex;align-items:center;gap:.5rem}
-
-/* Page Content */
-.page-content{flex:1;padding:1.5rem;overflow-y:auto}
-@media(max-width:768px){.page-content{padding:1rem;padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
-
-/* Buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.625rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:none;outline:none;white-space:nowrap}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.btn-success{background:var(--success);color:white}
-.btn-success:hover:not(:disabled){filter:brightness(0.9)}
-.btn-outline{background:transparent;border:1.5px solid var(--border-color);color:var(--text-secondary)}
-.btn-outline:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
-.btn-sm{padding:.4rem .875rem;font-size:.8rem}
-.btn-block{width:100%}
-
-.btn-icon{width:40px;height:40px;padding:0;border-radius:.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
-.btn-icon:hover{background:rgba(16,185,129,.05);color:var(--primary);border-color:var(--primary)}
-
-/* Cards */
-.card{background:var(--bg-card);border-radius:1rem;border:1px solid var(--border-color);overflow:hidden;transition:all .25s}
-.card:hover{box-shadow:var(--shadow-lg)}
-.card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.card-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.5rem}
-.card-body{padding:1.5rem}
-
-/* Forms */
-.form-group{margin-bottom:1.25rem}
-.form-label{display:block;font-size:.875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.5rem}
-.form-input{width:100%;padding:.75rem 1rem;border:1.5px solid var(--border-color);border-radius:.75rem;background:var(--bg-secondary);color:var(--text-primary);font-size:.95rem;transition:all .15s;font-family:inherit}
-.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(16,185,129,.1)}
-.form-input::placeholder{color:var(--text-muted)}
-
-/* Loading */
-.loading-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg-primary);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9998;opacity:0;visibility:hidden;transition:all .25s}
-.loading-overlay.active{opacity:1;visibility:visible}
-.spinner{width:48px;height:48px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Mobile Nav */
-.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bottom-nav-height);background:var(--bg-card);border-top:1px solid var(--border-color);z-index:999;padding:0 1rem}
-.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:500;transition:all .15s;padding:.5rem}
-.mobile-nav-item i{font-size:1.25rem}
-.mobile-nav-item.active,.mobile-nav-item:hover{color:var(--primary)}
-@media(max-width:768px){.mobile-nav{display:flex}.page-content{padding-bottom:calc(var(--bottom-nav-height) + 1rem)}}
-
-/* Kas Specific Styles */
-.kas-card{max-width:500px;margin:0 auto}
-.kas-amount{font-size:3rem;font-weight:700;color:var(--primary);text-align:center;padding:2rem;background:rgba(16,185,129,.1);border-radius:var(--radius-xl);margin-bottom:1.5rem;border:2px solid rgba(16,185,129,.2)}
-.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem}
-.numpad-btn{padding:1.5rem;border:1px solid var(--border-color);background:var(--bg-card);border-radius:var(--radius-lg);font-size:1.5rem;font-weight:600;cursor:pointer;transition:all 0.15s;color:var(--text-primary)}
-.numpad-btn:hover{background:var(--bg-secondary)}
-.numpad-btn.action{background:var(--primary);color:white;border-color:var(--primary)}
-.quick-amounts{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem}
-.quick-amount{padding:0.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:50px;font-size:0.875rem;cursor:pointer;transition:all 0.15s;color:var(--text-primary)}
-.quick-amount:hover{background:var(--primary);color:white;border-color:var(--primary)}
-.kas-info{background:var(--bg-secondary);border-radius:var(--radius-lg);padding:1rem;margin-bottom:1.5rem;text-align:center}
-.kas-info-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem}
-.kas-info-value{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-
-/* Toast */
-.toast-container{position:fixed;top:1rem;right:1rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;max-width:400px}
-.toast{display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;background:var(--bg-card);border-radius:.75rem;box-shadow:var(--shadow-lg);border-left:4px solid;animation:slideIn .3s ease}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.toast.success{border-left-color:var(--success)}
-.toast.error{border-left-color:var(--danger)}
-
-.d-md-none{display:none!important}
-@media(max-width:768px){.d-md-none{display:flex!important}}
-  </style>
-
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -179,7 +229,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 </head>
 <body>
   <div class="app-container">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo-container">
@@ -191,11 +240,10 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       <div class="sidebar-search">
         <div class="search-input-wrapper">
           <i class="fas fa-search"></i>
-          <input type="text" class="search-input" placeholder="Cari menu...">
+          <input type="text" class="search-input" id="menuSearch" placeholder="Cari menu...">
         </div>
       </div>
       <nav class="sidebar-nav">
-        <!-- Utama -->
         <div class="nav-section">
           <div class="nav-section-title">Utama</div>
           <ul class="nav-menu">
@@ -204,46 +252,35 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <li class="nav-item"><a href="page-produk.html" class="nav-link" data-menu="produk"><i class="fas fa-box"></i><span>Produk</span></a></li>
           </ul>
         </div>
-
-        <!-- Transaksi -->
         <div class="nav-section">
           <div class="nav-section-title">Transaksi</div>
           <ul class="nav-menu">
             <li class="nav-item"><a href="page-riwayat.html" class="nav-link" data-menu="riwayat"><i class="fas fa-history"></i><span>Riwayat Transaksi</span></a></li>
             <li class="nav-item nav-dropdown" data-dropdown>
-              <div class="nav-link nav-dropdown-toggle active" data-menu="kas">
-                <div style="display:flex;align-items:center;gap:0.75rem;"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
+              <div class="nav-link nav-dropdown-toggle" data-menu="kas">
+                <div style="display:flex;align-items:center;gap:.75rem;"><i class="fas fa-wallet"></i><span>Kas Management</span></div>
                 <i class="fas fa-chevron-down dropdown-arrow"></i>
               </div>
               <ul class="nav-submenu">
                 <li><a href="page-kas.html" class="nav-link"><span>Ringkasan Kas</span></a></li>
                 <li><a href="page-modal-harian.html" class="nav-link"><span>Modal Harian</span></a></li>
-                <li><a href="page-kas-masuk.html" class="nav-link active"><span>Kas Masuk</span></a></li>
+                <li><a href="page-kas-masuk.html" class="nav-link"><span>Kas Masuk</span></a></li>
                 <li><a href="page-kas-keluar.html" class="nav-link"><span>Kas Keluar</span></a></li>
-                <li><a href="page-kas-shift.html" class="nav-link"><span>Kas & Shift</span></a></li>
+                <li><a href="page-kas-shift.html" class="nav-link active"><span>Kas & Shift</span></a></li>
                 <li><a href="page-kas-topup.html" class="nav-link"><span>Top Up</span></a></li>
                 <li><a href="page-kas-tarik.html" class="nav-link"><span>Tarik Tunai</span></a></li>
               </ul>
             </li>
-            <li class="nav-item">
-  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
-    <i class="fas fa-shopping-cart"></i>
-    <span>Pembelian / Restock</span>
-  </a>
-</li>
+            <li class="nav-item"><a href="page-pembelian.html" class="nav-link" data-menu="pembelian"><i class="fas fa-shopping-cart"></i><span>Pembelian / Restock</span></a></li>
             <li class="nav-item"><a href="page-hutang.html" class="nav-link" data-menu="hutang"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a></li>
           </ul>
         </div>
-
-        <!-- Laporan -->
         <div class="nav-section">
           <div class="nav-section-title">Laporan</div>
           <ul class="nav-menu">
             <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
           </ul>
         </div>
-
-        <!-- Integrasi -->
         <div class="nav-section">
           <div class="nav-section-title">Integrasi</div>
           <ul class="nav-menu">
@@ -251,8 +288,6 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
             <li class="nav-item"><a href="page-data-pelanggan.html" class="nav-link" data-menu="pelanggan"><i class="fas fa-users"></i><span>Data Pelanggan</span></a></li>
           </ul>
         </div>
-
-        <!-- Sistem -->
         <div class="nav-section">
           <div class="nav-section-title">Sistem</div>
           <ul class="nav-menu">
@@ -278,62 +313,75 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     <main class="main-content">
       <header class="main-header">
         <div class="header-left">
-          <button class="btn-icon" id="mobileMenuToggle">
-  <i class="fas fa-bars"></i>
-</button>
-          <h1 class="header-title">Kas Masuk</h1>
+          <button class="btn-icon" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+          <h1 class="header-title">Kas & Shift</h1>
         </div>
         <div class="header-actions">
-          <button class="btn-icon" id="btnLogout"><i class="fas fa-sign-out-alt"></i></button>
+          <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+          <button class="btn-icon" id="btnLogout" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
         </div>
       </header>
 
       <div class="page-content">
-        <div class="kas-card">
-          <div class="card">
+        <div class="shift-container">
+          <div class="status-card">
+            <div class="status-indicator-large closed" id="shiftStatusIcon"><i class="fas fa-store-slash"></i></div>
+            <div class="status-text closed" id="shiftStatusText">TUTUP</div>
+            <div class="status-time" id="shiftStatusTime">-</div>
+            <button class="btn-shift open" id="btnToggleShift"><i class="fas fa-store"></i><span>Buka Shift</span></button>
+            <div class="summary-grid">
+              <div class="summary-item">
+                <div class="summary-label">Modal</div>
+                <div class="summary-value" id="summaryModal">Rp 0</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Penjualan</div>
+                <div class="summary-value positive" id="summaryPenjualan">Rp 0</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Kas Masuk</div>
+                <div class="summary-value positive" id="summaryKasMasuk">Rp 0</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Kas Keluar</div>
+                <div class="summary-value negative" id="summaryKasKeluar">Rp 0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="history-card">
             <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-arrow-down" style="color:var(--success)"></i> Tambah Kas Masuk</h3>
+              <h3 class="card-title"><i class="fas fa-history"></i>Riwayat Shift</h3>
+              <span id="totalShiftCount" style="font-size:.75rem;color:var(--text-muted);background:var(--bg-secondary);padding:.25rem .75rem;border-radius:1rem;">0 shift</span>
             </div>
-            <div class="card-body">
-              <div class="kas-info">
-                <div class="kas-info-label">Total Kas Saat Ini</div>
-                <div class="kas-info-value" id="kasSaatIni">Rp 0</div>
-              </div>
-
-              <div class="kas-amount" id="kasAmount">Rp 0</div>
-
-              <div class="quick-amounts">
-                <button class="quick-amount" data-amount="50000">50.000</button>
-                <button class="quick-amount" data-amount="100000">100.000</button>
-                <button class="quick-amount" data-amount="200000">200.000</button>
-                <button class="quick-amount" data-amount="500000">500.000</button>
-                <button class="quick-amount" data-amount="1000000">1jt</button>
-              </div>
-
-              <div class="numpad">
-                <button class="numpad-btn" data-num="1">1</button>
-                <button class="numpad-btn" data-num="2">2</button>
-                <button class="numpad-btn" data-num="3">3</button>
-                <button class="numpad-btn" data-num="4">4</button>
-                <button class="numpad-btn" data-num="5">5</button>
-                <button class="numpad-btn" data-num="6">6</button>
-                <button class="numpad-btn" data-num="7">7</button>
-                <button class="numpad-btn" data-num="8">8</button>
-                <button class="numpad-btn" data-num="9">9</button>
-                <button class="numpad-btn action" data-action="clear">C</button>
-                <button class="numpad-btn" data-num="0">0</button>
-                <button class="numpad-btn action" data-action="backspace"><i class="fas fa-backspace"></i></button>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Keterangan <span style="color:var(--danger)">*</span></label>
-                <input type="text" class="form-input" id="kasNote" placeholder="Contoh: Setoran modal tambahan, pendapatan lainnya..." required>
-              </div>
-
-              <button class="btn btn-success btn-block" id="btnSimpanKas" style="padding:1rem;font-size:1.1rem">
-                <i class="fas fa-save"></i> Simpan Kas Masuk
-              </button>
+            <div class="filter-bar" id="filterBar">
+              <button class="filter-btn active" data-filter="today">Hari Ini</button>
+              <button class="filter-btn" data-filter="yesterday">Kemarin</button>
+              <button class="filter-btn" data-filter="week">Minggu Ini</button>
+              <button class="filter-btn" data-filter="month">Bulan Ini</button>
+              <button class="filter-btn" data-filter="last-month">Bulan Lalu</button>
+              <button class="filter-btn" data-filter="all">Semua</button>
             </div>
+            <div class="date-range-info" id="dateRangeInfo"><i class="fas fa-calendar-alt"></i><span>Memuat data...</span></div>
+            <div class="filter-stats" id="filterStats" style="display:none;">
+              <div class="filter-stat-item">
+                <div class="filter-stat-value" id="statTotalShift">0</div>
+                <div class="filter-stat-label">Total Shift</div>
+              </div>
+              <div class="filter-stat-item">
+                <div class="filter-stat-value" id="statOpen">0</div>
+                <div class="filter-stat-label">Sedang Buka</div>
+              </div>
+              <div class="filter-stat-item">
+                <div class="filter-stat-value" id="statClosed">0</div>
+                <div class="filter-stat-label">Sudah Tutup</div>
+              </div>
+              <div class="filter-stat-item">
+                <div class="filter-stat-value" id="statTotalSales">Rp 0</div>
+                <div class="filter-stat-label">Total Penjualan</div>
+              </div>
+            </div>
+            <div class="history-list" id="shiftHistory"></div>
           </div>
         </div>
       </div>
@@ -348,12 +396,31 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
     </nav>
   </div>
 
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <p style="margin-top:1rem;color:var(--text-secondary)">Loading...</p>
+  <div class="modal-overlay" id="closeShiftModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Tutup Shift</div>
+        <div class="modal-subtitle">Masukkan jumlah kas akhir untuk menutup shift</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kas Akhir (Fisik)</label>
+        <input type="text" class="form-input" id="kasAkhirInput" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan (Opsional)</label>
+        <input type="text" class="form-input" id="catatanInput" placeholder="Contoh: Shift berjalan lancar">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="btnCancelClose">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmClose">Tutup Shift</button>
+      </div>
+    </div>
   </div>
 
-  <div class="toast-container" id="toastContainer"></div>
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p style="margin-top:1rem;color:var(--text-secondary);">Loading...</p>
+  </div>
 
   <script src="js/firebase-config.js"></script>
   <script src="js/utils.js"></script>
@@ -361,176 +428,381 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   <script src="js/sidebar-filter.js"></script>
 
   <script>
-    let amount = 0;
-    let currentKas = 0;
-    let user = null;
+    let isShiftOpen = false;
+    let currentShiftId = null;
+
+    function initKasShift() {
+      database.ref('shifts').once('value')
+        .then(() => console.log('✅ Shifts: access granted'))
+        .catch(err => console.error('❌ Shifts Error:', err.code, err.message));
+
+      document.getElementById('kasAkhirInput').addEventListener('input', (e) => {
+        e.target.value = Utils.formatNumberInput(e.target.value);
+      });
+
+      checkShiftStatus();
+      loadShiftHistory('today');
+
+      document.getElementById('btnToggleShift').addEventListener('click', () => {
+        if (isShiftOpen) {
+          document.getElementById('closeShiftModal').classList.add('active');
+        } else {
+          openShift();
+        }
+      });
+
+      document.getElementById('btnCancelClose').addEventListener('click', () => {
+        document.getElementById('closeShiftModal').classList.remove('active');
+      });
+
+      document.getElementById('btnConfirmClose').addEventListener('click', closeShift);
+
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
+
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const sidebar = document.getElementById('sidebar');
+      if (mobileToggle) {
+        mobileToggle.removeAttribute('style');
+        mobileToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sidebar.classList.toggle('mobile-open');
+        });
+      }
+
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 1024) {
+            sidebar.classList.remove('mobile-open');
+          }
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 1024 && sidebar.classList.contains('mobile-open') && !sidebar.contains(e.target) && e.target !== mobileToggle) {
+          sidebar.classList.remove('mobile-open');
+        }
+      });
+
+      document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
+        const toggle = dropdown.querySelector('.nav-dropdown-toggle');
+        if (toggle) {
+          toggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            dropdown.classList.toggle('open');
+          });
+        }
+      });
+
+      document.getElementById('btnTheme').addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('webpos_theme', newTheme);
+        const icon = document.getElementById('btnTheme').querySelector('i');
+        icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        Utils.confirm('Apakah Anda yakin ingin logout?', () => {
+          Auth.logout();
+        });
+      });
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          const filterType = e.target.getAttribute('data-filter');
+          loadShiftHistory(filterType);
+        });
+      });
+    }
+
+    async function checkShiftStatus() {
+      const today = Utils.getTodayString();
+      const user = Auth.getCurrentUser();
+      try {
+        const snapshot = await database.ref('shifts/' + today + '/' + user.uid).once('value');
+        const shiftData = snapshot.val();
+        if (shiftData && shiftData.status === 'open') {
+          isShiftOpen = true;
+          currentShiftId = shiftData.id;
+          updateShiftUI(true, shiftData.openTime);
+        } else {
+          isShiftOpen = false;
+          currentShiftId = null;
+          updateShiftUI(false);
+        }
+        loadTodaySummary();
+      } catch (error) {
+        console.error('Error checking shift status:', error);
+      }
+    }
+
+    function updateShiftUI(isOpen, openTime = null) {
+      const icon = document.getElementById('shiftStatusIcon');
+      const text = document.getElementById('shiftStatusText');
+      const time = document.getElementById('shiftStatusTime');
+      const btn = document.getElementById('btnToggleShift');
+      if (isOpen) {
+        icon.classList.remove('closed');
+        icon.classList.add('open');
+        icon.innerHTML = '<i class="fas fa-store"></i>';
+        text.classList.remove('closed');
+        text.classList.add('open');
+        text.textContent = 'BUKA';
+        time.textContent = openTime ? 'Dibuka: ' + new Date(openTime).toLocaleString('id-ID') : '-';
+        btn.classList.remove('open');
+        btn.classList.add('close');
+        btn.innerHTML = '<i class="fas fa-store-slash"></i><span>Tutup Shift</span>';
+      } else {
+        icon.classList.remove('open');
+        icon.classList.add('closed');
+        icon.innerHTML = '<i class="fas fa-store-slash"></i>';
+        text.classList.remove('open');
+        text.classList.add('closed');
+        text.textContent = 'TUTUP';
+        time.textContent = '-';
+        btn.classList.remove('close');
+        btn.classList.add('open');
+        btn.innerHTML = '<i class="fas fa-store"></i><span>Buka Shift</span>';
+      }
+    }
+
+    async function openShift() {
+      Utils.showLoading();
+      try {
+        const today = Utils.getTodayString();
+        const user = Auth.getCurrentUser();
+        const shiftId = 'shift_' + Date.now();
+        const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+        const modalData = modalSnapshot.val();
+        await database.ref('shifts/' + today + '/' + user.uid).set({
+          id: shiftId,
+          status: 'open',
+          openTime: Date.now(),
+          userId: user.uid,
+          userName: user.name || user.email,
+          modalAwal: modalData ? modalData.amount : 0
+        });
+        Utils.showToast('Shift berhasil dibuka', 'success');
+        checkShiftStatus();
+      } catch (error) {
+        console.error('Error opening shift:', error);
+        Utils.showToast('Gagal membuka shift', 'error');
+      }
+      Utils.hideLoading();
+    }
+
+    async function closeShift() {
+      Utils.showLoading();
+      try {
+        const today = Utils.getTodayString();
+        const user = Auth.getCurrentUser();
+        const kasAkhir = parseInt(document.getElementById('kasAkhirInput').value.replace(/\./g, '')) || 0;
+        const catatan = document.getElementById('catatanInput').value;
+        const transSnapshot = await database.ref('transactions/' + today).once('value');
+        const transactions = transSnapshot.val() || {};
+        let penjualan = 0, kasMasuk = 0, kasKeluar = 0, topup = 0, tarik = 0, topupAdminFee = 0;
+        Object.values(transactions).forEach(trans => {
+          if (trans.status !== 'cancelled') {
+            switch(trans.type) {
+              case 'penjualan': penjualan += trans.total || 0; break;
+              case 'kas_masuk': kasMasuk += trans.amount || 0; break;
+              case 'kas_keluar': kasKeluar += trans.amount || 0; break;
+              case 'topup': topup += trans.amount || 0; topupAdminFee += trans.adminFee || 0; break;
+              case 'tarik': tarik += trans.amount || 0; break;
+            }
+          }
+        });
+        const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+        const modalData = modalSnapshot.val();
+        const kasSistem = (modalData ? modalData.amount : 0) + kasMasuk - kasKeluar + penjualan + topup + topupAdminFee - tarik;
+        const selisih = kasAkhir - kasSistem;
+        let statusSelisih = 'pas';
+        if (selisih > 0) statusSelisih = 'lebih';
+        if (selisih < 0) statusSelisih = 'kurang';
+        await database.ref('shifts/' + today + '/' + user.uid).update({
+          status: 'closed', closeTime: Date.now(), kasAkhir, kasSistem, selisih, statusSelisih,
+          penjualan, kasMasuk, kasKeluar, topup, tarik, topupAdminFee, catatan
+        });
+        document.getElementById('closeShiftModal').classList.remove('active');
+        document.getElementById('kasAkhirInput').value = '';
+        document.getElementById('catatanInput').value = '';
+        Utils.showToast('Shift berhasil ditutup', 'success');
+        checkShiftStatus();
+        loadShiftHistory('today');
+      } catch (error) {
+        console.error('Error closing shift:', error);
+        Utils.showToast('Gagal menutup shift', 'error');
+      }
+      Utils.hideLoading();
+    }
+
+    async function loadTodaySummary() {
+      const today = Utils.getTodayString();
+      const user = Auth.getCurrentUser();
+      try {
+        const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+        const modalData = modalSnapshot.val();
+        const transSnapshot = await database.ref('transactions/' + today).once('value');
+        const transactions = transSnapshot.val() || {};
+        let penjualan = 0, kasMasuk = 0, kasKeluar = 0;
+        Object.values(transactions).forEach(trans => {
+          if (trans.status !== 'cancelled') {
+            switch(trans.type) {
+              case 'penjualan': penjualan += trans.total || 0; break;
+              case 'kas_masuk': kasMasuk += trans.amount || 0; break;
+              case 'kas_keluar': kasKeluar += trans.amount || 0; break;
+            }
+          }
+        });
+        document.getElementById('summaryModal').textContent = Utils.formatRupiah(modalData ? modalData.amount : 0);
+        document.getElementById('summaryPenjualan').textContent = Utils.formatRupiah(penjualan);
+        document.getElementById('summaryKasMasuk').textContent = Utils.formatRupiah(kasMasuk);
+        document.getElementById('summaryKasKeluar').textContent = Utils.formatRupiah(kasKeluar);
+      } catch (error) {
+        console.error('Error loading today summary:', error);
+      }
+    }
+
+    async function loadShiftHistory(filterType = 'today') {
+      Utils.showLoading();
+      try {
+        const currentUser = Auth.getCurrentUser();
+        const snapshot = await database.ref('shifts').once('value');
+        const shiftsData = snapshot.val() || {};
+        let shiftsArray = [];
+        Object.entries(shiftsData).forEach(([date, users]) => {
+          Object.entries(users).forEach(([userId, data]) => {
+            shiftsArray.push({ date, userId, ...data });
+          });
+        });
+        const filteredShifts = filterShiftsByPeriod(shiftsArray, filterType);
+        filteredShifts.sort((a, b) => (b.openTime || 0) - (a.openTime || 0));
+        updateFilterStats(filteredShifts);
+        updateDateRangeInfo(filterType, filteredShifts.length);
+        const historyList = document.getElementById('shiftHistory');
+        let html = '';
+        if (filteredShifts.length === 0) {
+          html = '<div class="empty-state" style="padding:3rem 1.5rem;"><i class="fas fa-inbox"></i><p>Tidak ada data shift untuk periode ini</p></div>';
+        } else {
+          filteredShifts.forEach(shift => {
+            const formattedDate = new Date(shift.date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const openTime = shift.openTime ? new Date(shift.openTime).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '-';
+            const closeTime = shift.closeTime ? new Date(shift.closeTime).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '-';
+            let duration = '-';
+            if (shift.openTime && shift.closeTime) {
+              const diff = shift.closeTime - shift.openTime;
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              duration = `${hours}j ${minutes}m`;
+            } else if (shift.openTime && shift.status === 'open') {
+              const diff = Date.now() - shift.openTime;
+              const hours = Math.floor(diff / (1000 * 60 * 60));
+              const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+              duration = `${hours}j ${minutes}m (berjalan)`;
+            }
+            let selisihHtml = '';
+            if (shift.status === 'closed' && shift.selisih !== undefined) {
+              const selisihColor = shift.selisih > 0 ? 'var(--success)' : (shift.selisih < 0 ? 'var(--danger)' : 'var(--text-muted)');
+              const selisihText = shift.selisih > 0 ? 'Lebih' : (shift.selisih < 0 ? 'Kurang' : 'Pas');
+              const selisihFormatted = Utils.formatRupiah(Math.abs(shift.selisih));
+              selisihHtml = `<div style="margin-top:6px;padding-top:6px;border-top:1px dashed var(--border-color);"><div style="font-size:.75rem;color:var(--text-muted);">Kas Sistem: ${shift.kasSistem ? Utils.formatRupiah(shift.kasSistem) : '-'}</div><div style="font-size:.8rem;color:${selisihColor};font-weight:600;">Selisih: ${selisihText} ${selisihFormatted}</div></div>`;
+            }
+            html += `<div class="shift-item"><div class="shift-info"><span class="shift-date">${formattedDate}</span><span class="shift-time">${openTime} - ${closeTime}</span><span class="shift-user">${shift.userName || 'Unknown'}</span>${shift.status === 'closed' && shift.kasAkhir ? `<span style="color:var(--success);font-size:.8rem;margin-top:2px;">Kas Fisik: ${Utils.formatRupiah(shift.kasAkhir)}</span>` : ''}${selisihHtml}</div><div class="shift-status"><span class="shift-badge ${shift.status}">${shift.status === 'open' ? 'BUKA' : 'TUTUP'}</span><span class="shift-duration">${duration}</span></div></div>`;
+          });
+        }
+        historyList.innerHTML = html;
+        document.getElementById('totalShiftCount').textContent = `${filteredShifts.length} shift`;
+      } catch (error) {
+        console.error('Error:', error);
+        Utils.showToast('Gagal memuat data', 'error');
+      }
+      Utils.hideLoading();
+    }
+
+    function filterShiftsByPeriod(shifts, filterType) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      return shifts.filter(shift => {
+        const shiftDate = new Date(shift.date);
+        shiftDate.setHours(0, 0, 0, 0);
+        switch(filterType) {
+          case 'today': return shiftDate.getTime() === today.getTime();
+          case 'yesterday': return shiftDate.getTime() === yesterday.getTime();
+          case 'week': return shiftDate >= startOfWeek && shiftDate <= today;
+          case 'month': return shiftDate >= startOfMonth && shiftDate <= today;
+          case 'last-month': return shiftDate >= startOfLastMonth && shiftDate <= endOfLastMonth;
+          case 'all': default: return true;
+        }
+      });
+    }
+
+    function updateFilterStats(shifts) {
+      const statsContainer = document.getElementById('filterStats');
+      if (shifts.length === 0) {
+        statsContainer.style.display = 'none';
+        return;
+      }
+      statsContainer.style.display = 'grid';
+      const openCount = shifts.filter(s => s.status === 'open').length;
+      const closedCount = shifts.filter(s => s.status === 'closed').length;
+      const totalSales = shifts.reduce((sum, s) => sum + (s.penjualan || 0), 0);
+      document.getElementById('statTotalShift').textContent = shifts.length;
+      document.getElementById('statOpen').textContent = openCount;
+      document.getElementById('statClosed').textContent = closedCount;
+      document.getElementById('statTotalSales').textContent = Utils.formatRupiah(totalSales);
+    }
+
+    function updateDateRangeInfo(filterType, count) {
+      const infoEl = document.getElementById('dateRangeInfo');
+      const today = new Date();
+      let text = '';
+      switch(filterType) {
+        case 'today': text = `Hari ini (${today.toLocaleDateString('id-ID')}) - ${count} shift`; break;
+        case 'yesterday': const yest = new Date(today); yest.setDate(yest.getDate() - 1); text = `Kemarin (${yest.toLocaleDateString('id-ID')}) - ${count} shift`; break;
+        case 'week': const startWeek = new Date(today); startWeek.setDate(today.getDate() - today.getDay()); text = `Minggu ini (${startWeek.toLocaleDateString('id-ID')} - ${today.toLocaleDateString('id-ID')}) - ${count} shift`; break;
+        case 'month': const startMonth = new Date(today.getFullYear(), today.getMonth(), 1); text = `Bulan ini (${startMonth.toLocaleDateString('id-ID')} - ${today.toLocaleDateString('id-ID')}) - ${count} shift`; break;
+        case 'last-month': const startLast = new Date(today.getFullYear(), today.getMonth() - 1, 1); const endLast = new Date(today.getFullYear(), today.getMonth(), 0); text = `Bulan lalu (${startLast.toLocaleDateString('id-ID')} - ${endLast.toLocaleDateString('id-ID')}) - ${count} shift`; break;
+        case 'all': text = `Semua periode - ${count} shift total`; break;
+        default: text = `${count} shift ditemukan`;
+      }
+      infoEl.innerHTML = `<i class="fas fa-calendar-alt"></i><span>${text}</span>`;
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((authUser) => {
-        if (!authUser && !Utils.getStorage('webpos_session')) {
+      auth.onAuthStateChanged(async (user) => {
+        if (!user && !Utils.getStorage('webpos_session')) {
           window.location.href = 'login.html';
           return;
         }
-        if (authUser) {
-          user = authUser;
-          document.getElementById('userName').textContent = authUser.displayName || authUser.email || 'User';
-          document.getElementById('userRole').textContent = 'Kasir';
-          // Baca langsung dari Firebase database
-          if (typeof database !== 'undefined') {
-            database.ref('users/' + authUser.uid).once('value').then(function(snap) {
-              var ud = snap.val();
-              if (ud) {
-                var nameEl = document.getElementById('userName');
-                var roleEl = document.getElementById('userRole');
-                if (nameEl && ud.name) nameEl.textContent = ud.name;
-                if (roleEl && ud.role) roleEl.textContent = ud.role.charAt(0).toUpperCase() + ud.role.slice(1);
-              }
-            }).catch(function(){});
+        if (user) {
+          try {
+            const userSnap = await database.ref('users/' + user.uid).once('value');
+            const userData = userSnap.val() || {};
+            document.getElementById('userName').textContent = userData.name || user.email || 'User';
+            document.getElementById('userRole').textContent = userData.role ? userData.role.charAt(0).toUpperCase() + userData.role.slice(1) : 'Kasir';
+            if (userData.name) {
+              const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+              document.getElementById('userAvatar').textContent = initials;
+            }
+          } catch (e) {
+            console.error('Error load user:', e);
           }
-          loadCurrentKas();
+          initKasShift();
         }
       });
-
-      initEventListeners();
     });
-
-    function initEventListeners() {
-  // Sidebar toggle - Desktop (collapse/expand)
-  document.getElementById('menuToggle').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('collapsed');
-  });
-
-  // Sidebar toggle - Mobile (burger menu) - VERSI BARU
-  const mobileToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('sidebar');
-
-  if (mobileToggle) {
-    mobileToggle.removeAttribute('style');
-    mobileToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      sidebar.classList.toggle('mobile-open');
-    });
-  }
-
-  // Tutup sidebar saat klik link di mobile
-  document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-      if (window.innerWidth <= 1024) {
-        sidebar.classList.remove('mobile-open');
-      }
-    });
-  });
-
-  // Tutup sidebar saat klik overlay (area gelap di luar sidebar)
-  document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 1024 && 
-        sidebar.classList.contains('mobile-open') &&
-        !sidebar.contains(e.target) && 
-        e.target !== mobileToggle) {
-      sidebar.classList.remove('mobile-open');
-    }
-  });
-      // Dropdown toggle
-          document.getElementById('btnLogout').addEventListener('click', () => {
-        Utils.confirm('Yakin ingin logout?', () => Auth.logout());
-      });
-
-      document.querySelectorAll('.nav-dropdown-toggle').forEach(toggle => {
-  toggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    const parent = this.closest('.nav-dropdown');
-    document.querySelectorAll('.nav-dropdown.open').forEach(openDropdown => {
-      if (openDropdown !== parent) openDropdown.classList.remove('open');
-    });
-    parent.classList.toggle('open');
-  });
-});
-
-      // Numpad
-      document.querySelectorAll('.numpad-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const num = btn.dataset.num;
-          const action = btn.dataset.action;
-          if (num !== undefined) amount = (amount * 10) + parseInt(num);
-          else if (action === 'clear') amount = 0;
-          else if (action === 'backspace') amount = Math.floor(amount / 10);
-          updateDisplay();
-        });
-      });
-
-      // Quick amounts
-      document.querySelectorAll('.quick-amount').forEach(btn => {
-        btn.addEventListener('click', () => {
-          amount = parseInt(btn.dataset.amount);
-          updateDisplay();
-        });
-      });
-
-      document.getElementById('btnSimpanKas').addEventListener('click', saveKasMasuk);
-    }
-
-    async function loadCurrentKas() {
-      try {
-        const today = Utils.getTodayString();
-        let kas = 0;
-        const modalSnap = await database.ref(`modal/${today}/${user.uid}`).once('value');
-        const modal = modalSnap.val();
-        if (modal) kas = modal.amount || 0;
-
-        const transSnap = await database.ref(`transactions/${today}`).once('value');
-        const transactions = transSnap.val() || {};
-        Object.values(transactions).forEach(trans => {
-          if (trans.status === 'cancelled') return;
-          if (trans.type === 'penjualan') kas += trans.total || 0;
-          else if (trans.type === 'kas_masuk' || trans.type === 'topup') kas += trans.amount || 0;
-          else if (trans.type === 'kas_keluar' || trans.type === 'tarik') kas -= trans.amount || 0;
-        });
-
-        currentKas = kas;
-        document.getElementById('kasSaatIni').textContent = Utils.formatRupiah(currentKas);
-      } catch (error) {
-        console.error('Error loading kas:', error);
-      }
-    }
-
-    function updateDisplay() {
-      document.getElementById('kasAmount').textContent = Utils.formatRupiah(amount);
-    }
-
-    async function saveKasMasuk() {
-      const note = document.getElementById('kasNote').value.trim();
-      if (amount <= 0) {
-        Utils.showToast('Masukkan jumlah uang terlebih dahulu', 'warning');
-        return;
-      }
-      if (!note) {
-        Utils.showToast('Keterangan wajib diisi', 'warning');
-        document.getElementById('kasNote').focus();
-        return;
-      }
-
-      try {
-        Utils.showLoading('Menyimpan...');
-        const today = Utils.getTodayString();
-        await database.ref(`transactions/${today}`).push({
-          type: 'kas_masuk',
-          amount: amount,
-          note: note,
-          userId: user.uid,
-          userName: user.displayName || user.email,
-          timestamp: firebase.database.ServerValue.TIMESTAMP,
-          date: today,
-          status: 'completed'
-        });
-
-        Utils.hideLoading();
-        Utils.showToast(`Kas masuk ${Utils.formatRupiah(amount)} berhasil disimpan!`, 'success');
-        setTimeout(() => window.location.href = 'page-kas.html', 1500);
-      } catch (error) {
-        Utils.hideLoading();
-        Utils.showToast('Gagal menyimpan: ' + error.message, 'error');
-      }
-    }
   </script>
 </body>
 </html>
