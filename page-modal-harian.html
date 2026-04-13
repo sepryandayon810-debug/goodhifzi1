@@ -571,6 +571,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </ul>
             </li>
             <li class="nav-item">
+  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+    <i class="fas fa-shopping-cart"></i>
+    <span>Pembelian / Restock</span>
+  </a>
+</li>
+            <li class="nav-item">
               <a href="page-hutang.html" class="nav-link" data-menu="hutang">
                 <i class="fas fa-hand-holding-usd"></i>
                 <span>Hutang & Piutang</span>
@@ -811,6 +817,65 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     document.getElementById('userRole').textContent = roleText;
   }
 
+    async function saveModal() {
+    const date = document.getElementById('modalDate').value;
+    const amountInput = document.getElementById('modalAmount').value;
+    const note = document.getElementById('modalNote').value;
+    const user = Auth.getCurrentUser();
+    
+    if (!date) {
+      Utils.showToast('Pilih tanggal terlebih dahulu', 'warning');
+      return;
+    }
+    
+    if (!amountInput || amountInput === '0') {
+      Utils.showToast('Masukkan jumlah modal', 'warning');
+      return;
+    }
+    
+    // Parse amount (hapus titik pemisah ribuan)
+    const amount = parseInt(amountInput.replace(/\./g, '')) || 0;
+    
+    if (amount <= 0) {
+      Utils.showToast('Jumlah modal tidak valid', 'warning');
+      return;
+    }
+    
+    Utils.showLoading('Menyimpan modal...');
+    
+    try {
+      await database.ref('modal/' + date + '/' + user.uid).set({
+        amount: amount,
+        note: note || '',
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        userId: user.uid,
+        userName: user.name || user.email || 'User'
+      });
+      
+      Utils.hideLoading();
+      Utils.showToast('Modal berhasil disimpan!', 'success');
+      
+      // Reset form input amount (tapi biarkan tanggal)
+      document.getElementById('modalAmount').value = '';
+      document.getElementById('modalNote').value = '';
+      
+      // Refresh tampilan
+      loadTodayModal();
+      loadModalHistory();
+      
+    } catch (error) {
+      Utils.hideLoading();
+      console.error('Error saving modal:', error);
+      Utils.showToast('Gagal menyimpan modal', 'error');
+    }
+  }
+
+  // Event listener form (yang sudah ada)
+  document.getElementById('modalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await saveModal();  // Sekarang fungsinya sudah tersedia
+  });
+
   // Set today's date as default
   document.getElementById('modalDate').value = new Date().toISOString().split('T')[0];
         
@@ -825,12 +890,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         
         // Load modal history
         loadModalHistory();
-
-        // Form submit
-        document.getElementById('modalForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          await saveModal();
-        });
+      
 
         // Filter date change
         document.getElementById('filterDateFrom').addEventListener('change', loadModalHistory);
