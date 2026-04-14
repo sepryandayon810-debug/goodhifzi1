@@ -1158,26 +1158,35 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
+  auth.onAuthStateChanged((user) => {
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    if (user) {
+      Auth.loadUserData(user.uid).then(() => {
+        const currentUser = Auth.getCurrentUser();
+        
+        // ⭐ INI YANG DITAMBAHKAN: Update sidebar user profile
+        if (currentUser) {
+          document.getElementById('userName').textContent = currentUser.name || user.email || 'User';
+          document.getElementById('userRole').textContent = currentUser.role || 'Kasir';
+          const initial = (currentUser.name || user.email || 'U').charAt(0).toUpperCase();
+          document.getElementById('userAvatar').textContent = initial;
+        }
+        
+        // Check permission
+        if (currentUser && currentUser.role !== 'owner' && currentUser.role !== 'admin') {
+          Utils.showToast('Anda tidak memiliki izin mengakses halaman ini', 'error');
+          window.location.href = 'index.html';
           return;
         }
         
-        if (user) {
-          Auth.loadUserData(user.uid).then(() => {
-            // Check if user is owner or admin
-            const currentUser = Auth.getCurrentUser();
-            if (currentUser && currentUser.role !== 'owner' && currentUser.role !== 'admin') {
-              Utils.showToast('Anda tidak memiliki izin mengakses halaman ini', 'error');
-              window.location.href = 'index.html';
-              return;
-            }
-            initPengguna();
-          });
-        }
+        initPengguna();
       });
-
+    }
+  });
       function initPengguna() {
         let penggunaData = {};
         let currentFilter = 'all';
