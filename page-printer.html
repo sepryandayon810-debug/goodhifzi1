@@ -625,6 +625,12 @@
               </ul>
             </li>
             <li class="nav-item">
+  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+    <i class="fas fa-shopping-cart"></i>
+    <span>Pembelian / Restock</span>
+  </a>
+</li>
+            <li class="nav-item">
               <a href="page-hutang.html" class="nav-link"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a>
             </li>
           </ul>
@@ -837,19 +843,109 @@
                 </button>
               </div>
 
-              <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem;">
-                  Pengaturan Printer
-                </h4>
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                  <span class="status-badge disconnected" id="printerStatusBadge">
-                    <i class="fas fa-times-circle"></i> Offline
-                  </span>
-                </div>
-                <button class="btn btn-outline btn-sm btn-block" onclick="togglePrinterConnection()">
-                  <i class="fas fa-plug"></i> <span id="printerConnectText">Hubungkan Printer</span>
-                </button>
-              </div>
+              <!-- GANTI DENGAN INI - Panel Printer Connection Lengkap -->
+<div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+    <i class="fas fa-plug" style="color: var(--primary)"></i> 
+    Koneksi Printer
+  </h4>
+  
+  <!-- Status Connection -->
+  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 0.5rem;">
+    <div id="printerStatusIndicator" style="width: 10px; height: 10px; border-radius: 50%; background: var(--danger); transition: all 0.3s;"></div>
+    <span id="printerStatusText" style="font-size: 0.85rem; font-weight: 500;">Printer tidak terhubung</span>
+  </div>
+
+  <!-- Connection Type Selector -->
+  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('bluetooth')" id="btnBluetooth">
+      <i class="fab fa-bluetooth-b"></i> Bluetooth
+    </button>
+    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('network')" id="btnNetwork">
+      <i class="fas fa-wifi"></i> Network
+    </button>
+    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('usb')" id="btnUSB">
+      <i class="fas fa-usb"></i> USB
+    </button>
+  </div>
+
+  <!-- Bluetooth Panel -->
+  <div id="panelBluetooth" style="display: none;">
+    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+        <i class="fas fa-info-circle"></i> Printer Thermal Bluetooth (58mm/80mm)
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" onclick="scanBluetoothPrinter()" id="btnScanBluetooth">
+        <i class="fas fa-search"></i> Cari Printer
+      </button>
+      <div id="bluetoothDeviceList" style="margin-top: 0.75rem; max-height: 150px; overflow-y: auto;"></div>
+      <div id="bluetoothLoading" style="display: none; text-align: center; padding: 1rem;">
+        <div class="spinner" style="width: 30px; height: 30px; margin: 0 auto 0.5rem;"></div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Mencari device...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network Panel -->
+  <div id="panelNetwork" style="display: none;">
+    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+        <i class="fas fa-info-circle"></i> Printer Thermal WiFi/LAN (ESC/POS)
+      </div>
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <label class="form-label" style="font-size: 0.8rem;">IP Address Printer</label>
+        <input type="text" class="form-input" id="printerIpAddress" placeholder="192.168.1.100" style="font-size: 0.85rem;">
+      </div>
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <label class="form-label" style="font-size: 0.8rem;">Port (default 9100)</label>
+        <input type="number" class="form-input" id="printerPort" value="9100" style="font-size: 0.85rem;">
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" onclick="connectNetworkPrinter()">
+        <i class="fas fa-plug"></i> Hubungkan
+      </button>
+    </div>
+  </div>
+
+  <!-- USB Panel -->
+  <div id="panelUSB" style="display: none;">
+    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+        <i class="fas fa-info-circle"></i> Printer USB (dengan OTG)
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" onclick="connectUSBPrinter()">
+        <i class="fas fa-usb"></i> Pilih Printer USB
+      </button>
+      <div id="usbDeviceInfo" style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);"></div>
+    </div>
+  </div>
+
+  <!-- Connected Printer Info -->
+  <div id="connectedPrinterInfo" style="display: none; background: rgba(16,185,129,0.1); border: 1px solid var(--success); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
+    <div style="font-size: 0.8rem; font-weight: 600; color: var(--success); margin-bottom: 0.25rem;">
+      <i class="fas fa-check-circle"></i> Printer Terhubung
+    </div>
+    <div id="printerInfoDetails" style="font-size: 0.75rem; color: var(--text-secondary);"></div>
+    <button class="btn btn-outline btn-sm btn-block" style="margin-top: 0.5rem; font-size: 0.75rem;" onclick="disconnectPrinter()">
+      <i class="fas fa-unlink"></i> Putuskan Koneksi
+    </button>
+  </div>
+
+  <!-- Test Print & Actions -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+    <button class="btn btn-outline btn-sm" onclick="testPrint()" id="btnTestPrint" disabled>
+      <i class="fas fa-print"></i> Test Print
+    </button>
+    <button class="btn btn-outline btn-sm" onclick="printReceipt()">
+      <i class="fas fa-receipt"></i> Cetak Struk
+    </button>
+  </div>
+  
+  <div style="margin-top: 0.5rem;">
+    <button class="btn btn-outline btn-sm btn-block" onclick="savePrinterConfig()">
+      <i class="fas fa-save"></i> Simpan Konfigurasi
+    </button>
+  </div>
+</div>
             </div>
           </div>
         </div>
@@ -1751,25 +1847,465 @@
     }
 
     // ==========================================
-    // PRINTER CONNECTION
-    // ==========================================
-    function togglePrinterConnection() {
-      isPrinterConnected = !isPrinterConnected;
-      const badge = document.getElementById('printerStatusBadge');
-      const btnText = document.getElementById('printerConnectText');
-      
-      if (isPrinterConnected) {
-        badge.className = 'status-badge connected';
-        badge.innerHTML = '<i class="fas fa-check-circle"></i> Online';
-        btnText.innerHTML = 'Putuskan Printer';
-        showToast('Printer berhasil terhubung!', 'success');
-      } else {
-        badge.className = 'status-badge disconnected';
-        badge.innerHTML = '<i class="fas fa-times-circle"></i> Offline';
-        btnText.innerHTML = 'Hubungkan Printer';
-        showToast('Printer terputus', 'info');
+// PRINTER CONNECTION MANAGER - LENGKAP
+// ==========================================
+
+let connectedPrinter = null;
+let printerConnectionType = null;
+
+// Load saved config on startup
+document.addEventListener('DOMContentLoaded', () => {
+  loadPrinterConfig();
+});
+
+function showPrinterPanel(type) {
+  // Hide all panels
+  document.getElementById('panelBluetooth').style.display = 'none';
+  document.getElementById('panelNetwork').style.display = 'none';
+  document.getElementById('panelUSB').style.display = 'none';
+  
+  // Reset button styles
+  ['btnBluetooth', 'btnNetwork', 'btnUSB'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    }
+  });
+  
+  // Show selected panel
+  const panelName = 'panel' + type.charAt(0).toUpperCase() + type.slice(1);
+  const btnName = 'btn' + type.charAt(0).toUpperCase() + type.slice(1);
+  
+  const panel = document.getElementById(panelName);
+  const btn = document.getElementById(btnName);
+  
+  if (panel) panel.style.display = 'block';
+  if (btn) {
+    btn.classList.remove('btn-outline');
+    btn.classList.add('btn-primary');
+  }
+}
+
+// ===== BLUETOOTH PRINTER =====
+async function scanBluetoothPrinter() {
+  const listContainer = document.getElementById('bluetoothDeviceList');
+  const loading = document.getElementById('bluetoothLoading');
+  
+  listContainer.innerHTML = '';
+  loading.style.display = 'block';
+  
+  try {
+    if (!navigator.bluetooth) {
+      throw new Error('Browser tidak mendukung Web Bluetooth. Gunakan Chrome/Edge Android.');
+    }
+    
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+    });
+    
+    loading.style.display = 'none';
+    
+    if (device) {
+      displayBluetoothDevice(device);
+    }
+    
+  } catch (error) {
+    loading.style.display = 'none';
+    console.error('Bluetooth error:', error);
+    showToast(error.message || 'Gagal mencari printer Bluetooth', 'error');
+  }
+}
+
+function displayBluetoothDevice(device) {
+  const container = document.getElementById('bluetoothDeviceList');
+  
+  const item = document.createElement('div');
+  item.style.cssText = `
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 0.75rem; 
+    background: var(--bg-card); 
+    border-radius: 0.5rem; 
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border-color);
+  `;
+  
+  item.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <i class="fas fa-print" style="color: var(--primary);"></i>
+      <div>
+        <div style="font-size: 0.85rem; font-weight: 600;">${device.name || 'Unknown Printer'}</div>
+        <div style="font-size: 0.7rem; color: var(--text-muted);">ID: ${device.id.substring(0, 8)}...</div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
+      <i class="fas fa-link"></i> Hubungkan
+    </button>
+  `;
+  
+  item.querySelector('button').addEventListener('click', () => connectBluetoothPrinter(device));
+  container.appendChild(item);
+}
+
+async function connectBluetoothPrinter(device) {
+  try {
+    showToast('Menghubungkan ke ' + (device.name || 'printer') + '...', 'info');
+    
+    const server = await device.gatt.connect();
+    const services = await server.getPrimaryServices();
+    
+    let printService = null;
+    for (const service of services) {
+      if (service.uuid.includes('18f0') || service.uuid.includes('e7810a71')) {
+        printService = service;
+        break;
       }
     }
+    
+    if (!printService && services.length > 0) {
+      printService = services[0];
+    }
+    
+    if (!printService) {
+      throw new Error('Service printer tidak ditemukan');
+    }
+    
+    const characteristics = await printService.getCharacteristics();
+    let writeCharacteristic = null;
+    
+    for (const char of characteristics) {
+      if (char.properties.write || char.properties.writeWithoutResponse) {
+        writeCharacteristic = char;
+        break;
+      }
+    }
+    
+    if (!writeCharacteristic) {
+      throw new Error('Karakteristik write tidak ditemukan');
+    }
+    
+    connectedPrinter = {
+      device: device,
+      server: server,
+      service: printService,
+      characteristic: writeCharacteristic,
+      type: 'bluetooth'
+    };
+    
+    printerConnectionType = 'bluetooth';
+    updatePrinterStatus(true, 'Bluetooth: ' + device.name);
+    showToast('Printer Bluetooth berhasil terhubung!', 'success');
+    
+    device.addEventListener('gattserverdisconnected', () => {
+      updatePrinterStatus(false);
+      showToast('Printer Bluetooth terputus', 'warning');
+    });
+    
+    savePrinterConfig();
+    
+  } catch (error) {
+    console.error('Connection error:', error);
+    showToast('Gagal menghubungkan: ' + error.message, 'error');
+  }
+}
+
+// ===== NETWORK PRINTER =====
+async function connectNetworkPrinter() {
+  const ip = document.getElementById('printerIpAddress').value.trim();
+  const port = parseInt(document.getElementById('printerPort').value) || 9100;
+  
+  if (!ip) {
+    showToast('Masukkan IP Address printer!', 'warning');
+    return;
+  }
+  
+  try {
+    showToast('Menghubungkan ke ' + ip + ':' + port + '...', 'info');
+    
+    // Untuk browser, kita simpan konfigurasi saja
+    // Print actual akan melalui backend atau native wrapper
+    connectedPrinter = {
+      type: 'network',
+      ip: ip,
+      port: port,
+      protocol: 'tcp'
+    };
+    
+    printerConnectionType = 'network';
+    updatePrinterStatus(true, 'Network: ' + ip + ':' + port);
+    showToast('Printer Network tersimpan', 'success');
+    
+    savePrinterConfig();
+    
+  } catch (error) {
+    showToast('Error: ' + error.message, 'error');
+  }
+}
+
+// ===== USB PRINTER =====
+async function connectUSBPrinter() {
+  try {
+    if (!navigator.usb) {
+      throw new Error('Browser tidak mendukung WebUSB');
+    }
+    
+    const device = await navigator.usb.requestDevice({
+      filters: [
+        { classCode: 7 },
+        { vendorId: 0x0483 },
+        { vendorId: 0x1a86 },
+        { vendorId: 0x067b },
+        { vendorId: 0x0456 }
+      ]
+    });
+    
+    await device.open();
+    
+    if (device.configuration === null) {
+      await device.selectConfiguration(1);
+    }
+    
+    await device.claimInterface(0);
+    
+    const iface = device.configuration.interfaces[0];
+    const endpoint = iface.alternate.endpoints.find(e => e.direction === 'out');
+    
+    connectedPrinter = {
+      device: device,
+      type: 'usb',
+      interface: 0,
+      endpoint: endpoint
+    };
+    
+    printerConnectionType = 'usb';
+    updatePrinterStatus(true, 'USB: ' + (device.productName || 'Printer'));
+    showToast('Printer USB berhasil terhubung!', 'success');
+    
+    document.getElementById('usbDeviceInfo').textContent = `Device: ${device.productName || 'Unknown'}`;
+    
+    savePrinterConfig();
+    
+  } catch (error) {
+    console.error('USB Error:', error);
+    showToast('Error USB: ' + error.message, 'error');
+  }
+}
+
+// ===== PRINT FUNCTIONS =====
+async function testPrint() {
+  if (!connectedPrinter) {
+    showToast('Printer belum terhubung!', 'warning');
+    return;
+  }
+  
+  const testContent = `
+${centerText('TEST PRINT')}
+${centerText('============')}
+  
+Printer: ${connectedPrinter.type.toUpperCase()}
+Status: Connected
+Time: ${new Date().toLocaleString()}
+
+${centerText('Printer OK!')}
+${centerText('============')}
+
+\n\n\n`;
+  
+  await sendToPrinter(testContent);
+  showToast('Test print terkirim!', 'success');
+}
+
+async function printReceipt() {
+  const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
+  if (nominal <= 0) {
+    showToast('Nominal harus diisi!', 'warning');
+    return;
+  }
+  
+  if (!connectedPrinter) {
+    // Fallback ke browser print
+    const content = generateReceiptText(); // Fungsi dari kode Anda yang sudah ada
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>Struk</title><style>body{font-family: 'Courier New', monospace; padding: 20px; white-space: pre-wrap; font-size: 12px;}</style></head><body>${content}</body></html>`);
+    w.document.close();
+    w.print();
+    return;
+  }
+  
+  // Print ke printer hardware
+  const content = generateReceiptText();
+  await sendToPrinter(content);
+  showToast('Struk sedang dicetak...', 'success');
+}
+
+function generateReceiptText() {
+  const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
+  const address = document.getElementById('receiptAddress')?.value || '';
+  const phone = document.getElementById('receiptPhone')?.value || '';
+  const note = document.getElementById('receiptNote')?.value || 'Terima kasih';
+  const date = document.getElementById('manualDate')?.value || '';
+  const time = document.getElementById('manualTime')?.value || '';
+  const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
+  const admin = parseInt(document.getElementById('manualAdmin')?.value) || 0;
+  const total = nominal + admin;
+  const trxId = currentReceiptType.substring(0,2).toUpperCase() + '-' + Date.now().toString().slice(-6);
+  
+  return `================================
+    ${storeName.toUpperCase()}
+${address}
+${phone ? 'HP: ' + phone : ''}
+================================
+${currentReceiptType === 'transfer' ? 'BUKTI TRANSFER' : currentReceiptType === 'tarik_tunai' ? 'BUKTI TARIK TUNAI' : 'BUKTI TOP UP'}
+No: ${trxId}
+Tgl: ${date} ${time}
+--------------------------------
+Nominal: Rp ${formatNumber(nominal)}
+Admin: Rp ${formatNumber(admin)}
+--------------------------------
+TOTAL: Rp ${formatNumber(total)}
+================================
+${note}
+================================
+`;
+}
+
+async function sendToPrinter(data) {
+  try {
+    if (connectedPrinter.type === 'bluetooth') {
+      const encoder = new TextEncoder();
+      const buffer = encoder.encode(data);
+      
+      // Split into chunks (BLE MTU limit)
+      const chunkSize = 512;
+      for (let i = 0; i < buffer.length; i += chunkSize) {
+        const chunk = buffer.slice(i, i + chunkSize);
+        await connectedPrinter.characteristic.writeValue(chunk);
+      }
+      
+    } else if (connectedPrinter.type === 'usb') {
+      const encoder = new TextEncoder();
+      const buffer = encoder.encode(data);
+      await connectedPrinter.device.transferOut(connectedPrinter.endpoint.endpointNumber, buffer);
+      
+    } else if (connectedPrinter.type === 'network') {
+      // Untuk network, simpan ke queue atau gunakan backend
+      showToast('Network print via browser terbatas. Gunakan USB/Bluetooth.', 'warning');
+      // Fallback ke window.print
+      window.open('', '_blank').document.write(`<pre>${data}</pre>`).print();
+    }
+    
+  } catch (error) {
+    console.error('Print error:', error);
+    showToast('Gagal mencetak: ' + error.message, 'error');
+    updatePrinterStatus(false);
+  }
+}
+
+// ===== UTILITY FUNCTIONS =====
+function updatePrinterStatus(connected, details = '') {
+  const indicator = document.getElementById('printerStatusIndicator');
+  const statusText = document.getElementById('printerStatusText');
+  const connectedInfo = document.getElementById('connectedPrinterInfo');
+  const infoDetails = document.getElementById('printerInfoDetails');
+  const btnTest = document.getElementById('btnTestPrint');
+  
+  if (connected) {
+    indicator.style.background = 'var(--success)';
+    indicator.style.boxShadow = '0 0 8px var(--success)';
+    statusText.textContent = 'Printer terhubung';
+    statusText.style.color = 'var(--success)';
+    
+    connectedInfo.style.display = 'block';
+    infoDetails.textContent = details;
+    btnTest.disabled = false;
+  } else {
+    indicator.style.background = 'var(--danger)';
+    indicator.style.boxShadow = 'none';
+    statusText.textContent = 'Printer tidak terhubung';
+    statusText.style.color = 'var(--danger)';
+    
+    connectedInfo.style.display = 'none';
+    btnTest.disabled = true;
+    
+    connectedPrinter = null;
+    printerConnectionType = null;
+  }
+}
+
+function disconnectPrinter() {
+  if (connectedPrinter) {
+    if (connectedPrinter.type === 'bluetooth' && connectedPrinter.device.gatt.connected) {
+      connectedPrinter.device.gatt.disconnect();
+    } else if (connectedPrinter.type === 'usb' && connectedPrinter.device.opened) {
+      connectedPrinter.device.close();
+    }
+  }
+  
+  connectedPrinter = null;
+  updatePrinterStatus(false);
+  showToast('Printer diputuskan', 'info');
+  localStorage.removeItem('webpos_printer_config');
+}
+
+function savePrinterConfig() {
+  if (!connectedPrinter) return;
+  
+  const config = {
+    type: connectedPrinter.type,
+    timestamp: Date.now()
+  };
+  
+  if (connectedPrinter.type === 'bluetooth') {
+    config.deviceId = connectedPrinter.device.id;
+    config.deviceName = connectedPrinter.device.name;
+  } else if (connectedPrinter.type === 'network') {
+    config.ip = connectedPrinter.ip;
+    config.port = connectedPrinter.port;
+  } else if (connectedPrinter.type === 'usb') {
+    config.vendorId = connectedPrinter.device.vendorId;
+    config.productId = connectedPrinter.device.productId;
+    config.productName = connectedPrinter.device.productName;
+  }
+  
+  localStorage.setItem('webpos_printer_config', JSON.stringify(config));
+  showToast('Konfigurasi tersimpan', 'success');
+}
+
+function loadPrinterConfig() {
+  const saved = localStorage.getItem('webpos_printer_config');
+  if (!saved) return;
+  
+  try {
+    const config = JSON.parse(saved);
+    showPrinterPanel(config.type);
+    
+    if (config.type === 'network') {
+      document.getElementById('printerIpAddress').value = config.ip || '';
+      document.getElementById('printerPort').value = config.port || 9100;
+    }
+    
+    // Auto reconnect info
+    if (config.deviceName || config.ip || config.productName) {
+      const name = config.deviceName || config.ip || config.productName;
+      document.getElementById('printerStatusText').textContent = `Terakhir: ${name} (klik Scan untuk reconnect)`;
+    }
+  } catch (e) {
+    console.error('Error loading config:', e);
+  }
+}
+
+function centerText(text, width = 32) {
+  const pad = Math.max(0, Math.floor((width - text.length) / 2));
+  return ' '.repeat(pad) + text;
+}
+
+function togglePrinterConnection() {
+  // Legacy function - replaced by individual connect functions
+  showToast('Silakan pilih jenis printer (Bluetooth/Network/USB)', 'info');
+}
 
     // ==========================================
     // EVENT LISTENERS
