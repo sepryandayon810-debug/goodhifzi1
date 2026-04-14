@@ -166,7 +166,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .category-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 
 /* ===== SUMMARY CARDS - REDESIGN ===== */
-.summary-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.25rem;margin-bottom:2rem}
 @media(max-width:768px){.summary-cards{grid-template-columns:1fr;gap:.75rem}}
 
 .summary-card{
@@ -194,6 +194,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .summary-card-penjualan::after{background:linear-gradient(180deg,var(--primary),var(--secondary))}
 .summary-card-trx::after{background:linear-gradient(180deg,var(--info),#6366f1)}
 .summary-card-laba::after{background:linear-gradient(180deg,var(--success),#059669)}
+.summary-card-pembelian::after{background:linear-gradient(180deg,var(--warning),#d97706)}
 
 .summary-card-icon{
   width:56px;height:56px;border-radius:var(--radius-lg);
@@ -272,6 +273,7 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .transaction-type.tarik{background:rgba(239,68,68,.1);color:var(--danger)}
 .transaction-type.kas_masuk{background:rgba(16,185,129,.15);color:var(--success)}
 .transaction-type.kas_keluar{background:rgba(239,68,68,.15);color:var(--danger)}
+.transaction-type.pembelian{background:rgba(245,158,11,.15);color:var(--warning);}
 
 /* ===== MODALS ===== */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;opacity:0;visibility:hidden;transition:all .25s;padding:1rem;backdrop-filter:blur(4px)}
@@ -706,10 +708,13 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
           <button class="category-tab" data-category="penjualan">Produk</button>
           <button class="category-tab" data-category="kas">Kas Masuk/Keluar</button>
           <button class="category-tab" data-category="topup_tarik">Top Up & Tarik</button>
+          <button class="category-tab" data-category="pembelian">Pembelian</button>
+
         </div>
 
-        <!-- Summary Cards - Redesign -->
+               <!-- Summary Cards - Redesign -->
         <div class="summary-cards">
+          <!-- Card 1: Total Penjualan -->
           <div class="summary-card summary-card-penjualan">
             <div class="summary-card-icon"><i class="fas fa-shopping-cart"></i></div>
             <div class="summary-card-content">
@@ -718,6 +723,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               <div class="summary-card-sub" id="subPenjualan">dari transaksi produk</div>
             </div>
           </div>
+          
+          <!-- Card 2: Total Transaksi -->
           <div class="summary-card summary-card-trx">
             <div class="summary-card-icon"><i class="fas fa-receipt"></i></div>
             <div class="summary-card-content">
@@ -726,6 +733,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               <div class="summary-card-sub" id="subTransaksi">semua jenis transaksi</div>
             </div>
           </div>
+          
+          <!-- Card 3: Total Laba -->
           <div class="summary-card summary-card-laba">
             <div class="summary-card-icon"><i class="fas fa-chart-line"></i></div>
             <div class="summary-card-content">
@@ -734,7 +743,19 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
               <div class="summary-card-sub" id="subLaba">termasuk fee admin</div>
             </div>
           </div>
-        </div>
+          
+          <!-- Card 4: Total Pembelian (BARU) -->
+          <div class="summary-card summary-card-pembelian" style="display:none">
+            <div class="summary-card-icon" style="background:rgba(245,158,11,.12);color:var(--warning)">
+              <i class="fas fa-truck-loading"></i>
+            </div>
+            <div class="summary-card-content">
+              <div class="summary-card-title">Total Pembelian</div>
+              <div class="summary-card-value" id="totalPembelian" style="color:var(--warning)">Rp 0</div>
+              <div class="summary-card-sub" id="subPembelian">dari transaksi pembelian</div>
+            </div>
+          </div>
+        </div>  <!-- ✅ Tutup summary-cards hanya 1x di sini -->
 
         <!-- Transactions Table -->
         <div class="card">
@@ -837,7 +858,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       topup: 'Top Up',
       tarik: 'Tarik Tunai',
       kas_masuk: 'Kas Masuk',
-      kas_keluar: 'Kas Keluar'
+      kas_keluar: 'Kas Keluar',
+      pembelian: 'Pembelian',
     };
 
     const TYPE_ICONS = {
@@ -845,7 +867,8 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
       topup: 'fa-arrow-circle-up',
       tarik: 'fa-arrow-circle-down',
       kas_masuk: 'fa-plus-circle',
-      kas_keluar: 'fa-minus-circle'
+      kas_keluar: 'fa-minus-circle',
+      pembelian: 'fa-truck-loading',
     };
 
     // ========== THEME LOADER (ikuti pengaturan global) ==========
@@ -1064,10 +1087,29 @@ document.addEventListener('click', (e) => {
           );
 
           snapshots.forEach((snap, idx) => {
-            const trans = snap.val() || {};
-            Object.entries(trans).forEach(([id, data]) => {
-              if (data.status !== 'cancelled' && data.status !== 'returned') {
-                allTransactions.push({ id, dateKey: chunk[idx], ...data });
+  const trans = snap.val() || {};
+  Object.entries(trans).forEach(([id, data]) => {
+    if (data.status !== 'cancelled' && data.status !== 'returned') {
+      allTransactions.push({ id, dateKey: chunk[idx], ...data });
+    }
+  });
+});
+
+                    // Load dari purchases juga (pembelian barang)
+          const purchaseSnapshots = await Promise.all(
+            chunk.map(dateStr => database.ref(`purchases/${dateStr}`).once('value'))
+          );
+
+          purchaseSnapshots.forEach((snap, idx) => {
+            const purchases = snap.val() || {};
+            Object.entries(purchases).forEach(([id, data]) => {
+              if (data.status !== 'cancelled') {
+                allTransactions.push({ 
+                  id, 
+                  dateKey: chunk[idx], 
+                  type: 'pembelian',  // Force type
+                  ...data 
+                });
               }
             });
           });
@@ -1100,6 +1142,8 @@ document.addEventListener('click', (e) => {
             case 'penjualan':    return t.type === 'penjualan';
             case 'kas':          return t.type === 'kas_masuk' || t.type === 'kas_keluar';
             case 'topup_tarik':  return t.type === 'topup' || t.type === 'tarik';
+            case 'pembelian':    return t.type === 'pembelian';
+
             default:             return true;
           }
         });
@@ -1109,17 +1153,41 @@ document.addEventListener('click', (e) => {
     }
 
     // Ambil deskripsi singkat transaksi (produk pertama / keterangan)
-    function getTransactionDesc(t) {
+        function getTransactionDesc(t) {
       if (t.type === 'penjualan' && t.items && t.items.length > 0) {
         const names = t.items.map(i => i.name).filter(Boolean);
         if (names.length === 0) return 'Penjualan Produk';
         if (names.length === 1) return names[0];
         return names[0] + ' +' + (names.length - 1) + ' lainnya';
       }
+      
+      // ✅ UPDATE BAGIAN INI untuk pembelian
+      if (t.type === 'pembelian') {
+        const supplier = t.supplierName ? ' dari ' + t.supplierName : '';
+        
+        // Ambil nama produk pertama jika ada items
+        if (t.items && t.items.length > 0) {
+          // Cek field name (bisa "name", "nama", "productName", atau "product")
+          const firstItem = t.items[0];
+          const productName = firstItem.name || firstItem.nama || firstItem.productName || firstItem.product || firstItem.title;
+          
+          if (productName) {
+            if (t.items.length === 1) {
+              return 'Pembelian ' + productName + supplier;
+            } else {
+              return 'Pembelian ' + productName + ' +' + (t.items.length - 1) + ' lainnya' + supplier;
+            }
+          }
+        }
+        
+        return 'Pembelian' + supplier;
+      }
+      
       if (t.type === 'topup') return 'Top Up' + (t.targetName ? ' - ' + t.targetName : '');
       if (t.type === 'tarik') return 'Tarik Tunai' + (t.targetName ? ' - ' + t.targetName : '');
       if (t.type === 'kas_masuk') return t.description || t.note || 'Kas Masuk';
       if (t.type === 'kas_keluar') return t.description || t.note || 'Kas Keluar';
+      
       return t.note || TYPE_LABELS[t.type] || t.type || '-';
     }
 
@@ -1158,7 +1226,7 @@ document.addEventListener('click', (e) => {
           <td><span class="transaction-type ${t.type}">${TYPE_LABELS[t.type] || t.type}</span></td>
           <td>${t.paymentMethod || '-'}</td>
           <td>${t.cashierName || '-'}</td>
-          <td style="font-weight:700">${formatRupiah(t.total || t.amount || 0)}</td>
+<td style="font-weight:700">${formatRupiah(t.total || t.amount || calculateTotalFromItems(t.items) || 0)}</td>
           <td style="text-align:center">
             <div style="display:flex;gap:.35rem;justify-content:center">
               <button class="btn btn-sm btn-secondary" onclick="editTransaction('${t.id}')" title="Edit">
@@ -1188,6 +1256,15 @@ document.addEventListener('click', (e) => {
       }).join('');
     }
 
+    // ========== HELPER: Calculate Total from Items ==========
+function calculateTotalFromItems(items) {
+  if (!items || !Array.isArray(items)) return 0;
+  return items.reduce((sum, item) => {
+    const subtotal = item.subtotal || (item.qty || item.quantity || 0) * (item.price || item.harga || item.buyPrice || 0);
+    return sum + subtotal;
+  }, 0);
+}
+    
     function buildDetailItems(t) {
       let gridItems = `
         <div class="detail-panel-grid">
@@ -1233,18 +1310,26 @@ document.addEventListener('click', (e) => {
           <table class="detail-items-table">
             <thead><tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead>
             <tbody>
-              ${t.items.map(item => `
-                <tr>
-                  <td>${item.name || '-'}</td>
-                  <td>${item.qty || 0}</td>
-                  <td>${formatRupiah(item.price || (item.subtotal / item.qty))}</td>
-                  <td>${formatRupiah(item.subtotal)}</td>
-                </tr>
-              `).join('')}
+              ${t.items.map(item => {
+  // Cek field nama yang tersedia (bisa name, nama, productName, product, title)
+  const productName = item.name || item.nama || item.productName || item.product || item.title || 'Produk';
+  const qty = item.qty || item.quantity || 0;
+  const price = item.price || item.harga || item.buyPrice || item.purchasePrice || 0;
+  const subtotal = item.subtotal || (qty * price) || 0;
+  
+  return `
+    <tr>
+      <td>${productName}</td>
+      <td>${qty}</td>
+      <td>${formatRupiah(price)}</td>
+      <td>${formatRupiah(subtotal)}</td>
+    </tr>
+  `;
+}).join('')}
               <tr>
-                <td colspan="3"><strong>TOTAL</strong></td>
-                <td><strong>${formatRupiah(t.total)}</strong></td>
-              </tr>
+  <td colspan="3"><strong>TOTAL</strong></td>
+  <td><strong>${formatRupiah(t.total || t.totalAmount || t.grandTotal || t.amount || calculateTotalFromItems(t.items))}</strong></td>
+</tr>
             </tbody>
           </table>`;
       }
@@ -1274,34 +1359,60 @@ document.addEventListener('click', (e) => {
       }
     }
 
-    // ========== SUMMARY ==========
     function updateSummary(transactions) {
-      let totalPenjualan = 0;
-      let totalLaba = 0;
-      let countPenjualan = 0;
+  let totalPenjualan = 0;
+  let totalPembelian = 0;
+  let totalLaba = 0;
+  let countPenjualan = 0;
+  let countPembelian = 0;
 
-      transactions.forEach(t => {
-        if (t.type === 'penjualan') {
-          totalPenjualan += t.total || 0;
-          totalLaba += t.profit || 0;
-          countPenjualan++;
-        }
-        if ((t.type === 'topup' || t.type === 'tarik') && t.adminFee) {
-          totalLaba += t.adminFee;
-        }
-      });
-
-      document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
-      document.getElementById('totalTransaksi').textContent = transactions.length;
-      document.getElementById('totalLaba').textContent = formatRupiah(totalLaba);
-
-      const subP = document.getElementById('subPenjualan');
-      const subT = document.getElementById('subTransaksi');
-      const subL = document.getElementById('subLaba');
-      if (subP) subP.textContent = countPenjualan + ' transaksi produk';
-      if (subT) subT.textContent = transactions.length + ' dari semua jenis';
-      if (subL) subL.textContent = totalLaba > 0 ? 'margin + fee admin' : 'belum ada laba';
+  transactions.forEach(t => {
+    if (t.type === 'penjualan') {
+      const transTotal = t.total || t.amount || calculateTotalFromItems(t.items);
+      totalPenjualan += transTotal;
+      totalLaba += t.profit || 0;
+      countPenjualan++;
     }
+    // ✅ TAMBAHKAN INI:
+    if (t.type === 'pembelian') {
+      const transTotal = t.total || t.totalAmount || t.grandTotal || t.amount || calculateTotalFromItems(t.items);
+      totalPembelian += transTotal;
+      countPembelian++;
+    }
+    if ((t.type === 'topup' || t.type === 'tarik') && t.adminFee) {
+      totalLaba += t.adminFee;
+    }
+  });
+
+  // Update DOM
+  document.getElementById('totalPenjualan').textContent = formatRupiah(totalPenjualan);
+  document.getElementById('totalTransaksi').textContent = transactions.length;
+  document.getElementById('totalLaba').textContent = formatRupiah(totalLaba);
+  
+  // ✅ TAMBAHKAN INI untuk update total pembelian:
+  const totalPembelianEl = document.getElementById('totalPembelian');
+  const subPembelianEl = document.getElementById('subPembelian');
+  const cardPembelian = document.querySelector('.summary-card-pembelian');
+  
+  if (totalPembelianEl) totalPembelianEl.textContent = formatRupiah(totalPembelian);
+  if (subPembelianEl) subPembelianEl.textContent = countPembelian + ' transaksi pembelian';
+  
+  // ✅ Show/hide card pembelian berdasarkan filter
+  if (cardPembelian) {
+    if (currentFilter === 'pembelian' || currentFilter === 'all') {
+      cardPembelian.style.display = 'flex';
+    } else {
+      cardPembelian.style.display = 'none';
+    }
+  }
+
+  const subP = document.getElementById('subPenjualan');
+  const subT = document.getElementById('subTransaksi');
+  const subL = document.getElementById('subLaba');
+  if (subP) subP.textContent = countPenjualan + ' transaksi produk';
+  if (subT) subT.textContent = transactions.length + ' dari semua jenis';
+  if (subL) subL.textContent = totalLaba > 0 ? 'margin + fee admin' : 'belum ada laba';
+}
 
     // ========== EDIT ==========
     function editTransaction(id) {
