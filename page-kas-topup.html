@@ -597,47 +597,50 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="js/sidebar-filter.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Wait for Firebase auth to be ready
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = '../login.html';
-          return;
-        }
         
-        // Load user data if available
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        // Initialize topup
-        initTopup();
-      });
-
-      // ===== FUNGSI CEK DAN KEMBALI =====
+// ===== GLOBAL FUNCTIONS =====
 function isFromKasir() {
   return localStorage.getItem('fromKasir') === 'true';
 }
 
 function goBack() {
-  const dariKasir = isFromKasir();        // ✅ Cek dulu statusnya
-  localStorage.removeItem('fromKasir');   // ✅ Baru hapus setelah dicek
+  const dariKasir = isFromKasir();
+  localStorage.removeItem('fromKasir');
   
   if (dariKasir) {
-    window.location.href = 'page-kasir.html';
+    window.location.replace('page-kasir.html');
   } else {
     window.location.href = 'page-kas.html';
   }
 }
 
-      function initTopup() {
-      const user = Auth.getCurrentUser();
-      document.getElementById('userName').textContent = user?.name || user?.email || 'User';
-      document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait for Firebase auth to be ready
+  auth.onAuthStateChanged((user) => {
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = '../login.html';
+      return;
+    }
+    
+    // Load user data if available
+    if (user) {
+      Auth.loadUserData(user.uid);
+    }
+    
+    // Initialize topup
+    initTopup();
+  });
 
-      let amount = 0;
-      let adminFee = 0;
+  // HAPUS definisi fungsi dari sini (sudah pindah ke atas)
+  
+  function initTopup() {
+    const user = Auth.getCurrentUser();
+    document.getElementById('userName').textContent = user?.name || user?.email || 'User';
+    document.getElementById('userRole').textContent = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Kasir';
 
+    let amount = 0;
+    let adminFee = 0;
+    
       // Update summary display
       function updateSummary() {
         adminFee = parseInt(document.getElementById('adminFee').value) || 0;
