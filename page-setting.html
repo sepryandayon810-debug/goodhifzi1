@@ -837,6 +837,15 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
       function initSettings() {
         const currentUser = Auth.getCurrentUser();
+
+        // Fungsi update logo toko
+function updateLogoToko(namaToko) {
+  const logoText = document.querySelector('.logo-text');
+  if (logoText && namaToko) {
+    logoText.textContent = namaToko;
+  }
+  localStorage.setItem('webpos_store_name', namaToko);
+}
         
         // Update user info
         document.getElementById('userName').textContent = currentUser?.name || currentUser?.username || 'User';
@@ -845,6 +854,8 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         document.getElementById('userFullName').value = currentUser?.name || '';
         document.getElementById('userUsername').value = currentUser?.username || '';
         document.getElementById('userEmail').value = currentUser?.email || '';
+
+        
 
         // Generate theme grid
         const themeGrid = document.getElementById('themeGrid');
@@ -925,7 +936,7 @@ document.addEventListener('click', (e) => {
         // Load store settings
         loadStoreSettings();
 
-        async function loadStoreSettings() {
+                async function loadStoreSettings() {
           try {
             const snapshot = await database.ref('settings/store').once('value');
             const settings = snapshot.val();
@@ -934,23 +945,45 @@ document.addEventListener('click', (e) => {
               document.getElementById('storeName').value = settings.name || '';
               document.getElementById('storeAddress').value = settings.address || '';
               document.getElementById('storePhone').value = settings.phone || '';
+              
+              // Update logo saat load
+              updateLogoToko(settings.name);
+              
+              // Simpan ke localStorage untuk page lain
+              localStorage.setItem('webpos_store_name', settings.name || 'WebPOS');
+              localStorage.setItem('webpos_store_address', settings.address || '');
+              localStorage.setItem('webpos_store_phone', settings.phone || '');
             }
           } catch (error) {
             console.error('Error loading settings:', error);
           }
         }
-
-        // Save store settings
-        document.getElementById('btnSaveStore').addEventListener('click', async () => {
+                  
+                document.getElementById('btnSaveStore').addEventListener('click', async () => {
           Utils.showLoading();
           
           try {
+            const storeName = document.getElementById('storeName').value;
+            const storeAddress = document.getElementById('storeAddress').value;
+            const storePhone = document.getElementById('storePhone').value;
+            
             await database.ref('settings/store').set({
-              name: document.getElementById('storeName').value,
-              address: document.getElementById('storeAddress').value,
-              phone: document.getElementById('storePhone').value,
+              name: storeName,
+              address: storeAddress,
+              phone: storePhone,
               updatedAt: Date.now()
             });
+            
+            // Update logo langsung di page ini
+            updateLogoToko(storeName);
+            
+            // Simpan ke localStorage untuk page lain
+            localStorage.setItem('webpos_store_name', storeName);
+            localStorage.setItem('webpos_store_address', storeAddress);
+            localStorage.setItem('webpos_store_phone', storePhone);
+            
+            // Update document title
+            document.title = `${storeName} - Pengaturan`;
             
             Utils.hideLoading();
             Utils.showToast('Pengaturan toko disimpan', 'success');
@@ -959,7 +992,7 @@ document.addEventListener('click', (e) => {
             console.error('Error saving settings:', error);
             Utils.showToast('Gagal menyimpan pengaturan', 'error');
           }
-        });
+        });  // ✅ Hanya satu closing!
 
         // Change password
         document.getElementById('btnChangePassword').addEventListener('click', () => {
