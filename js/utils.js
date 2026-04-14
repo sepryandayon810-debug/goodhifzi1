@@ -510,7 +510,66 @@ const Utils = {
   }
 };
 
-// Initialize theme on load
+// Auto-update store name - Panggil SEKARANG juga, tidak tunggu DOMContentLoaded
+function updateStoreDisplay() {
+  const storeName = localStorage.getItem('webpos_store_name');
+  const storeAddress = localStorage.getItem('webpos_store_address');
+  const storePhone = localStorage.getItem('webpos_store_phone');
+  
+  console.log('Updating store display:', { storeName, storeAddress, storePhone }); // Debug
+  
+  // Update logo nama toko - coba cari dengan selector berbeda
+  const logoText = document.querySelector('.logo-text');
+  if (logoText && storeName) {
+    logoText.textContent = storeName;
+    console.log('Logo updated to:', storeName);
+  }
+  
+  // Update title
+  if (storeName && document.title.includes('WebPOS')) {
+    document.title = document.title.replace('WebPOS', storeName);
+  }
+  
+  // Update alamat & telepon di header
+  const addressEl = document.getElementById('headerStoreAddress');
+  const phoneEl = document.getElementById('headerStorePhone');
+  if (addressEl) addressEl.textContent = storeAddress || '-';
+  if (phoneEl) phoneEl.textContent = storePhone || '-';
+  
+  // Update di sidebar
+  const sidebarAddr = document.getElementById('sidebarStoreAddress');
+  const sidebarPhone = document.getElementById('sidebarStorePhone');
+  if (sidebarAddr) sidebarAddr.textContent = storeAddress || '';
+  if (sidebarPhone) sidebarPhone.textContent = storePhone || '';
+}
+
+// Jalankan SEKARANG (immediate) dan juga saat DOM ready
+updateStoreDisplay();
+
+// Jalankan lagi saat DOM fully loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', updateStoreDisplay);
+} else {
+  // DOM sudah ready, jalankan lagi untuk memastikan
+  updateStoreDisplay();
+}
+
+// Listen untuk perubahan localStorage (sync antar tab)
+window.addEventListener('storage', (e) => {
+  if (e.key === 'webpos_store_name' || e.key === 'webpos_store_address' || e.key === 'webpos_store_phone') {
+    console.log('Storage changed:', e.key, e.newValue);
+    updateStoreDisplay();
+  }
+});
+
+// Update saat tab menjadi visible lagi
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    updateStoreDisplay();
+  }
+});
+
+// Initialize theme
 document.addEventListener('DOMContentLoaded', () => {
   Utils.Theme.init();
 });
