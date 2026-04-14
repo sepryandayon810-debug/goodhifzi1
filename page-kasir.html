@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id" data-theme="light">
 <head>
@@ -326,6 +327,47 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
 .cart-item-remove{position:absolute;top:.5rem;right:.5rem;width:24px;height:24px;border:none;background:rgba(239,68,68,.1);color:var(--danger);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.75rem;opacity:0;transition:all .15s}
 .cart-item:hover .cart-item-remove{opacity:1}
 .cart-item-remove:hover{background:var(--danger);color:white}
+    /* ===== TOMBOL EDIT DI CART ITEM ===== */
+.cart-item-edit {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  opacity: 1;
+  z-index: 10;
+  transition: all 0.15s;
+}
+
+.cart-item-edit:hover {
+  background: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Mobile: padding lebih besar untuk memberi ruang tombol */
+@media (max-width: 1024px) {
+  .cart-item {
+    padding-left: 2.5rem !important;
+  }
+  
+  .cart-item-edit {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+    top: 0.75rem;
+    left: 0.5rem;
+  }
+}
 .cart-empty{text-align:center;padding:3rem 1rem;color:var(--text-muted)}
 .cart-empty i{font-size:3rem;margin-bottom:1rem;opacity:.5}
 
@@ -1999,44 +2041,47 @@ const isUnlimited = product.isUnlimited ||
     };
 
     // ===== RENDER CART =====
-    function renderCart() {
-      const container = document.getElementById('cartItems');
-      const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-      document.getElementById('cartCount').textContent = totalItems;
-      document.getElementById('cartBadge').textContent = totalItems;
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+  document.getElementById('cartCount').textContent = totalItems;
+  document.getElementById('cartBadge').textContent = totalItems;
 
-      if (cart.length === 0) {
-        container.innerHTML = `
-          <div class="cart-empty">
-            <i class="fas fa-shopping-basket"></i>
-            <p>Keranjang masih kosong</p>
-            <p style="font-size:.75rem;margin-top:.5rem;">Klik produk untuk menambahkan</p>
-          </div>`;
-        return;
-      }
+  if (cart.length === 0) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <i class="fas fa-shopping-basket"></i>
+        <p>Keranjang masih kosong</p>
+        <p style="font-size:.75rem;margin-top:.5rem;">Klik produk untuk menambahkan</p>
+      </div>`;
+    return;
+  }
 
-      container.innerHTML = cart.map(item => `
-        <div class="cart-item">
-          <div class="cart-item-image">
-            ${item.image
-              ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">`
-              : '<i class="fas fa-box"></i>'}
-          </div>
-          <div class="cart-item-details">
-            <div class="cart-item-name">${item.name}</div>
-            <div class="cart-item-price">${formatRupiah(item.price)}</div>
-            <div class="cart-item-actions">
-              <button class="qty-btn" onclick="updateQty('${item.productId}', -1)">-</button>
-              <input type="text" class="qty-input" value="${item.quantity}" readonly>
-              <button class="qty-btn" onclick="updateQty('${item.productId}', 1)">+</button>
-            </div>
-          </div>
-          <div class="cart-item-total">${formatRupiah(item.total)}</div>
-          <button class="cart-item-remove" onclick="removeFromCart('${item.productId}')">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>`).join('');
-    }
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <button class="cart-item-edit" onclick="openEditCartModal('${item.productId}')" title="Edit">
+        <i class="fas fa-pen"></i>
+      </button>
+      <div class="cart-item-image">
+        ${item.image
+          ? `<img src="${item.image}" alt="${item.name}" style="width:100%;height:100%;object-fit:cover;">`
+          : '<i class="fas fa-box"></i>'}
+      </div>
+      <div class="cart-item-details">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">${formatRupiah(item.price)}</div>
+        <div class="cart-item-actions">
+          <button class="qty-btn" onclick="updateQty('${item.productId}', -1)">-</button>
+          <input type="text" class="qty-input" value="${item.quantity}" readonly>
+          <button class="qty-btn" onclick="updateQty('${item.productId}', 1)">+</button>
+        </div>
+      </div>
+      <div class="cart-item-total">${formatRupiah(item.total)}</div>
+      <button class="cart-item-remove" onclick="removeFromCart('${item.productId}')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>`).join('');
+}
 
     // ===== UPDATE SUMMARY =====
     function updateSummary() {
@@ -2402,6 +2447,100 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     applyCurrentView();
   });
 });
+
+    // ===== EDIT CART VARIABLES =====
+let currentEditProductId = null;
+
+// ===== OPEN EDIT CART MODAL =====
+function openEditCartModal(productId) {
+  const item = cart.find(i => i.productId === productId);
+  if (!item) return;
+  
+  currentEditProductId = productId;
+  
+  document.getElementById('editCartName').value = item.name;
+  document.getElementById('editCartCost').value = item.cost || 0;
+  document.getElementById('editCartPrice').value = item.price;
+  document.getElementById('editCartQty').value = item.quantity;
+  
+  calculateEditProfit();
+  
+  const modal = document.getElementById('editCartModal');
+  if (modal) modal.classList.add('active');
+}
+
+// ===== CLOSE EDIT CART MODAL =====
+function closeEditCartModal() {
+  const modal = document.getElementById('editCartModal');
+  if (modal) modal.classList.remove('active');
+  currentEditProductId = null;
+}
+
+// ===== CALCULATE EDIT PROFIT =====
+function calculateEditProfit() {
+  const cost = parseInt(document.getElementById('editCartCost').value) || 0;
+  const price = parseInt(document.getElementById('editCartPrice').value) || 0;
+  const qty = parseInt(document.getElementById('editCartQty').value) || 1;
+  
+  const profitPerItem = price - cost;
+  const totalProfit = profitPerItem * qty;
+  const totalPrice = price * qty;
+  
+  const profitEl = document.getElementById('editProfitDisplay');
+  if (profitEl) {
+    profitEl.textContent = `Laba per item: ${formatRupiah(profitPerItem)} | Total: ${formatRupiah(totalProfit)}`;
+    profitEl.style.color = profitPerItem >= 0 ? 'var(--success)' : 'var(--danger)';
+    profitEl.style.borderColor = profitPerItem >= 0 ? 'var(--success)' : 'var(--danger)';
+    profitEl.style.background = profitPerItem >= 0 ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)';
+  }
+  
+  const totalEl = document.getElementById('editTotalDisplay');
+  if (totalEl) totalEl.textContent = formatRupiah(totalPrice);
+}
+
+// ===== CONFIRM EDIT CART =====
+function confirmEditCart() {
+  if (!currentEditProductId) return;
+  
+  const cost = parseInt(document.getElementById('editCartCost').value) || 0;
+  const price = parseInt(document.getElementById('editCartPrice').value) || 0;
+  const qty = parseInt(document.getElementById('editCartQty').value) || 1;
+  
+  if (price <= 0) {
+    showToast('Harga jual harus lebih dari 0', 'error');
+    return;
+  }
+  
+  if (qty <= 0) {
+    showToast('Quantity minimal 1', 'error');
+    return;
+  }
+  
+  const itemIndex = cart.findIndex(i => i.productId === currentEditProductId);
+  if (itemIndex === -1) return;
+  
+  // Update item
+  cart[itemIndex].cost = cost;
+  cart[itemIndex].price = price;
+  cart[itemIndex].quantity = qty;
+  cart[itemIndex].total = price * qty;
+  
+  saveCart();
+  renderCart();
+  updateSummary();
+  closeEditCartModal();
+  showToast(`${cart[itemIndex].name} berhasil diupdate`, 'success');
+}
+
+// ===== TUTUP MODAL SAAT KLIK OUTSIDE =====
+document.addEventListener('DOMContentLoaded', () => {
+  const editCartModal = document.getElementById('editCartModal');
+  if (editCartModal) {
+    editCartModal.addEventListener('click', (e) => {
+      if (e.target === editCartModal) closeEditCartModal();
+    });
+  }
+});
     
     // ===== INISIALISASI =====
     firebase.auth().onAuthStateChanged(user => {
@@ -2418,6 +2557,56 @@ document.querySelectorAll('.view-btn').forEach(btn => {
     });
     
   </script>
+    <!-- Edit Cart Modal -->
+  <div class="modal-overlay" id="editCartModal">
+    <div class="modal edit-cart-modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fas fa-edit" style="margin-right: 0.5rem;"></i>
+          Edit Item Keranjang
+        </h3>
+        <button class="modal-close" onclick="closeEditCartModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nama Produk</label>
+          <input type="text" class="form-input" id="editCartName" readonly style="background: var(--bg-secondary);">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Harga Modal (Cost)</label>
+          <input type="number" class="form-input" id="editCartCost" placeholder="0" oninput="calculateEditProfit()">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Harga Jual</label>
+          <input type="number" class="form-input" id="editCartPrice" placeholder="0" oninput="calculateEditProfit()">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" class="form-input" id="editCartQty" placeholder="1" min="1" oninput="calculateEditProfit()">
+        </div>
+        
+        <div class="profit-display" id="editProfitDisplay" style="background: rgba(99,102,241,0.1); border: 2px solid var(--primary); color: var(--primary); padding: 0.75rem; border-radius: var(--radius-lg); text-align: center; margin-top: 0.75rem; font-weight: 600;">
+          Laba per item: Rp 0 | Total laba: Rp 0
+        </div>
+        
+        <div class="price-display" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 1rem; border-radius: var(--radius-lg); text-align: center; margin-top: 1rem;">
+          <div class="label" style="font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em;">Total Harga</div>
+          <div class="value" id="editTotalDisplay" style="font-size: 1.5rem; font-weight: 700; margin-top: 0.25rem;">Rp 0</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeEditCartModal()">Batal</button>
+        <button class="btn btn-primary" onclick="confirmEditCart()">
+          <i class="fas fa-save"></i> Simpan Perubahan
+        </button>
+      </div>
+    </div>
+  </div>
   
 </body>
 </html>
