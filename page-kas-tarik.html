@@ -600,11 +600,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="js/sidebar-filter.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Wait for Firebase auth to be ready
-      auth.onAuthStateChanged((user) => {
-
-        // ===== FUNGSI KEMBALI KE KASIR =====
+// ===== GLOBAL FUNCTIONS =====
 function isFromKasir() {
   return localStorage.getItem('fromKasir') === 'true';
 }
@@ -614,17 +610,22 @@ function goBack() {
   localStorage.removeItem('fromKasir');
   
   if (dariKasir) {
-    window.location.href = 'page-kasir.html';
+    window.location.replace('page-kasir.html');
   } else {
     window.location.href = 'page-kas.html';
   }
 }
-        
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = '../login.html';
-          return;
-        }
-        
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait for Firebase auth to be ready
+  auth.onAuthStateChanged((user) => {
+    
+    // HAPUS definisi fungsi dari sini (sudah pindah ke atas)
+    
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = '../login.html';
+      return;
+    }        
         // Load user data if available
         if (user) {
           Auth.loadUserData(user.uid);
