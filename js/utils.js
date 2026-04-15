@@ -578,3 +578,71 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Utils;
 }
+
+// Tambahkan di akhir js/utils.js
+
+// ============================================
+// NETWORK STATUS DETECTOR (Global)
+// ============================================
+const NetworkDetector = {
+  init() {
+    // Buat banner HTML kalau belum ada
+    if (!document.getElementById('offlineBanner')) {
+      const banner = document.createElement('div');
+      banner.id = 'offlineBanner';
+      banner.innerHTML = '<i class="fas fa-wifi"></i> Mode Offline - Beberapa fitur terbatas';
+      banner.style.cssText = `
+        display:none; 
+        position:fixed; 
+        top:70px; 
+        left:0; 
+        right:0; 
+        padding:0.75rem; 
+        background:#f59e0b; 
+        color:white; 
+        text-align:center; 
+        font-size:0.9rem; 
+        font-weight:600; 
+        z-index:999;
+        box-shadow:0 2px 10px rgba(0,0,0,0.1);
+      `;
+      document.body.appendChild(banner);
+    }
+
+    const banner = document.getElementById('offlineBanner');
+    
+    // Cek status awal
+    this.checkStatus();
+    
+    // Event listeners
+    window.addEventListener('online', () => {
+      banner.style.display = 'none';
+      if (typeof Utils !== 'undefined' && Utils.showToast) {
+        Utils.showToast('🟢 Koneksi kembali normal', 'success');
+      }
+    });
+    
+    window.addEventListener('offline', () => {
+      banner.style.display = 'block';
+      if (typeof Utils !== 'undefined' && Utils.showToast) {
+        Utils.showToast('🔴 Anda offline', 'warning');
+      }
+    });
+  },
+  
+  checkStatus() {
+    const banner = document.getElementById('offlineBanner');
+    if (!navigator.onLine && banner) {
+      banner.style.display = 'block';
+    }
+  },
+  
+  isOnline() {
+    return navigator.onLine;
+  }
+};
+
+// Auto-init saat DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  NetworkDetector.init();
+});
