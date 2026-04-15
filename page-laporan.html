@@ -1307,19 +1307,56 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="js/sidebar-filter.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
-          return;
-        }
-        
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        initLaporan();
-      });
+  document.addEventListener('DOMContentLoaded', () => {
+    const database = firebase.database();
+    const auth = firebase.auth();
+    
+    // ✅ FALLBACK Utils & Auth
+    if (typeof Utils === 'undefined') {
+      window.Utils = {
+        formatRupiah: (num) => 'Rp ' + Math.round(num || 0).toLocaleString('id-ID'),
+        showToast: (msg, type) => alert(msg),
+        showLoading: () => document.getElementById('loadingOverlay')?.classList.add('active'),
+        hideLoading: () => document.getElementById('loadingOverlay')?.classList.remove('active'),
+        getStorage: (key) => localStorage.getItem(key),
+        confirm: (msg, callback) => { if(confirm(msg)) callback(); }
+      };
+    }
+    
+    // ✅ VERSI SIMPLIFIED (sama persis dengan Kasir)
+function loadUserData(user) {  // Terima user sebagai parameter
+  if (!user) return;
+  
+  database.ref('users/' + user.uid).once('value').then(snap => {
+    const data = snap.val() || {};
+    const name = data.name || user.email || 'Admin';
+    const role = data.role || 'admin';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('userRole').textContent = role;
+    const avatar = document.getElementById('userAvatar');
+    if (avatar) avatar.textContent = name.charAt(0).toUpperCase();
+  }).catch(err => {
+    console.error('Error load user:', err);
+    document.getElementById('userName').textContent = 'Admin';
+  });
+}
+
+// Panggil dengan:
+auth.onAuthStateChanged((user) => {
+  if (!user && !Utils.getStorage('webpos_session')) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  if (user) {
+    loadUserData(user);  // ✅ Pass user object langsung
+  } else {
+    document.getElementById('userName').textContent = 'Admin';
+    document.getElementById('userRole').textContent = 'User';
+  }
+  
+  initLaporan();
+});
 
       function initLaporan() {
         let currentReport = 'penjualan';
@@ -1371,23 +1408,26 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
         function renderChart(transactions) {
   const container = document.getElementById('chartContainer');
-  if (!container) {
-    console.error('Chart container not found');
-    return;
-  }
+  if (!container) return;
   
-  // Cek apakah canvas ada, jika tidak recreate
-  let canvas = document.getElementById('reportChart');
-  if (!canvas) {
-    container.innerHTML = '<canvas id="reportChart"></canvas>';
-    canvas = document.getElementById('reportChart');
-  }
-  
+  // ✅ SELALU recreate canvas untuk menghindari error Chart.js
+  container.innerHTML = '<canvas id="reportChart"></canvas>';
+  const canvas = document.getElementById('reportChart');
   const ctx = canvas.getContext('2d');
   
   // Destroy existing chart if any
   if (chartInstance) {
     chartInstance.destroy();
+  }
+  
+  if (transactions.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding-top: 100px;">
+        <i class="fas fa-chart-bar" style="font-size: 3rem; color: var(--text-muted);"></i>
+        <p style="margin-top: 1rem; color: var(--text-muted);">Tidak ada data untuk ditampilkan</p>
+      </div>
+    `;
+    return;
   }
   
   // Group data by date
@@ -1434,8 +1474,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
     }
   });
-}
-  
+}  
 
 // Global function for chart type buttons
 window.changeChartType = function(type) {
@@ -1444,9 +1483,6 @@ window.changeChartType = function(type) {
     renderChart(reportData);
   }
 };
-
-        // Generate report
-        document.getElementById('btnGenerate').addEventListener('click', generateReport);
 
         // Reset
         document.getElementById('btnReset').addEventListener('click', () => {
@@ -1458,6 +1494,9 @@ window.changeChartType = function(type) {
 
         // Export
         document.getElementById('btnExport').addEventListener('click', exportReport);
+
+        // Generate Report
+        document.getElementById('btnGenerate').addEventListener('click', generateReport);
 
         // Sidebar toggle - Desktop (collapse/expand)
 document.getElementById('menuToggle').addEventListener('click', () => {
@@ -1515,10 +1554,15 @@ document.addEventListener('click', (e) => {
 
         // Logout
         document.getElementById('btnLogout').addEventListener('click', () => {
-          Utils.confirm('Apakah Anda yakin ingin logout?', () => {
-            Auth.logout();
-          });
-        });
+  Utils.confirm('Apakah Anda yakin ingin logout?', () => {
+    // Langsung pakai Firebase auth, tidak perlu Auth object
+    auth.signOut().then(() => {
+      window.location.href = 'login.html';
+    }).catch(() => {
+      window.location.href = 'login.html';
+    });
+  });
+});
 
         function updateReportTitle() {
           const titles = {
