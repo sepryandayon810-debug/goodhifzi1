@@ -86,6 +86,14 @@ export const MENU_CONFIG = {
       href: "../pages/page-laporan.html",
       roles: ["admin"]
     },
+
+    {
+      id: "laporan-stok",
+      label: "Laporan Stok",
+      icon: "boxes", // fas fa-boxes (atau "box-open", "warehouse")
+      href: "../pages/page-laporan-stok.html",
+      roles: ["admin", "gudang"] // kasir juga bisa akses untuk cek stok
+    },
     
     // Section: INTEGRASI
     { type: "divider", label: "INTEGRASI" },
