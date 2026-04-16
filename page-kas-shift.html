@@ -276,11 +276,29 @@
           </ul>
         </div>
         <div class="nav-section">
-          <div class="nav-section-title">Laporan</div>
-          <ul class="nav-menu">
-            <li class="nav-item"><a href="page-laporan.html" class="nav-link" data-menu="laporan"><i class="fas fa-chart-bar"></i><span>Laporan Penjualan</span></a></li>
-          </ul>
-        </div>
+    <div class="nav-section-title">Laporan</div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="page-laporan.html" class="nav-link" data-menu="laporan">
+          <i class="fas fa-chart-bar"></i>
+          <span>Laporan Penjualan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="page-laporan-stok.html" class="nav-link" data-menu="laporan-stok">
+          <i class="fas fa-boxes"></i>
+          <span>Laporan Stok</span>
+        </a>
+      </li>
+      <!-- BARANG TERLARIS - Menu Standalone (BUKAN SUBMENU) -->
+      <li class="nav-item">
+        <a href="page-laporan-terlaris.html" class="nav-link" data-menu="laporan-terlaris">
+          <i class="fas fa-crown"></i>
+          <span>Barang Terlaris</span>
+        </a>
+      </li>
+    </ul>
+  </div>
         <div class="nav-section">
           <div class="nav-section-title">Integrasi</div>
           <ul class="nav-menu">
@@ -294,6 +312,12 @@
             <li class="nav-item"><a href="page-pengguna.html" class="nav-link" data-menu="pengguna"><i class="fas fa-user-cog"></i><span>Pengguna</span></a></li>
             <li class="nav-item"><a href="page-setting.html" class="nav-link" data-menu="setting"><i class="fas fa-cog"></i><span>Pengaturan</span></a></li>
             <li class="nav-item"><a href="page-backup.html" class="nav-link" data-menu="backup"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a></li>
+            <li class="nav-item">
+        <a href="page-log-aktivitas.html" class="nav-link" data-menu="log-aktivitas">
+          <i class="fas fa-history"></i>
+          <span>Log Aktivitas</span>
+        </a>
+      </li>
             <li class="nav-item"><a href="page-printer.html" class="nav-link" data-menu="printer"><i class="fas fa-print"></i><span>Printer & Struk</span></a></li>
             <li class="nav-item"><a href="page-reset.html" class="nav-link" data-menu="reset"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a></li>
           </ul>
@@ -422,7 +446,8 @@
     <p style="margin-top:1rem;color:var(--text-secondary);">Loading...</p>
   </div>
 
-  <script src="js/firebase-config.js"></script>
+   <!-- Scripts -->
+  <script src="js/firebase-config.js?v=2"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/sidebar-filter.js"></script>
