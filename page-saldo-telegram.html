@@ -1346,27 +1346,56 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     };
   }
 
-    auth.onAuthStateChanged((user) => {
-    if (!user && !Utils.getStorage('webpos_session')) {
-      window.location.href = 'login.html';
-      return;
-    }
-    
-    if (user) {
-      Auth.loadUserData(user.uid);
-    } else {
-      document.getElementById('userName').textContent = 'Admin';
-      document.getElementById('userRole').textContent = 'User';
-    }
-    
-    initTelegram();
-  });
+        auth.onAuthStateChanged((user) => {
+      if (!user && !Utils.getStorage('webpos_session')) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Load user data dengan cara yang sama seperti Dashboard
+      if (user) {
+        database.ref('users/' + user.uid).once('value').then(snap => {
+          const userData = snap.val() || {};
+          document.getElementById('userName').textContent = userData.name || user.email || 'Admin';
+          document.getElementById('userRole').textContent = userData.role 
+            ? (userData.role.charAt(0).toUpperCase() + userData.role.slice(1)) 
+            : 'Administrator';
+          
+          const avatar = document.getElementById('userAvatar');
+          if (userData.name) {
+            const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            avatar.textContent = initials;
+          } else if (user.email) {
+            avatar.textContent = user.email.charAt(0).toUpperCase();
+          }
+          
+          // Init Telegram setelah user data loaded
+          initTelegram();
+        }).catch(() => {
+          document.getElementById('userName').textContent = user.email || 'Admin';
+          document.getElementById('userRole').textContent = 'Administrator';
+          document.getElementById('userAvatar').textContent = user.email ? user.email.charAt(0).toUpperCase() : 'A';
+          initTelegram();
+        });
+      } else {
+        const savedUser = Utils.getStorage('webpos_session');
+        if (savedUser) {
+          document.getElementById('userName').textContent = savedUser.name || savedUser.email || 'Admin';
+          document.getElementById('userRole').textContent = savedUser.role || 'Administrator';
+          if (savedUser.name) {
+            document.getElementById('userAvatar').textContent = savedUser.name.charAt(0).toUpperCase();
+          }
+        }
+        initTelegram();
+      }
+    });
 
       function initTelegram() {
         let isConnected = false;
         let config = {};
         let selectedSaldoType = null;
         let currentTransaction = null;
+        loadUserData();
 
         // Load config
         loadConfig();
@@ -1502,6 +1531,47 @@ document.addEventListener('click', (e) => {
     }
   });
 });
+
+                // Fungsi load user data
+        function loadUserData() {
+          const user = auth.currentUser;
+          if (user) {
+            // Ambil dari database users
+            database.ref('users/' + user.uid).once('value').then(snap => {
+              const userData = snap.val() || {};
+              document.getElementById('userName').textContent = userData.name || user.email || 'Admin';
+              document.getElementById('userRole').textContent = userData.role 
+                ? (userData.role.charAt(0).toUpperCase() + userData.role.slice(1)) 
+                : 'Administrator';
+              
+              // Set avatar inisial
+              const avatar = document.getElementById('userAvatar');
+              if (userData.name) {
+                const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                avatar.textContent = initials;
+              } else if (user.email) {
+                avatar.textContent = user.email.charAt(0).toUpperCase();
+              }
+            }).catch(() => {
+              // Fallback ke data auth
+              document.getElementById('userName').textContent = user.email || 'Admin';
+              document.getElementById('userRole').textContent = 'Administrator';
+              document.getElementById('userAvatar').textContent = user.email ? user.email.charAt(0).toUpperCase() : 'A';
+            });
+          } else {
+            // Fallback ke localStorage
+            const savedUser = Utils.getStorage('webpos_session');
+            if (savedUser) {
+              document.getElementById('userName').textContent = savedUser.name || savedUser.email || 'Admin';
+              document.getElementById('userRole').textContent = savedUser.role || 'Administrator';
+              if (savedUser.name) {
+                const initials = savedUser.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                document.getElementById('userAvatar').textContent = initials;
+              }
+            }
+          }
+        }
+        
                 // ============================================
         // EVENT LISTENERS & FUNGSI UTAMA
         // ============================================
