@@ -649,6 +649,30 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       color: var(--text-muted);
       margin-bottom: 0.5rem;
     }
+
+    /* History Card Collapse */
+.history-card.collapsed .history-list {
+  display: none !important;
+}
+
+.history-card.collapsed .history-header {
+  border-bottom: none !important;
+}
+
+#historyToggleIcon {
+  transition: transform 0.3s ease;
+}
+
+.history-card.collapsed #historyToggleIcon {
+  transform: rotate(-90deg);
+}
+
+/* Hover effect untuk header yang bisa diklik */
+#historyHeader:hover {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+}
+    
   </style>
 </head>
 <body>
@@ -744,16 +768,29 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
         <!-- Laporan -->
         <div class="nav-section">
-          <div class="nav-section-title">Laporan</div>
-          <ul class="nav-menu">
-            <li class="nav-item">
-              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
-                <i class="fas fa-chart-bar"></i>
-                <span>Laporan Penjualan</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+    <div class="nav-section-title">Laporan</div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="page-laporan.html" class="nav-link" data-menu="laporan">
+          <i class="fas fa-chart-bar"></i>
+          <span>Laporan Penjualan</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="page-laporan-stok.html" class="nav-link" data-menu="laporan-stok">
+          <i class="fas fa-boxes"></i>
+          <span>Laporan Stok</span>
+        </a>
+      </li>
+      <!-- BARANG TERLARIS - Menu Standalone (BUKAN SUBMENU) -->
+      <li class="nav-item">
+        <a href="page-laporan-terlaris.html" class="nav-link" data-menu="laporan-terlaris">
+          <i class="fas fa-crown"></i>
+          <span>Barang Terlaris</span>
+        </a>
+      </li>
+    </ul>
+  </div>
 
         <!-- Integrasi -->
         <div class="nav-section">
@@ -796,6 +833,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                 <span>Backup & Sync</span>
               </a>
             </li>
+            <li class="nav-item">
+        <a href="page-log-aktivitas.html" class="nav-link" data-menu="log-aktivitas">
+          <i class="fas fa-history"></i>
+          <span>Log Aktivitas</span>
+        </a>
+      </li>
             <li class="nav-item">
               <a href="page-printer.html" class="nav-link" data-menu="printer">
                 <i class="fas fa-print"></i>
@@ -946,14 +989,15 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           </div>
         </div>
 
-        <!-- History -->
-        <div class="history-card">
-          <div class="history-header">
+                <!-- History -->
+        <div class="history-card" id="historyCard">
+          <div class="history-header" id="historyHeader" style="cursor: pointer;">
             <h3 class="history-title">
               <i class="fas fa-history"></i>
               Riwayat Backup
+              <i class="fas fa-chevron-down" id="historyToggleIcon" style="margin-left: 0.5rem; font-size: 0.8rem; transition: transform 0.3s;"></i>
             </h3>
-            <button class="btn btn-outline" id="btnClearHistory">
+            <button class="btn btn-outline" id="btnClearHistory" onclick="event.stopPropagation();">
               <i class="fas fa-trash"></i>
               Hapus Riwayat
             </button>
@@ -1020,25 +1064,34 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   </div>
 
   <!-- Scripts -->
-  <script src="js/firebase-config.js"></script>
+  <<script src="js/firebase-config.js?v=2"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/sidebar-filter.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
-          return;
-        }
-        
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        initBackup();
-      });
+      firebase.auth().onAuthStateChanged((user) => {
+  if (!user && !Utils.getStorage('webpos_session')) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  if (user) {
+    // Load user data langsung dari Firebase (sama seperti kasir)
+    firebase.database().ref('users/' + user.uid).once('value').then(snap => {
+      const data = snap.val() || {};
+      document.getElementById('userName').textContent = data.name || user.email || 'Admin';
+      document.getElementById('userRole').textContent = data.role || 'admin';
+      document.getElementById('userAvatar').textContent = (data.name || user.email || 'A').charAt(0).toUpperCase();
+    }).catch(err => {
+      console.error('Error loading user:', err);
+      document.getElementById('userName').textContent = user.email || 'Admin';
+    });
+  }
+  
+  initBackup();
+});
 
       function initBackup() {
         // Load status
@@ -1067,16 +1120,35 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           Utils.showToast('Fitur auto backup akan segera hadir', 'info');
         });
 
-        // Clear history
+                // Clear history
         document.getElementById('btnClearHistory').addEventListener('click', () => {
           Utils.confirm('Hapus semua riwayat backup?', () => {
             localStorage.removeItem('backup_history');
             loadHistory();
             Utils.showToast('Riwayat berhasil dihapus', 'success');
           });
-        });
+        });  // ← TUTUP EVENT LISTENER DI SINI
 
-        // Sidebar toggle
+        // ✅ TAMBAHKAN INI DI LUAR (setelah tutup kurung di atas):
+        // Collapse/Expand History
+        const historyHeader = document.getElementById('historyHeader');
+        const historyCard = document.getElementById('historyCard');
+        const historyToggleIcon = document.getElementById('historyToggleIcon');
+        
+        // Check saved state
+        const isHistoryCollapsed = localStorage.getItem('webpos_history_collapsed') === 'true';
+        if (isHistoryCollapsed) {
+          historyCard.classList.add('collapsed');
+        }
+        
+        historyHeader.addEventListener('click', (e) => {
+          // Don't trigger if clicking the delete button
+          if (e.target.closest('#btnClearHistory')) return;
+          
+          historyCard.classList.toggle('collapsed');
+          localStorage.setItem('webpos_history_collapsed', historyCard.classList.contains('collapsed'));
+        });
+        
         // Sidebar toggle - Desktop (collapse/expand)
 document.getElementById('menuToggle').addEventListener('click', () => {
   document.getElementById('sidebar').classList.toggle('collapsed');
@@ -1139,30 +1211,88 @@ document.addEventListener('click', (e) => {
         });
 
         async function loadStatus() {
-          try {
-            // Get database size estimate
-            const snapshot = await database.ref().once('value');
-            const data = snapshot.val();
-            const size = JSON.stringify(data).length;
-            const sizeMB = (size / 1024 / 1024).toFixed(2);
-            
-            document.getElementById('dbSize').textContent = sizeMB + ' MB';
-            
-            // Storage usage (simulated)
-            const storagePercent = Math.min((size / (10 * 1024 * 1024)) * 100, 100);
-            document.getElementById('storageUsed').textContent = storagePercent.toFixed(1) + '%';
-            document.getElementById('storageProgress').style.width = storagePercent + '%';
-            
-            // Last backup
-            const lastBackup = localStorage.getItem('last_backup');
-            if (lastBackup) {
-              document.getElementById('lastBackup').textContent = new Date(parseInt(lastBackup)).toLocaleString('id-ID');
-              document.getElementById('lastBackup').classList.remove('warning');
-            }
-          } catch (error) {
-            console.error('Error loading status:', error);
-          }
+  try {
+    // Coba ambil data dari localStorage dulu sebagai fallback
+    const localData = {
+      products: Utils.getStorage('webpos_products') || [],
+      transactions: Utils.getStorage('webpos_transactions') || [],
+      customers: Utils.getStorage('webpos_customers') || [],
+      kas: Utils.getStorage('webpos_kas') || {},
+      saldoTelegram: Utils.getStorage('webpos_saldo_telegram') || []
+    };
+    
+    let size = 0;
+    let dataSource = 'local';
+    
+    try {
+      // Coba dari Firebase tapi spesifik path, bukan root
+      const paths = ['products', 'transactions', 'customers', 'kas', 'saldo_telegram'];
+      const firebaseData = {};
+      
+      for (const path of paths) {
+        try {
+          const snap = await database.ref(path).once('value');
+          firebaseData[path] = snap.val() || {};
+        } catch (e) {
+          // Skip path yang error permission
+          firebaseData[path] = {};
         }
+      }
+      
+      size = JSON.stringify(firebaseData).length;
+      dataSource = 'firebase';
+    } catch (firebaseError) {
+      // Kalau Firebase error, pakai localStorage
+      size = JSON.stringify(localData).length;
+      console.log('Using localStorage for size estimate');
+    }
+    
+    const sizeMB = (size / 1024 / 1024).toFixed(2);
+    const sizeKB = (size / 1024).toFixed(0);
+    
+    // Tampilkan KB kalau < 1MB, MB kalau >= 1MB
+    document.getElementById('dbSize').textContent = 
+      size < 1024 * 1024 ? `${sizeKB} KB` : `${sizeMB} MB`;
+    
+    // Storage usage (dari localStorage quota atau simulasi)
+    const storageUsed = Math.min((size / (5 * 1024 * 1024)) * 100, 100);
+    document.getElementById('storageUsed').textContent = storageUsed.toFixed(1) + '%';
+    document.getElementById('storageProgress').style.width = storageUsed + '%';
+    
+  } catch (error) {
+    console.error('Error loading status:', error);
+    document.getElementById('dbSize').textContent = 'N/A';
+    document.getElementById('storageUsed').textContent = 'N/A';
+  }
+  
+  // Last backup - cek semua kemungkinan key
+  const possibleBackupKeys = ['last_backup', 'webpos_last_backup', 'backup_last_time'];
+  let lastBackup = null;
+  
+  for (const key of possibleBackupKeys) {
+    const val = localStorage.getItem(key);
+    if (val && val !== 'null') {
+      lastBackup = val;
+      break;
+    }
+  }
+  
+  if (lastBackup) {
+    const backupDate = new Date(parseInt(lastBackup));
+    const backupStr = backupDate.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const el = document.getElementById('lastBackup');
+    el.textContent = backupStr;
+    el.classList.remove('warning');
+    el.classList.add('success');
+  }
+}
 
         function loadHistory() {
           const history = JSON.parse(localStorage.getItem('backup_history') || '[]');
@@ -1193,34 +1323,45 @@ document.addEventListener('click', (e) => {
         }
 
         async function exportData() {
-          Utils.showLoading();
-          
-          try {
-            const snapshot = await database.ref().once('value');
-            const data = snapshot.val();
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `webpos_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            // Save history
-            addHistory('Export Data', 'export', 'success');
-            localStorage.setItem('last_backup', Date.now().toString());
-            
-            Utils.showToast('Data berhasil diexport', 'success');
-            loadStatus();
-          } catch (error) {
-            console.error('Error exporting:', error);
-            Utils.showToast('Gagal export data', 'error');
-            addHistory('Export Data', 'export', 'error');
-          }
-          
-          Utils.hideLoading();
-        }
+  Utils.showLoading();
+  
+  try {
+    // Ambil dari localStorage saja (tidak perlu permission Firebase root)
+    const data = {
+      products: Utils.getStorage('webpos_products') || [],
+      transactions: Utils.getStorage('webpos_transactions') || [],
+      customers: Utils.getStorage('webpos_customers') || [],
+      kas: Utils.getStorage('webpos_kas') || {},
+      saldoTelegram: Utils.getStorage('webpos_saldo_telegram') || [],
+      categories: Utils.getStorage('webpos_categories') || [],
+      users: Utils.getStorage('webpos_users') || {},
+      settings: Utils.getStorage('webpos_settings') || {}
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `webpos_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    // Save history
+    const backupTime = Date.now().toString();
+    localStorage.setItem('last_backup', backupTime);
+    localStorage.setItem('webpos_last_backup', backupTime);
+    addHistory('Export Data', 'export', 'success');
+    
+    Utils.showToast('Data berhasil diexport', 'success');
+    loadStatus(); // Refresh tampilan backup terakhir
+  } catch (error) {
+    console.error('Error exporting:', error);
+    Utils.showToast('Gagal export data', 'error');
+    addHistory('Export Data', 'export', 'error');
+  } finally {
+    Utils.hideLoading();
+  }
+}
 
         async function importData() {
           const fileInput = document.getElementById('importFile');
@@ -1256,22 +1397,33 @@ document.addEventListener('click', (e) => {
         }
 
         async function syncData() {
-          Utils.showLoading();
-          
-          try {
-            // Simulate sync
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            addHistory('Sinkronisasi', 'sync', 'success');
-            Utils.showToast('Sinkronisasi berhasil', 'success');
-          } catch (error) {
-            console.error('Error syncing:', error);
-            Utils.showToast('Gagal sinkronisasi', 'error');
-            addHistory('Sinkronisasi', 'sync', 'error');
-          }
-          
-          Utils.hideLoading();
-        }
+  Utils.showLoading();
+  
+  try {
+    // Simulate sync
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Update history
+    addHistory('Sinkronisasi', 'sync', 'success');
+    
+    // ✅ SIMPAN WAKTU BACKUP - HARUS DI SINI (dalam try)
+    const syncTime = Date.now().toString();
+    localStorage.setItem('last_backup', syncTime);
+    localStorage.setItem('webpos_last_backup', syncTime);
+    localStorage.setItem('last_sync_time', syncTime);
+    
+    // Update tampilan status
+    loadStatus();
+    
+    Utils.showToast('Sinkronisasi berhasil', 'success');
+  } catch (error) {
+    console.error('Error syncing:', error);
+    Utils.showToast('Gagal sinkronisasi', 'error');
+    addHistory('Sinkronisasi', 'sync', 'error');
+  } finally {
+    Utils.hideLoading();
+  }
+}
 
         function addHistory(action, type, status) {
           const history = JSON.parse(localStorage.getItem('backup_history') || '[]');
