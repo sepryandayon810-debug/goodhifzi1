@@ -19,16 +19,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
 const storage = firebase.storage();
-database.enablePersistence({synchronizeTabs: true})
-  .then(() => {
-    console.log('✅ Offline persistence enabled');
-  })
-  .catch((err) => {
-    if (err.code === 'failed-precondition') {
-      console.warn('⚠️ Persistence failed: Multiple tabs open');
-    } else if (err.code === 'unimplemented') {
-      console.warn('⚠️ Browser tidak support offline persistence');
-    }
-  });
 
+console.log('✅ Firebase RTDB initialized (offline ready)');
 console.log('✅ Firebase initialized');
