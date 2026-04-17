@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <script>
-  // Set tema sebelum halaman tampil (biar tidak flicker)
+  // Set tema sebelum halaman tampil
   const themeColor = localStorage.getItem('theme_color') || 'indigo';
   const isDark = localStorage.getItem('dark_mode') === 'true';
   document.documentElement.setAttribute('data-theme-color', themeColor);
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
 </script>
 
-  <title>WebPOS - Printer & Struk</title>
+  <title>WebPOS - Printer Digital</title>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,32 +22,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Tesseract.js -->
+  <!-- Tesseract.js untuk OCR -->
   <script src="https://unpkg.com/tesseract.js@2.1.5/dist/tesseract.min.js"></script>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 
   <style>
-
-    /* TAMBAH INI - START - Warna Tema */
-:root { --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #ec4899; }
-[data-theme-color="orange"] { --primary: #f97316; --primary-dark: #ea580c; --secondary: #f59e0b; }
-[data-theme-color="blue"] { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #06b6d4; }
-[data-theme-color="green"] { --primary: #10b981; --primary-dark: #059669; --secondary: #84cc16; }
-[data-theme-color="purple"] { --primary: #8b5cf6; --primary-dark: #7c3aed; --secondary: #d946ef; }
-[data-theme-color="red"] { --primary: #ef4444; --primary-dark: #dc2626; --secondary: #f97316; }
-[data-theme-color="pink"] { --primary: #ec4899; --primary-dark: #db2777; --secondary: #8b5cf6; }
-[data-theme-color="teal"] { --primary: #14b8a6; --primary-dark: #0d9488; --secondary: #06b6d4; }
-
-[data-theme="dark"] { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --border-color: #334155; }
-[data-theme="light"] { --bg-primary: #f8fafc; --bg-secondary: #f1f5f9; --bg-card: #ffffff; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8; --border-color: #e2e8f0; }
+    /* TAMBAH INI - Warna Tema */
+    :root { --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #ec4899; }
+    [data-theme-color="orange"] { --primary: #f97316; --primary-dark: #ea580c; --secondary: #f59e0b; }
+    [data-theme-color="blue"] { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #06b6d4; }
+    [data-theme-color="green"] { --primary: #10b981; --primary-dark: #059669; --secondary: #84cc16; }
+    [data-theme-color="purple"] { --primary: #8b5cf6; --primary-dark: #7c3aed; --secondary: #d946ef; }
+    
+    [data-theme="dark"] { --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-card: #1e293b; --text-primary: #f8fafc; --text-secondary: #cbd5e1; --text-muted: #64748b; --border-color: #334155; }
+    [data-theme="light"] { --bg-primary: #f8fafc; --bg-secondary: #f1f5f9; --bg-card: #ffffff; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8; --border-color: #e2e8f0; }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { font-size: 16px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    html { font-size: 16px; font-family: 'Inter', sans-serif; }
     
     body {
       background: var(--bg-primary);
@@ -61,7 +57,6 @@
     ::-webkit-scrollbar-track { background: var(--bg-secondary); }
     ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 9999px; }
 
-    /* Shadow & Radius */
     :root {
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
@@ -76,10 +71,9 @@
       --bottom-nav-height: 70px;
     }
 
-    /* Layout */
     .app-container { display: flex; min-height: 100vh; }
 
-    /* SIDEBAR */
+    /* SIDEBAR - SAMA DENGAN STRUKTUR STANDAR */
     .sidebar {
       position: fixed;
       top: 0;
@@ -229,7 +223,6 @@
     .nav-submenu .nav-link { padding: 0.5rem 1rem; font-size: 0.85rem; }
     .nav-submenu .nav-link.active { background: rgba(255,255,255,0.1); color: var(--primary); }
 
-    /* SIDEBAR FOOTER - USER PROFILE FIX */
     .sidebar-footer {
       padding: 1rem;
       border-top: 1px solid var(--border-color);
@@ -560,6 +553,16 @@
 
     .d-md-none { display: none !important; }
     @media (max-width: 1024px) { .d-md-none { display: flex !important; } }
+
+    /* Share buttons */
+    .share-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.5rem; }
+    @media (max-width: 480px) { .share-actions { grid-template-columns: 1fr; } }
+    .share-btn { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.875rem; border-radius: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; border: none; }
+    .share-btn.pdf { background: #dc2626; color: white; }
+    .share-btn.image { background: #059669; color: white; }
+    .share-btn.whatsapp { background: #25d366; color: white; }
+    .share-btn.print { background: var(--primary); color: white; }
+    .share-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
   </style>
 </head>
 <body>
@@ -625,11 +628,11 @@
               </ul>
             </li>
             <li class="nav-item">
-  <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
-    <i class="fas fa-shopping-cart"></i>
-    <span>Pembelian / Restock</span>
-  </a>
-</li>
+              <a href="page-pembelian.html" class="nav-link" data-menu="pembelian">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Pembelian / Restock</span>
+              </a>
+            </li>
             <li class="nav-item">
               <a href="page-hutang.html" class="nav-link"><i class="fas fa-hand-holding-usd"></i><span>Hutang & Piutang</span></a>
             </li>
@@ -638,29 +641,28 @@
 
         <!-- LAPORAN -->
         <div class="nav-section">
-    <div class="nav-section-title">Laporan</div>
-    <ul class="nav-menu">
-      <li class="nav-item">
-        <a href="page-laporan.html" class="nav-link" data-menu="laporan">
-          <i class="fas fa-chart-bar"></i>
-          <span>Laporan Penjualan</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="page-laporan-stok.html" class="nav-link" data-menu="laporan-stok">
-          <i class="fas fa-boxes"></i>
-          <span>Laporan Stok</span>
-        </a>
-      </li>
-      <!-- BARANG TERLARIS - Menu Standalone (BUKAN SUBMENU) -->
-      <li class="nav-item">
-        <a href="page-laporan-terlaris.html" class="nav-link" data-menu="laporan-terlaris">
-          <i class="fas fa-crown"></i>
-          <span>Barang Terlaris</span>
-        </a>
-      </li>
-    </ul>
-  </div>
+          <div class="nav-section-title">Laporan</div>
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <a href="page-laporan.html" class="nav-link" data-menu="laporan">
+                <i class="fas fa-chart-bar"></i>
+                <span>Laporan Penjualan</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-laporan-stok.html" class="nav-link" data-menu="laporan-stok">
+                <i class="fas fa-boxes"></i>
+                <span>Laporan Stok</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="page-laporan-terlaris.html" class="nav-link" data-menu="laporan-terlaris">
+                <i class="fas fa-crown"></i>
+                <span>Barang Terlaris</span>
+              </a>
+            </li>
+          </ul>
+        </div>
 
         <!-- INTEGRASI -->
         <div class="nav-section">
@@ -689,13 +691,14 @@
               <a href="page-backup.html" class="nav-link"><i class="fas fa-cloud-upload-alt"></i><span>Backup & Sync</span></a>
             </li>
             <li class="nav-item">
-        <a href="page-log-aktivitas.html" class="nav-link" data-menu="log-aktivitas">
-          <i class="fas fa-history"></i>
-          <span>Log Aktivitas</span>
-        </a>
-      </li>
+              <a href="page-log-aktivitas.html" class="nav-link" data-menu="log-aktivitas">
+                <i class="fas fa-history"></i>
+                <span>Log Aktivitas</span>
+              </a>
+            </li>
+            <!-- Menu Printer - Tetap namanya Printer biar konsisten -->
             <li class="nav-item">
-              <a href="page-printer.html" class="nav-link active"><i class="fas fa-print"></i><span>Printer & Struk</span></a>
+              <a href="page-printer.html" class="nav-link active"><i class="fas fa-receipt"></i><span>Printer & Struk</span></a>
             </li>
             <li class="nav-item">
               <a href="page-reset.html" class="nav-link"><i class="fas fa-trash-alt"></i><span>Reset Data</span></a>
@@ -723,7 +726,7 @@
       <header class="main-header">
         <div class="header-left">
           <button class="btn-icon d-md-none" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
-          <h1 class="header-title">Printer & Struk</h1>
+          <h1 class="header-title">Struk Digital & Bukti Transfer</h1>
         </div>
         <div class="header-actions">
           <button class="btn-icon" id="btnTheme" title="Toggle Dark Mode">
@@ -856,118 +859,32 @@
                 <div class="receipt-footer" id="previewFooter">Terima kasih</div>
               </div>
 
-              <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                <button class="btn btn-primary btn-block" onclick="printReceipt()">
-                  <i class="fas fa-print"></i> Cetak Struk
+              <!-- ACTIONS: Share & Print (Browser) -->
+              <div class="share-actions">
+                <button class="share-btn pdf" onclick="shareAsPDF()">
+                  <i class="fas fa-file-pdf"></i> Simpan PDF
                 </button>
-                <button class="btn btn-outline" onclick="window.print()" title="Print halaman ini">
-                  <i class="fas fa-file-alt"></i>
+                <button class="share-btn image" onclick="shareAsImage()">
+                  <i class="fas fa-image"></i> Share Gambar
+                </button>
+                <button class="share-btn whatsapp" onclick="shareToWhatsApp()">
+                  <i class="fab fa-whatsapp"></i> Share WhatsApp
+                </button>
+                <button class="share-btn print" onclick="printReceipt()">
+                  <i class="fas fa-print"></i> Print/Save PDF
                 </button>
               </div>
 
-              <!-- GANTI DENGAN INI - Panel Printer Connection Lengkap -->
-<div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-    <i class="fas fa-plug" style="color: var(--primary)"></i> 
-    Koneksi Printer
-  </h4>
-  
-  <!-- Status Connection -->
-  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: 0.5rem;">
-    <div id="printerStatusIndicator" style="width: 10px; height: 10px; border-radius: 50%; background: var(--danger); transition: all 0.3s;"></div>
-    <span id="printerStatusText" style="font-size: 0.85rem; font-weight: 500;">Printer tidak terhubung</span>
-  </div>
-
-  <!-- Connection Type Selector -->
-  <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('bluetooth')" id="btnBluetooth">
-      <i class="fab fa-bluetooth-b"></i> Bluetooth
-    </button>
-    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('network')" id="btnNetwork">
-      <i class="fas fa-wifi"></i> Network
-    </button>
-    <button class="btn btn-outline btn-sm" style="flex: 1; font-size: 0.75rem;" onclick="showPrinterPanel('usb')" id="btnUSB">
-      <i class="fas fa-usb"></i> USB
-    </button>
-  </div>
-
-  <!-- Bluetooth Panel -->
-  <div id="panelBluetooth" style="display: none;">
-    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-        <i class="fas fa-info-circle"></i> Printer Thermal Bluetooth (58mm/80mm)
-      </div>
-      <button class="btn btn-primary btn-block btn-sm" onclick="scanBluetoothPrinter()" id="btnScanBluetooth">
-        <i class="fas fa-search"></i> Cari Printer
-      </button>
-      <div id="bluetoothDeviceList" style="margin-top: 0.75rem; max-height: 150px; overflow-y: auto;"></div>
-      <div id="bluetoothLoading" style="display: none; text-align: center; padding: 1rem;">
-        <div class="spinner" style="width: 30px; height: 30px; margin: 0 auto 0.5rem;"></div>
-        <div style="font-size: 0.75rem; color: var(--text-muted);">Mencari device...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Network Panel -->
-  <div id="panelNetwork" style="display: none;">
-    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-        <i class="fas fa-info-circle"></i> Printer Thermal WiFi/LAN (ESC/POS)
-      </div>
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <label class="form-label" style="font-size: 0.8rem;">IP Address Printer</label>
-        <input type="text" class="form-input" id="printerIpAddress" placeholder="192.168.1.100" style="font-size: 0.85rem;">
-      </div>
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <label class="form-label" style="font-size: 0.8rem;">Port (default 9100)</label>
-        <input type="number" class="form-input" id="printerPort" value="9100" style="font-size: 0.85rem;">
-      </div>
-      <button class="btn btn-primary btn-block btn-sm" onclick="connectNetworkPrinter()">
-        <i class="fas fa-plug"></i> Hubungkan
-      </button>
-    </div>
-  </div>
-
-  <!-- USB Panel -->
-  <div id="panelUSB" style="display: none;">
-    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-      <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
-        <i class="fas fa-info-circle"></i> Printer USB (dengan OTG)
-      </div>
-      <button class="btn btn-primary btn-block btn-sm" onclick="connectUSBPrinter()">
-        <i class="fas fa-usb"></i> Pilih Printer USB
-      </button>
-      <div id="usbDeviceInfo" style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);"></div>
-    </div>
-  </div>
-
-  <!-- Connected Printer Info -->
-  <div id="connectedPrinterInfo" style="display: none; background: rgba(16,185,129,0.1); border: 1px solid var(--success); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem;">
-    <div style="font-size: 0.8rem; font-weight: 600; color: var(--success); margin-bottom: 0.25rem;">
-      <i class="fas fa-check-circle"></i> Printer Terhubung
-    </div>
-    <div id="printerInfoDetails" style="font-size: 0.75rem; color: var(--text-secondary);"></div>
-    <button class="btn btn-outline btn-sm btn-block" style="margin-top: 0.5rem; font-size: 0.75rem;" onclick="disconnectPrinter()">
-      <i class="fas fa-unlink"></i> Putuskan Koneksi
-    </button>
-  </div>
-
-  <!-- Test Print & Actions -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-    <button class="btn btn-outline btn-sm" onclick="testPrint()" id="btnTestPrint" disabled>
-      <i class="fas fa-print"></i> Test Print
-    </button>
-    <button class="btn btn-outline btn-sm" onclick="printReceipt()">
-      <i class="fas fa-receipt"></i> Cetak Struk
-    </button>
-  </div>
-  
-  <div style="margin-top: 0.5rem;">
-    <button class="btn btn-outline btn-sm btn-block" onclick="savePrinterConfig()">
-      <i class="fas fa-save"></i> Simpan Konfigurasi
-    </button>
-  </div>
-</div>
+              <!-- Info WebView -->
+              <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(245,158,11,0.1); border: 1px solid var(--warning); border-radius: 0.75rem; font-size: 0.8rem; color: var(--text-secondary);">
+                <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--warning);">
+                  <i class="fas fa-info-circle"></i> Catatan Printer
+                </div>
+                <div style="line-height: 1.5;">
+                  • Di aplikasi WebView, gunakan <strong>"Print/Save PDF"</strong> kemudian pilih <strong>"Share ke WhatsApp"</strong> atau <strong>"Save as PDF"</strong>.<br>
+                  • Untuk print ke printer thermal fisik, pastikan printer sudah terpasang di Android sebagai <strong>Default Printer</strong>, lalu pilih PDF → Print → Pilih printer thermal.
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -993,7 +910,7 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-   <!-- Scripts -->
+  <!-- Scripts -->
   <script src="js/firebase-config.js?v=2"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
@@ -1001,12 +918,23 @@
 
   <script>
     // ==========================================
+    // FILE READER HELPER (TAMBAHAN)
+    // ==========================================
+    function readFileAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('Gagal membaca file'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ==========================================
     // GLOBAL STATE
     // ==========================================
     let currentReceiptType = 'transfer';
     let ocrWorkerReady = false;
     let scannedData = null;
-    let isPrinterConnected = false;
     let receiptHeader = {};
     let currentUser = null;
 
@@ -1014,9 +942,7 @@
     // INITIALIZATION
     // ==========================================
    document.addEventListener('DOMContentLoaded', async function() {
-  // TAMBAH BARIS INI:
-  syncTheme(); // <-- TAMBAH INI
-  
+  syncTheme();
   updateThemeIcon();
       
       // Initialize OCR
@@ -1042,7 +968,6 @@
     // AUTH & USER PROFILE - FIX LOADING ISSUE
     // ==========================================
     function setupAuthListener() {
-      // Check if Firebase Auth is available
       if (typeof auth !== 'undefined') {
         auth.onAuthStateChanged((user) => {
           if (!user && !localStorage.getItem('webpos_session')) {
@@ -1054,7 +979,6 @@
             currentUser = user;
             loadUserData(user.uid);
           } else {
-            // Try to get from session storage
             const session = localStorage.getItem('webpos_session');
             if (session) {
               try {
@@ -1067,7 +991,6 @@
           }
         });
       } else {
-        // Fallback if auth not loaded yet
         const session = localStorage.getItem('webpos_session');
         if (session) {
           try {
@@ -1081,17 +1004,14 @@
     }
 
     function loadUserData(uid) {
-      // Try to get from database or localStorage
       if (typeof database !== 'undefined') {
         database.ref('users/' + uid).once('value')
           .then(snapshot => {
             const data = snapshot.val();
             if (data) {
               updateUserProfile(data);
-              // Save to localStorage for offline access
               localStorage.setItem('webpos_user', JSON.stringify(data));
             } else {
-              // Fallback to basic info
               updateUserProfile({ 
                 name: currentUser?.displayName || currentUser?.email || 'User',
                 role: 'Kasir'
@@ -1100,7 +1020,6 @@
           })
           .catch(err => {
             console.error('Error loading user:', err);
-            // Try localStorage fallback
             const cached = localStorage.getItem('webpos_user');
             if (cached) {
               try {
@@ -1108,12 +1027,9 @@
               } catch(e) {
                 updateUserProfile({ name: 'User', role: 'Kasir' });
               }
-            } else {
-              updateUserProfile({ name: 'User', role: 'Kasir' });
             }
           });
       } else {
-        // No database, use cached
         const cached = localStorage.getItem('webpos_user');
         if (cached) {
           try {
@@ -1136,7 +1052,6 @@
         roleEl.textContent = userData.role || 'Kasir';
       }
       
-      // Update avatar if photo available
       const avatarEl = document.getElementById('userAvatar');
       if (avatarEl && userData.photoURL) {
         avatarEl.innerHTML = `<img src="${userData.photoURL}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
@@ -1166,6 +1081,13 @@
       
       localStorage.setItem('dark_mode', !isDark);
       updateThemeIcon();
+    }
+
+    function syncTheme() {
+      const savedTheme = localStorage.getItem('dark_mode');
+      if (savedTheme === 'true') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
     }
 
     // ==========================================
@@ -1247,137 +1169,232 @@
       }
     }
 
-    function readFileAsDataURL(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.onerror = () => reject(new Error('Gagal membaca file'));
-        reader.readAsDataURL(file);
-      });
-    }
-
     function parseReceiptText(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
       const fullText = text.toLowerCase();
       
-      let detectedBank = '';
-      if (fullText.includes('bri') || fullText.includes('brimo')) detectedBank = 'BRI';
-      else if (fullText.includes('bca')) detectedBank = 'BCA';
-      else if (fullText.includes('bni')) detectedBank = 'BNI';
-      else if (fullText.includes('mandiri') || fullText.includes('livin')) detectedBank = 'MANDIRI';
-      else if (fullText.includes('dana')) detectedBank = 'DANA';
-      else if (fullText.includes('gopay')) detectedBank = 'GOPAY';
-      else if (fullText.includes('ovo')) detectedBank = 'OVO';
-      else if (fullText.includes('shopeepay')) detectedBank = 'SHOPEEPAY';
-      else if (fullText.includes('linkaja')) detectedBank = 'LINKAJA';
-
+      // ===== DETEKSI PROVIDER DENGAN BOBOT/PRIORITAS =====
+      let detectedApp = '';
+      let isEwallet = false;
+      let isBank = false;
+      let confidenceBank = 0;
+      let confidenceEwallet = 0;
+      
+      // Cek BANK terlebih dahulu (prioritas tinggi kalau ada indikator kuat)
+      if (/\b(bri|brimo|bri mobile)\b/i.test(fullText)) {
+        detectedApp = 'BRI'; 
+        isBank = true; 
+        confidenceBank += 10;
+      }
+      else if (/\b(bca|mybca|bca mobile)\b/i.test(fullText)) {
+        detectedApp = 'BCA'; 
+        isBank = true; 
+        confidenceBank += 10;
+      }
+      else if (/\b(bni|bni mobile)\b/i.test(fullText)) {
+        detectedApp = 'BNI'; 
+        isBank = true; 
+        confidenceBank += 10;
+      }
+      else if (/\b(mandiri|livin|bank mandiri)\b/i.test(fullText)) {
+        detectedApp = 'MANDIRI'; 
+        isBank = true; 
+        confidenceBank += 10;
+      }
+      else if (/\b(bsi|bank syariah indonesia)\b/i.test(fullText)) {
+        detectedApp = 'BSI'; 
+        isBank = true; 
+        confidenceBank += 10;
+      }
+      
+      // Cek E-WALLET hanya kalau tidak ada bank yang terdeteksi dengan kuat
+      if (confidenceBank === 0) {
+        if (/\b(dana|dana kaget)\b/i.test(fullText) && 
+            (fullText.includes('top up') || fullText.includes('kirim dana') || fullText.includes('saldo dana'))) {
+          detectedApp = 'DANA'; 
+          isEwallet = true; 
+          confidenceEwallet += 5;
+        }
+        else if (/\b(gopay|go-pay|gopay coins)\b/i.test(fullText)) {
+          detectedApp = 'GOPAY'; 
+          isEwallet = true;
+        }
+        else if (/\b(ovo|ovo cash|ovo points)\b/i.test(fullText)) {
+          detectedApp = 'OVO'; 
+          isEwallet = true;
+        }
+        else if (/\b(shopeepay|shopee pay)\b/i.test(fullText)) {
+          detectedApp = 'SHOPEEPAY'; 
+          isEwallet = true;
+        }
+        else if (/\b(linkaja|link aja)\b/i.test(fullText)) {
+          detectedApp = 'LINKAJA'; 
+          isEwallet = true;
+        }
+      }
+      
+      // ===== DETEKSI JENIS TRANSAKSI =====
       let type = 'transfer';
-      if (fullText.includes('top up') || fullText.includes('topup') || fullText.includes('isi ulang')) {
+      
+      if (isEwallet && (fullText.includes('top up') || fullText.includes('isi saldo') || fullText.includes('isi ulang'))) {
         type = 'top_up';
       }
-
+      else if (isBank && (fullText.includes('tarik tunai') || fullText.includes('withdrawal') || fullText.includes('penarikan'))) {
+        type = 'tarik_tunai';
+      }
+      else if (isBank && (fullText.includes('transfer') || fullText.includes('bifast') || fullText.includes('rtgs'))) {
+        type = 'transfer';
+      }
+      
+      // ===== PARSE TANGGAL & WAKTU =====
       let date = new Date().toISOString().split('T')[0];
       let time = new Date().toTimeString().slice(0, 5);
       
-      const dateMatch = text.match(/(\d{1,2})[\/\-\s](\d{1,2})[\/\-\s](\d{4})/);
-      if (dateMatch && dateMatch[3].length === 4) {
-        date = `${dateMatch[3]}-${dateMatch[2].padStart(2,'0')}-${dateMatch[1].padStart(2,'0')}`;
+      const dateMatch = text.match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4}|\d{2})/) || 
+                        text.match(/(\d{1,2})\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)\s+(\d{4})/i);
+      
+      if (dateMatch) {
+        if (dateMatch[2].match(/\d+/)) {
+          const day = dateMatch[1].padStart(2,'0');
+          const month = dateMatch[2].padStart(2,'0');
+          let year = dateMatch[3];
+          if (year.length === 2) year = '20' + year;
+          date = `${year}-${month}-${day}`;
+        } else {
+          const months = ['januari','februari','maret','april','mei','juni','juli','agustus','september','oktober','november','desember'];
+          const day = dateMatch[1].padStart(2,'0');
+          const month = String(months.indexOf(dateMatch[2].toLowerCase()) + 1).padStart(2,'0');
+          date = `${dateMatch[3]}-${month}-${day}`;
+        }
       }
       
-      const timeMatch = text.match(/(\d{1,2})[:.](\d{2})/);
+      const timeMatch = text.match(/(\d{1,2})[:.](\d{2})(?:[:.]\d{2})?/);
       if (timeMatch) {
         time = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
       }
 
+      // ===== PARSE NOMINAL =====
       let nominal = 0;
       let admin = 0;
       let total = 0;
 
-      const rpMatch = text.match(/rp[\s\.]?([\d\.,]+)/i);
-      if (rpMatch && rpMatch[1]) {
-        const cleanNum = rpMatch[1].replace(/[\.,]/g, '');
-        const num = parseInt(cleanNum);
-        if (num > 1000) {
-          total = num;
-          nominal = num;
-        }
-      }
-
-      const allNumbers = [...text.matchAll(/\b\d{5,10}\b/g)].map(m => parseInt(m[0])).filter(n => n > 10000);
-      allNumbers.sort((a,b) => b-a);
+      const rpMatches = [...text.matchAll(/rp[\s\.]?([\d\.,]+)/gi)];
       
-      if (allNumbers.length > 0 && total === 0) {
-        total = allNumbers[0];
-        nominal = total;
-      }
-
-      for (const num of allNumbers) {
-        if (num <= 50000 && num > 0) {
-          admin = num;
-          nominal = total - admin;
-          break;
+      if (rpMatches.length > 0) {
+        const amounts = rpMatches.map(match => {
+          let numStr = match[1].replace(/\./g, '');
+          numStr = numStr.replace(/,/g, '');
+          return parseInt(numStr);
+        }).filter(n => !isNaN(n) && n > 1000);
+        
+        if (amounts.length > 0) {
+          amounts.sort((a,b) => b-a);
+          total = amounts[0];
+          
+          const adminCandidate = amounts.find(n => n > 0 && n < 100000 && n !== total);
+          if (adminCandidate) {
+            admin = adminCandidate;
+            nominal = total - admin;
+          } else {
+            nominal = total;
+          }
         }
       }
 
+      if (total === 0) {
+        const allNumbers = [...text.matchAll(/\b\d{5,12}\b/g)]
+          .map(m => parseInt(m[0]))
+          .filter(n => n > 10000 && n < 1000000000);
+        
+        if (allNumbers.length > 0) {
+          allNumbers.sort((a,b) => b-a);
+          total = allNumbers[0];
+          nominal = total;
+        }
+      }
+
+      // ===== PARSE NAMA & REKENING =====
       let senderName = '';
       let senderAccount = '';
       let receiverName = '';
       let receiverAccount = '';
+      let phoneNumber = '';
+
+      const phoneMatch = text.match(/\b(08\d{8,13})\b/);
+      if (phoneMatch) {
+        phoneNumber = phoneMatch[1];
+      }
 
       for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].toLowerCase();
+        const line = lines[i];
+        const lowerLine = line.toLowerCase();
         const nextLine = lines[i+1] || '';
         
-        if ((line.includes('dari') || line.includes('pengirim') || line.includes('sumber')) && nextLine && !senderName) {
-          senderName = nextLine.trim().substring(0, 30);
+        if ((lowerLine.includes('pengirim') || 
+             lowerLine.includes('sumber') ||
+             lowerLine.includes('dari') ||
+             lowerLine.includes('debit') ||
+             lowerLine.includes('rekening sumber')) && 
+            nextLine && nextLine.length > 2 && !nextLine.match(/^\d+$/)) {
+          senderName = cleanName(nextLine);
         }
         
-        if ((line.includes('ke') || line.includes('penerima') || line.includes('tujuan')) && nextLine && !receiverName) {
-          receiverName = nextLine.trim().substring(0, 30);
+        if ((lowerLine.includes('penerima') || 
+             lowerLine.includes('tujuan') ||
+             lowerLine.includes('ke rekening') ||
+             lowerLine.includes('credit') ||
+             lowerLine.includes('beneficiary')) && 
+            nextLine && nextLine.length > 2 && !nextLine.match(/^\d+$/)) {
+          receiverName = cleanName(nextLine);
         }
       }
 
       const accountMatches = [...text.matchAll(/\b\d{10,16}\b/g)];
-      const accounts = accountMatches.map(m => m[0]).filter((v, i, a) => a.indexOf(v) === i);
+      const uniqueAccounts = [...new Set(accountMatches.map(m => m[0]))];
       
-      if (accounts.length >= 2) {
-        senderAccount = maskAccount(accounts[0]);
-        receiverAccount = maskAccount(accounts[1]);
-      } else if (accounts.length === 1) {
-        receiverAccount = maskAccount(accounts[0]);
+      if (uniqueAccounts.length >= 2) {
+        senderAccount = maskAccount(uniqueAccounts[0]);
+        receiverAccount = maskAccount(uniqueAccounts[1]);
+      } else if (uniqueAccounts.length === 1) {
+        receiverAccount = maskAccount(uniqueAccounts[0]);
       }
 
-      if (type === 'top_up' || ['DANA','GOPAY','OVO'].includes(detectedBank)) {
-        const phoneMatch = text.match(/\b(08\d{8,13})\b/);
-        if (phoneMatch) {
-          if (!receiverAccount) receiverAccount = phoneMatch[1];
+      if (isEwallet && phoneNumber) {
+        receiverAccount = phoneNumber;
+        if (!receiverName || receiverName === '-') {
+          receiverName = 'Pengguna ' + detectedApp;
         }
+        senderName = receiverName;
+        senderAccount = phoneNumber;
       }
 
-      if (detectedBank === 'BRI') {
-        if (!senderName) senderName = 'Nasabah BRI';
-        if (!receiverName) receiverName = 'Penerima BRI';
-      }
+      if (!senderName) senderName = isBank ? 'Nasabah ' + detectedApp : 'Pengirim';
+      if (!receiverName) receiverName = isBank ? 'Penerima ' + detectedApp : 'Penerima';
 
       return {
         type,
-        detected: nominal > 0 || detectedBank !== '',
-        provider: detectedBank,
-        senderProvider: detectedBank,
-        receiverProvider: detectedBank,
+        detected: total > 0 || detectedApp !== '',
+        provider: detectedApp,
+        isEwallet: isEwallet,
+        isBank: isBank,
         parsed: {
-          date, time,
-          senderName: senderName || 'Nama Pengirim',
-          senderAccount: senderAccount || '****XXXX',
-          senderBank: detectedBank,
-          receiverName: receiverName || 'Nama Penerima',
-          receiverAccount: receiverAccount || '****XXXX',
-          receiverBank: detectedBank,
+          date, 
+          time,
+          senderName: senderName,
+          senderAccount: senderAccount || (isEwallet ? phoneNumber : '****XXXX'),
+          senderBank: isEwallet ? detectedApp : (isBank ? detectedApp : ''),
+          receiverName: receiverName,
+          receiverAccount: receiverAccount || (isEwallet ? phoneNumber : '****XXXX'),
+          receiverBank: detectedApp,
           nominal,
           admin,
           total: total || nominal
         }
       };
+    }
+
+    function cleanName(str) {
+      return str.replace(/\d{10,}/g, '').trim().substring(0, 30) || 'Unknown';
     }
 
     function maskAccount(account) {
@@ -1769,6 +1786,10 @@
       `;
     }
 
+    // ==========================================
+    // SHARE & PRINT FUNCTIONS (TANPA BLUETOOTH)
+    // ==========================================
+    
     function printReceipt() {
       const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
       const address = document.getElementById('receiptAddress')?.value || '';
@@ -1795,24 +1816,163 @@
         const receiver = document.getElementById('manualReceiver')?.value || '-';
         const receiverAcc = document.getElementById('manualReceiverAccount')?.value || '-';
         const receiverBank = document.getElementById('manualBankTo')?.value || '';
-        content = `================================\n    ${storeName.toUpperCase()}\n${address}\n${phone ? 'HP: ' + phone : ''}\n================================\nBUKTI TRANSFER\nNo: ${trxId}\nTgl: ${date} ${time}\n--------------------------------\nPENGIRIM:\n${sender}\n${senderAcc} ${senderBank}\n--------------------------------\nPENERIMA:\n${receiver}\n${receiverAcc} ${receiverBank}\n--------------------------------\nNominal: Rp ${formatNumber(nominal)}\nAdmin: Rp ${formatNumber(admin)}\n--------------------------------\nTOTAL: Rp ${formatNumber(total)}\n================================\n${note}\n================================`;
+        content = `================================
+    ${storeName.toUpperCase()}
+${address}
+${phone ? 'HP: ' + phone : ''}
+================================
+BUKTI TRANSFER
+No: ${trxId}
+Tgl: ${date} ${time}
+--------------------------------
+PENGIRIM:
+${sender}
+${senderAcc} ${senderBank}
+--------------------------------
+PENERIMA:
+${receiver}
+${receiverAcc} ${receiverBank}
+--------------------------------
+Nominal: Rp ${formatNumber(nominal)}
+Admin: Rp ${formatNumber(admin)}
+--------------------------------
+TOTAL: Rp ${formatNumber(total)}
+================================
+${note}
+================================`;
       } else if (currentReceiptType === 'tarik_tunai') {
         const customer = document.getElementById('manualCustomer')?.value || '-';
         const bank = document.getElementById('manualBank')?.value || '';
         const account = document.getElementById('manualAccount')?.value || '-';
-        content = `================================\n    ${storeName.toUpperCase()}\n${address}\n${phone ? 'HP: ' + phone : ''}\n================================\nBUKTI TARIK TUNAI\nNo: ${trxId}\nTgl: ${date} ${time}\n--------------------------------\nCustomer: ${customer}\nBank: ${bank}\nNo Rek: ${account}\n--------------------------------\nNominal: Rp ${formatNumber(nominal)}\nAdmin: Rp ${formatNumber(admin)}\n--------------------------------\nTOTAL: Rp ${formatNumber(total)}\n================================\n${note}\n================================`;
+        content = `================================
+    ${storeName.toUpperCase()}
+${address}
+${phone ? 'HP: ' + phone : ''}
+================================
+BUKTI TARIK TUNAI
+No: ${trxId}
+Tgl: ${date} ${time}
+--------------------------------
+Customer: ${customer}
+Bank: ${bank}
+No Rek: ${account}
+--------------------------------
+Nominal: Rp ${formatNumber(nominal)}
+Admin: Rp ${formatNumber(admin)}
+--------------------------------
+TOTAL: Rp ${formatNumber(total)}
+================================
+${note}
+================================`;
       } else {
         const type = document.getElementById('manualTopUpType')?.value || '';
         const target = document.getElementById('manualTarget')?.value || '-';
         const customer = document.getElementById('manualCustomer')?.value || '-';
-        content = `================================\n    ${storeName.toUpperCase()}\n${address}\n${phone ? 'HP: ' + phone : ''}\n================================\nBUKTI TOP UP ${type.toUpperCase()}\nNo: ${trxId}\nTgl: ${date} ${time}\n--------------------------------\nCustomer: ${customer}\nNo Tujuan: ${target}\n--------------------------------\nNominal: Rp ${formatNumber(nominal)}\nAdmin: Rp ${formatNumber(admin)}\n--------------------------------\nTOTAL: Rp ${formatNumber(total)}\n================================\n${note}\n================================`;
+        content = `================================
+    ${storeName.toUpperCase()}
+${address}
+${phone ? 'HP: ' + phone : ''}
+================================
+BUKTI TOP UP ${type.toUpperCase()}
+No: ${trxId}
+Tgl: ${date} ${time}
+--------------------------------
+Customer: ${customer}
+No Tujuan: ${target}
+--------------------------------
+Nominal: Rp ${formatNumber(nominal)}
+Admin: Rp ${formatNumber(admin)}
+--------------------------------
+TOTAL: Rp ${formatNumber(total)}
+================================
+${note}
+================================`;
       }
 
       const w = window.open('', '_blank');
       w.document.write(`<html><head><title>Struk ${currentReceiptType}</title><style>body{font-family: 'Courier New', monospace; padding: 20px; white-space: pre-wrap; font-size: 12px; line-height: 1.4;}</style></head><body>${content}</body></html>`);
       w.document.close();
-      w.print();
-      showToast('Struk berhasil dicetak!', 'success');
+      
+      setTimeout(() => {
+        w.print();
+        w.close();
+      }, 250);
+      
+      showToast('Struk berhasil dibuat! Pilih "Save as PDF" atau "Share"', 'success');
+    }
+
+    async function shareAsPDF() {
+      if (!navigator.share) {
+        showToast('Fitur share tidak tersedia di browser ini. Gunakan tombol Print.', 'warning');
+        return;
+      }
+
+      try {
+        const content = generateReceiptText();
+        const blob = new Blob([content], { type: 'text/plain' });
+        const file = new File([blob], `bukti-transfer-${Date.now()}.txt`, { type: 'text/plain' });
+        
+        await navigator.share({
+          title: 'Bukti Transfer',
+          text: content.substring(0, 100) + '...',
+          files: [file]
+        });
+        
+        showToast('Berhasil membuka share dialog', 'success');
+      } catch (err) {
+        console.error('Share error:', err);
+        showToast('Gagal share, coba gunakan Print', 'error');
+      }
+    }
+
+    function shareAsImage() {
+      showToast('Fitur share gambar membutuhkan library html2canvas. Untuk sekarang gunakan Print.', 'info');
+      printReceipt();
+    }
+
+    function shareToWhatsApp() {
+      const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
+      const date = document.getElementById('manualDate')?.value || '';
+      const type = currentReceiptType === 'transfer' ? 'Transfer' : currentReceiptType === 'tarik_tunai' ? 'Tarik Tunai' : 'Top Up';
+      
+      let text = `*BUKTI ${type.toUpperCase()}*\n\n`;
+      text += `Tanggal: ${date}\n`;
+      text += `Nominal: Rp ${formatNumber(nominal)}\n\n`;
+      text += `_Dibuat via WebPOS_`;
+      
+      const encoded = encodeURIComponent(text);
+      window.open(`https://wa.me/?text=${encoded}`, '_blank');
+    }
+
+    function generateReceiptText() {
+      const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
+      const address = document.getElementById('receiptAddress')?.value || '';
+      const phone = document.getElementById('receiptPhone')?.value || '';
+      const note = document.getElementById('receiptNote')?.value || 'Terima kasih';
+      const date = document.getElementById('manualDate')?.value || '';
+      const time = document.getElementById('manualTime')?.value || '';
+      const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
+      const admin = parseInt(document.getElementById('manualAdmin')?.value) || 0;
+      const total = nominal + admin;
+      const trxId = currentReceiptType.substring(0,2).toUpperCase() + '-' + Date.now().toString().slice(-6);
+      
+      return `================================
+    ${storeName.toUpperCase()}
+${address}
+${phone ? 'HP: ' + phone : ''}
+================================
+${currentReceiptType === 'transfer' ? 'BUKTI TRANSFER' : currentReceiptType === 'tarik_tunai' ? 'BUKTI TARIK TUNAI' : 'BUKTI TOP UP'}
+No: ${trxId}
+Tgl: ${date} ${time}
+--------------------------------
+Nominal: Rp ${formatNumber(nominal)}
+Admin: Rp ${formatNumber(admin)}
+--------------------------------
+TOTAL: Rp ${formatNumber(total)}
+================================
+${note}
+================================
+`;
     }
 
     // ==========================================
@@ -1869,508 +2029,41 @@
     }
 
     // ==========================================
-// PRINTER CONNECTION MANAGER - LENGKAP
-// ==========================================
-
-let connectedPrinter = null;
-let printerConnectionType = null;
-
-// Load saved config on startup
-document.addEventListener('DOMContentLoaded', () => {
-  loadPrinterConfig();
-});
-
-function showPrinterPanel(type) {
-  // Hide all panels
-  document.getElementById('panelBluetooth').style.display = 'none';
-  document.getElementById('panelNetwork').style.display = 'none';
-  document.getElementById('panelUSB').style.display = 'none';
-  
-  // Reset button styles
-  ['btnBluetooth', 'btnNetwork', 'btnUSB'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) {
-      btn.classList.remove('btn-primary');
-      btn.classList.add('btn-outline');
-    }
-  });
-  
-  // Show selected panel
-  const panelName = 'panel' + type.charAt(0).toUpperCase() + type.slice(1);
-  const btnName = 'btn' + type.charAt(0).toUpperCase() + type.slice(1);
-  
-  const panel = document.getElementById(panelName);
-  const btn = document.getElementById(btnName);
-  
-  if (panel) panel.style.display = 'block';
-  if (btn) {
-    btn.classList.remove('btn-outline');
-    btn.classList.add('btn-primary');
-  }
-}
-
-// ===== BLUETOOTH PRINTER =====
-async function scanBluetoothPrinter() {
-  const listContainer = document.getElementById('bluetoothDeviceList');
-  const loading = document.getElementById('bluetoothLoading');
-  
-  listContainer.innerHTML = '';
-  loading.style.display = 'block';
-  
-  try {
-    if (!navigator.bluetooth) {
-      throw new Error('Browser tidak mendukung Web Bluetooth. Gunakan Chrome/Edge Android.');
-    }
-    
-    const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
-    });
-    
-    loading.style.display = 'none';
-    
-    if (device) {
-      displayBluetoothDevice(device);
-    }
-    
-  } catch (error) {
-    loading.style.display = 'none';
-    console.error('Bluetooth error:', error);
-    showToast(error.message || 'Gagal mencari printer Bluetooth', 'error');
-  }
-}
-
-function displayBluetoothDevice(device) {
-  const container = document.getElementById('bluetoothDeviceList');
-  
-  const item = document.createElement('div');
-  item.style.cssText = `
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 0.75rem; 
-    background: var(--bg-card); 
-    border-radius: 0.5rem; 
-    margin-bottom: 0.5rem;
-    border: 1px solid var(--border-color);
-  `;
-  
-  item.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-      <i class="fas fa-print" style="color: var(--primary);"></i>
-      <div>
-        <div style="font-size: 0.85rem; font-weight: 600;">${device.name || 'Unknown Printer'}</div>
-        <div style="font-size: 0.7rem; color: var(--text-muted);">ID: ${device.id.substring(0, 8)}...</div>
-      </div>
-    </div>
-    <button class="btn btn-primary btn-sm" style="padding: 0.25rem 0.75rem; font-size: 0.75rem;">
-      <i class="fas fa-link"></i> Hubungkan
-    </button>
-  `;
-  
-  item.querySelector('button').addEventListener('click', () => connectBluetoothPrinter(device));
-  container.appendChild(item);
-}
-
-async function connectBluetoothPrinter(device) {
-  try {
-    showToast('Menghubungkan ke ' + (device.name || 'printer') + '...', 'info');
-    
-    const server = await device.gatt.connect();
-    const services = await server.getPrimaryServices();
-    
-    let printService = null;
-    for (const service of services) {
-      if (service.uuid.includes('18f0') || service.uuid.includes('e7810a71')) {
-        printService = service;
-        break;
-      }
-    }
-    
-    if (!printService && services.length > 0) {
-      printService = services[0];
-    }
-    
-    if (!printService) {
-      throw new Error('Service printer tidak ditemukan');
-    }
-    
-    const characteristics = await printService.getCharacteristics();
-    let writeCharacteristic = null;
-    
-    for (const char of characteristics) {
-      if (char.properties.write || char.properties.writeWithoutResponse) {
-        writeCharacteristic = char;
-        break;
-      }
-    }
-    
-    if (!writeCharacteristic) {
-      throw new Error('Karakteristik write tidak ditemukan');
-    }
-    
-    connectedPrinter = {
-      device: device,
-      server: server,
-      service: printService,
-      characteristic: writeCharacteristic,
-      type: 'bluetooth'
-    };
-    
-    printerConnectionType = 'bluetooth';
-    updatePrinterStatus(true, 'Bluetooth: ' + device.name);
-    showToast('Printer Bluetooth berhasil terhubung!', 'success');
-    
-    device.addEventListener('gattserverdisconnected', () => {
-      updatePrinterStatus(false);
-      showToast('Printer Bluetooth terputus', 'warning');
-    });
-    
-    savePrinterConfig();
-    
-  } catch (error) {
-    console.error('Connection error:', error);
-    showToast('Gagal menghubungkan: ' + error.message, 'error');
-  }
-}
-
-// ===== NETWORK PRINTER =====
-async function connectNetworkPrinter() {
-  const ip = document.getElementById('printerIpAddress').value.trim();
-  const port = parseInt(document.getElementById('printerPort').value) || 9100;
-  
-  if (!ip) {
-    showToast('Masukkan IP Address printer!', 'warning');
-    return;
-  }
-  
-  try {
-    showToast('Menghubungkan ke ' + ip + ':' + port + '...', 'info');
-    
-    // Untuk browser, kita simpan konfigurasi saja
-    // Print actual akan melalui backend atau native wrapper
-    connectedPrinter = {
-      type: 'network',
-      ip: ip,
-      port: port,
-      protocol: 'tcp'
-    };
-    
-    printerConnectionType = 'network';
-    updatePrinterStatus(true, 'Network: ' + ip + ':' + port);
-    showToast('Printer Network tersimpan', 'success');
-    
-    savePrinterConfig();
-    
-  } catch (error) {
-    showToast('Error: ' + error.message, 'error');
-  }
-}
-
-// ===== USB PRINTER =====
-async function connectUSBPrinter() {
-  try {
-    if (!navigator.usb) {
-      throw new Error('Browser tidak mendukung WebUSB');
-    }
-    
-    const device = await navigator.usb.requestDevice({
-      filters: [
-        { classCode: 7 },
-        { vendorId: 0x0483 },
-        { vendorId: 0x1a86 },
-        { vendorId: 0x067b },
-        { vendorId: 0x0456 }
-      ]
-    });
-    
-    await device.open();
-    
-    if (device.configuration === null) {
-      await device.selectConfiguration(1);
-    }
-    
-    await device.claimInterface(0);
-    
-    const iface = device.configuration.interfaces[0];
-    const endpoint = iface.alternate.endpoints.find(e => e.direction === 'out');
-    
-    connectedPrinter = {
-      device: device,
-      type: 'usb',
-      interface: 0,
-      endpoint: endpoint
-    };
-    
-    printerConnectionType = 'usb';
-    updatePrinterStatus(true, 'USB: ' + (device.productName || 'Printer'));
-    showToast('Printer USB berhasil terhubung!', 'success');
-    
-    document.getElementById('usbDeviceInfo').textContent = `Device: ${device.productName || 'Unknown'}`;
-    
-    savePrinterConfig();
-    
-  } catch (error) {
-    console.error('USB Error:', error);
-    showToast('Error USB: ' + error.message, 'error');
-  }
-}
-
-// ===== PRINT FUNCTIONS =====
-async function testPrint() {
-  if (!connectedPrinter) {
-    showToast('Printer belum terhubung!', 'warning');
-    return;
-  }
-  
-  const testContent = `
-${centerText('TEST PRINT')}
-${centerText('============')}
-  
-Printer: ${connectedPrinter.type.toUpperCase()}
-Status: Connected
-Time: ${new Date().toLocaleString()}
-
-${centerText('Printer OK!')}
-${centerText('============')}
-
-\n\n\n`;
-  
-  await sendToPrinter(testContent);
-  showToast('Test print terkirim!', 'success');
-}
-
-async function printReceipt() {
-  const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
-  if (nominal <= 0) {
-    showToast('Nominal harus diisi!', 'warning');
-    return;
-  }
-  
-  if (!connectedPrinter) {
-    // Fallback ke browser print
-    const content = generateReceiptText(); // Fungsi dari kode Anda yang sudah ada
-    const w = window.open('', '_blank');
-    w.document.write(`<html><head><title>Struk</title><style>body{font-family: 'Courier New', monospace; padding: 20px; white-space: pre-wrap; font-size: 12px;}</style></head><body>${content}</body></html>`);
-    w.document.close();
-    w.print();
-    return;
-  }
-  
-  // Print ke printer hardware
-  const content = generateReceiptText();
-  await sendToPrinter(content);
-  showToast('Struk sedang dicetak...', 'success');
-}
-
-function generateReceiptText() {
-  const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
-  const address = document.getElementById('receiptAddress')?.value || '';
-  const phone = document.getElementById('receiptPhone')?.value || '';
-  const note = document.getElementById('receiptNote')?.value || 'Terima kasih';
-  const date = document.getElementById('manualDate')?.value || '';
-  const time = document.getElementById('manualTime')?.value || '';
-  const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
-  const admin = parseInt(document.getElementById('manualAdmin')?.value) || 0;
-  const total = nominal + admin;
-  const trxId = currentReceiptType.substring(0,2).toUpperCase() + '-' + Date.now().toString().slice(-6);
-  
-  return `================================
-    ${storeName.toUpperCase()}
-${address}
-${phone ? 'HP: ' + phone : ''}
-================================
-${currentReceiptType === 'transfer' ? 'BUKTI TRANSFER' : currentReceiptType === 'tarik_tunai' ? 'BUKTI TARIK TUNAI' : 'BUKTI TOP UP'}
-No: ${trxId}
-Tgl: ${date} ${time}
---------------------------------
-Nominal: Rp ${formatNumber(nominal)}
-Admin: Rp ${formatNumber(admin)}
---------------------------------
-TOTAL: Rp ${formatNumber(total)}
-================================
-${note}
-================================
-`;
-}
-
-async function sendToPrinter(data) {
-  try {
-    if (connectedPrinter.type === 'bluetooth') {
-      const encoder = new TextEncoder();
-      const buffer = encoder.encode(data);
-      
-      // Split into chunks (BLE MTU limit)
-      const chunkSize = 512;
-      for (let i = 0; i < buffer.length; i += chunkSize) {
-        const chunk = buffer.slice(i, i + chunkSize);
-        await connectedPrinter.characteristic.writeValue(chunk);
-      }
-      
-    } else if (connectedPrinter.type === 'usb') {
-      const encoder = new TextEncoder();
-      const buffer = encoder.encode(data);
-      await connectedPrinter.device.transferOut(connectedPrinter.endpoint.endpointNumber, buffer);
-      
-    } else if (connectedPrinter.type === 'network') {
-      // Untuk network, simpan ke queue atau gunakan backend
-      showToast('Network print via browser terbatas. Gunakan USB/Bluetooth.', 'warning');
-      // Fallback ke window.print
-      window.open('', '_blank').document.write(`<pre>${data}</pre>`).print();
-    }
-    
-  } catch (error) {
-    console.error('Print error:', error);
-    showToast('Gagal mencetak: ' + error.message, 'error');
-    updatePrinterStatus(false);
-  }
-}
-
-// ===== UTILITY FUNCTIONS =====
-function updatePrinterStatus(connected, details = '') {
-  const indicator = document.getElementById('printerStatusIndicator');
-  const statusText = document.getElementById('printerStatusText');
-  const connectedInfo = document.getElementById('connectedPrinterInfo');
-  const infoDetails = document.getElementById('printerInfoDetails');
-  const btnTest = document.getElementById('btnTestPrint');
-  
-  if (connected) {
-    indicator.style.background = 'var(--success)';
-    indicator.style.boxShadow = '0 0 8px var(--success)';
-    statusText.textContent = 'Printer terhubung';
-    statusText.style.color = 'var(--success)';
-    
-    connectedInfo.style.display = 'block';
-    infoDetails.textContent = details;
-    btnTest.disabled = false;
-  } else {
-    indicator.style.background = 'var(--danger)';
-    indicator.style.boxShadow = 'none';
-    statusText.textContent = 'Printer tidak terhubung';
-    statusText.style.color = 'var(--danger)';
-    
-    connectedInfo.style.display = 'none';
-    btnTest.disabled = true;
-    
-    connectedPrinter = null;
-    printerConnectionType = null;
-  }
-}
-
-function disconnectPrinter() {
-  if (connectedPrinter) {
-    if (connectedPrinter.type === 'bluetooth' && connectedPrinter.device.gatt.connected) {
-      connectedPrinter.device.gatt.disconnect();
-    } else if (connectedPrinter.type === 'usb' && connectedPrinter.device.opened) {
-      connectedPrinter.device.close();
-    }
-  }
-  
-  connectedPrinter = null;
-  updatePrinterStatus(false);
-  showToast('Printer diputuskan', 'info');
-  localStorage.removeItem('webpos_printer_config');
-}
-
-function savePrinterConfig() {
-  if (!connectedPrinter) return;
-  
-  const config = {
-    type: connectedPrinter.type,
-    timestamp: Date.now()
-  };
-  
-  if (connectedPrinter.type === 'bluetooth') {
-    config.deviceId = connectedPrinter.device.id;
-    config.deviceName = connectedPrinter.device.name;
-  } else if (connectedPrinter.type === 'network') {
-    config.ip = connectedPrinter.ip;
-    config.port = connectedPrinter.port;
-  } else if (connectedPrinter.type === 'usb') {
-    config.vendorId = connectedPrinter.device.vendorId;
-    config.productId = connectedPrinter.device.productId;
-    config.productName = connectedPrinter.device.productName;
-  }
-  
-  localStorage.setItem('webpos_printer_config', JSON.stringify(config));
-  showToast('Konfigurasi tersimpan', 'success');
-}
-
-function loadPrinterConfig() {
-  const saved = localStorage.getItem('webpos_printer_config');
-  if (!saved) return;
-  
-  try {
-    const config = JSON.parse(saved);
-    showPrinterPanel(config.type);
-    
-    if (config.type === 'network') {
-      document.getElementById('printerIpAddress').value = config.ip || '';
-      document.getElementById('printerPort').value = config.port || 9100;
-    }
-    
-    // Auto reconnect info
-    if (config.deviceName || config.ip || config.productName) {
-      const name = config.deviceName || config.ip || config.productName;
-      document.getElementById('printerStatusText').textContent = `Terakhir: ${name} (klik Scan untuk reconnect)`;
-    }
-  } catch (e) {
-    console.error('Error loading config:', e);
-  }
-}
-
-function centerText(text, width = 32) {
-  const pad = Math.max(0, Math.floor((width - text.length) / 2));
-  return ' '.repeat(pad) + text;
-}
-
-function togglePrinterConnection() {
-  // Legacy function - replaced by individual connect functions
-  showToast('Silakan pilih jenis printer (Bluetooth/Network/USB)', 'info');
-}
-
-    // ==========================================
     // EVENT LISTENERS
     // ==========================================
     function setupEventListeners() {
-      // Sidebar toggle
-      // Sidebar toggle - Desktop (collapse/expand)
-document.getElementById('menuToggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+      document.getElementById('menuToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+      });
 
-// Sidebar toggle - Mobile (burger menu) - VERSI BARU
-const mobileToggle = document.getElementById('mobileMenuToggle');
-const sidebar = document.getElementById('sidebar');
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const sidebar = document.getElementById('sidebar');
 
-if (mobileToggle) {
-  mobileToggle.removeAttribute('style');
-  mobileToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sidebar.classList.toggle('mobile-open');
-  });
-}
+      if (mobileToggle) {
+        mobileToggle.removeAttribute('style');
+        mobileToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          sidebar.classList.toggle('mobile-open');
+        });
+      }
 
-// Tutup sidebar saat klik link di mobile
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 1024) {
-      sidebar.classList.remove('mobile-open');
-    }
-  });
-});
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 1024) {
+            sidebar.classList.remove('mobile-open');
+          }
+        });
+      });
 
-// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
-document.addEventListener('click', (e) => {
-  if (window.innerWidth <= 1024 && 
-      sidebar.classList.contains('mobile-open') &&
-      !sidebar.contains(e.target) && 
-      e.target !== mobileToggle) {
-    sidebar.classList.remove('mobile-open');
-  }
-});
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 1024 && 
+            sidebar.classList.contains('mobile-open') &&
+            !sidebar.contains(e.target) && 
+            e.target !== mobileToggle) {
+          sidebar.classList.remove('mobile-open');
+        }
+      });
 
-      // Dropdowns
       document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
         const toggle = dropdown.querySelector('.nav-dropdown-toggle');
         if (toggle) {
@@ -2381,10 +2074,8 @@ document.addEventListener('click', (e) => {
         }
       });
 
-      // Theme toggle
       document.getElementById('btnTheme')?.addEventListener('click', toggleTheme);
 
-      // Logout
       document.getElementById('btnLogout')?.addEventListener('click', () => {
         if (confirm('Yakin ingin logout?')) {
           if (typeof auth !== 'undefined') {
@@ -2396,12 +2087,10 @@ document.addEventListener('click', (e) => {
         }
       });
 
-      // User profile click
       document.getElementById('userProfile')?.addEventListener('click', () => {
         window.location.href = 'page-pengguna.html';
       });
 
-      // OCR Upload
       const uploadArea = document.getElementById('ocrUploadArea');
       const fileInput = document.getElementById('ocrFileInput');
 
@@ -2411,7 +2100,6 @@ document.addEventListener('click', (e) => {
         if (e.target.files.length > 0) processImage(e.target.files[0]);
       });
 
-      // Drag & Drop
       ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
         uploadArea?.addEventListener(eventName, (e) => {
           e.preventDefault();
@@ -2432,7 +2120,6 @@ document.addEventListener('click', (e) => {
         if (files.length > 0) processImage(files[0]);
       });
 
-      // Menu search
       document.getElementById('menuSearch')?.addEventListener('input', function() {
         const q = this.value.toLowerCase();
         document.querySelectorAll('.nav-link span').forEach(span => {
@@ -2464,28 +2151,10 @@ document.addEventListener('click', (e) => {
       document.getElementById('toastContainer').appendChild(el);
       
       setTimeout(() => {
-        el.remove();
+        el.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => el.remove(), 300);
       }, 3000);
     }
-
-    // TAMBAH FUNGSI INI - START
-function syncTheme() {
-  if (typeof Utils !== 'undefined' && Utils.Theme) {
-    document.documentElement.setAttribute('data-theme-color', Utils.Theme.getColor());
-    if (Utils.Theme.isDarkMode()) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    }
-  }
-}
-
-// Dengar perubahan dari tab lain (Setting/Dashboard)
-window.addEventListener('storage', (e) => {
-  if (e.key === 'theme_color' || e.key === 'dark_mode') {
-    location.reload();
-  }
-});
-// TAMBAH FUNGSI INI - END
-    
   </script>
 </body>
 </html>
