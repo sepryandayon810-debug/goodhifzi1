@@ -239,7 +239,33 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .mb-0{margin-bottom:0!important}
 .mb-2{margin-bottom:1rem!important}
 .w-full{width:100%!important}
+    /* Password Modal Styles */
+    .toggle-password {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .toggle-password:hover {
+      background: var(--bg-secondary);
+      color: var(--primary);
+    }
 
+    .password-strength-weak { color: var(--danger); }
+    .password-strength-medium { color: var(--warning); }
+    .password-strength-strong { color: var(--success); }
+    
+    .password-match-error { color: var(--danger); }
+    .password-match-success { color: var(--success); }
+
+    /* Modal Animation Enhancement */
+    .modal-overlay {
+      backdrop-filter: blur(4px);
+    }
   </style>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -780,28 +806,32 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           </div>
 
           <!-- Account -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="fas fa-user-circle"></i> Akun</h3>
-            </div>
-            <div class="card-body">
-              <div class="form-group">
-                <label class="form-label">Nama Lengkap</label>
-                <input type="text" class="form-input" id="userFullName" placeholder="Nama Lengkap">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-input" id="userUsername" disabled>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-input" id="userEmail" disabled>
-              </div>
-              <button class="btn btn-secondary btn-block" id="btnChangePassword">
-                <i class="fas fa-key"></i> Ganti Password
-              </button>
-            </div>
-          </div>
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="fas fa-user-circle"></i> Akun</h3>
+  </div>
+  <div class="card-body">
+    <div class="form-group">
+      <label class="form-label">Nama Lengkap</label>
+      <input type="text" class="form-input" id="userFullName" placeholder="Nama Lengkap">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input type="text" class="form-input" id="userUsername" disabled>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="userEmail" disabled>
+    </div>
+    
+    <!-- Tombol Simpan Nama -->
+    <button class="btn btn-primary btn-block" id="btnSaveProfile" style="margin-bottom: 0.75rem;">
+      <i class="fas fa-save"></i> Simpan Perubahan Nama
+    </button>
+    
+    <button class="btn btn-secondary btn-block" id="btnChangePassword">
+      <i class="fas fa-key"></i> Ganti Password
+    </button>
 
           <!-- Danger Zone -->
           <div class="card" style="grid-column: 1/-1;">
@@ -835,7 +865,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     <p style="margin-top: 1rem; color: var(--text-secondary);">Loading...</p>
   </div>
 
-   <!-- Scripts -->
+       <!-- Scripts -->
   <script src="js/firebase-config.js?v=2"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
@@ -860,13 +890,13 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         const currentUser = Auth.getCurrentUser();
 
         // Fungsi update logo toko
-function updateLogoToko(namaToko) {
-  const logoText = document.querySelector('.logo-text');
-  if (logoText && namaToko) {
-    logoText.textContent = namaToko;
-  }
-  localStorage.setItem('webpos_store_name', namaToko);
-}
+        function updateLogoToko(namaToko) {
+          const logoText = document.querySelector('.logo-text');
+          if (logoText && namaToko) {
+            logoText.textContent = namaToko;
+          }
+          localStorage.setItem('webpos_store_name', namaToko);
+        }
         
         // Update user info
         document.getElementById('userName').textContent = currentUser?.name || currentUser?.username || 'User';
@@ -875,8 +905,6 @@ function updateLogoToko(namaToko) {
         document.getElementById('userFullName').value = currentUser?.name || '';
         document.getElementById('userUsername').value = currentUser?.username || '';
         document.getElementById('userEmail').value = currentUser?.email || '';
-
-        
 
         // Generate theme grid
         const themeGrid = document.getElementById('themeGrid');
@@ -900,40 +928,40 @@ function updateLogoToko(namaToko) {
         });
 
         // Sidebar toggle - Desktop (collapse/expand)
-document.getElementById('menuToggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+        document.getElementById('menuToggle').addEventListener('click', () => {
+          document.getElementById('sidebar').classList.toggle('collapsed');
+        });
 
-// Sidebar toggle - Mobile (burger menu) - VERSI BARU
-const mobileToggle = document.getElementById('mobileMenuToggle');
-const sidebar = document.getElementById('sidebar');
+        // Sidebar toggle - Mobile (burger menu)
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
 
-if (mobileToggle) {
-  mobileToggle.removeAttribute('style');
-  mobileToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sidebar.classList.toggle('mobile-open');
-  });
-}
+        if (mobileToggle) {
+          mobileToggle.removeAttribute('style');
+          mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+          });
+        }
 
-// Tutup sidebar saat klik link di mobile
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 1024) {
-      sidebar.classList.remove('mobile-open');
-    }
-  });
-});
+        // Tutup sidebar saat klik link di mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+              sidebar.classList.remove('mobile-open');
+            }
+          });
+        });
 
-// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
-document.addEventListener('click', (e) => {
-  if (window.innerWidth <= 1024 && 
-      sidebar.classList.contains('mobile-open') &&
-      !sidebar.contains(e.target) && 
-      e.target !== mobileToggle) {
-    sidebar.classList.remove('mobile-open');
-  }
-});
+        // Tutup sidebar saat klik overlay (area gelap di luar sidebar)
+        document.addEventListener('click', (e) => {
+          if (window.innerWidth <= 1024 && 
+              sidebar.classList.contains('mobile-open') &&
+              !sidebar.contains(e.target) && 
+              e.target !== mobileToggle) {
+            sidebar.classList.remove('mobile-open');
+          }
+        });
 
         // Logout
         document.getElementById('btnLogout').addEventListener('click', () => {
@@ -957,7 +985,7 @@ document.addEventListener('click', (e) => {
         // Load store settings
         loadStoreSettings();
 
-                async function loadStoreSettings() {
+        async function loadStoreSettings() {
           try {
             const snapshot = await database.ref('settings/store').once('value');
             const settings = snapshot.val();
@@ -980,7 +1008,7 @@ document.addEventListener('click', (e) => {
           }
         }
                   
-                document.getElementById('btnSaveStore').addEventListener('click', async () => {
+        document.getElementById('btnSaveStore').addEventListener('click', async () => {
           Utils.showLoading();
           
           try {
@@ -1013,21 +1041,247 @@ document.addEventListener('click', (e) => {
             console.error('Error saving settings:', error);
             Utils.showToast('Gagal menyimpan pengaturan', 'error');
           }
-        });  // ✅ Hanya satu closing!
+        });
 
-        // Change password
-        document.getElementById('btnChangePassword').addEventListener('click', () => {
-          Utils.prompt('Masukkan password baru:', '', async (newPassword) => {
-            if (!newPassword || newPassword.length < 6) {
-              Utils.showToast('Password minimal 6 karakter', 'error');
+        // ✅ SIMPAN PERUBAHAN NAMA LENGKAP
+        document.getElementById('btnSaveProfile').addEventListener('click', async () => {
+          const newName = document.getElementById('userFullName').value.trim();
+          
+          if (!newName) {
+            Utils.showToast('Nama lengkap tidak boleh kosong', 'error');
+            return;
+          }
+          
+          Utils.showLoading();
+          
+          try {
+            const user = Auth.getCurrentUser();
+            if (!user || !user.uid) {
+              Utils.showToast('User tidak ditemukan', 'error');
+              Utils.hideLoading();
               return;
             }
             
-            const result = await Auth.changePassword(newPassword);
-            if (result.success) {
-              Utils.showToast('Password berhasil diubah', 'success');
+            // Update ke Firebase Auth profile
+            await auth.currentUser.updateProfile({
+              displayName: newName
+            });
+            
+            // Update ke Realtime Database (users node)
+            await database.ref('users/' + user.uid).update({
+              name: newName,
+              updatedAt: Date.now()
+            });
+            
+            // Update local storage/session
+            const sessionData = JSON.parse(localStorage.getItem('webpos_session') || '{}');
+            sessionData.name = newName;
+            localStorage.setItem('webpos_session', JSON.stringify(sessionData));
+            
+            // Update tampilan navbar
+            document.getElementById('userName').textContent = newName;
+            
+            Utils.hideLoading();
+            Utils.showToast('Nama berhasil diperbarui', 'success');
+          } catch (error) {
+            Utils.hideLoading();
+            console.error('Error updating profile:', error);
+            Utils.showToast('Gagal memperbarui nama: ' + error.message, 'error');
+          }
+        });
+
+        // ✅ GANTI PASSWORD DENGAN RE-AUTHENTICATION
+        const passwordModal = document.getElementById('passwordModal');
+        const reauthModal = document.getElementById('reauthModal');
+        const newPasswordInput = document.getElementById('newPasswordInput');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+        const passwordStrength = document.getElementById('passwordStrength');
+        const passwordMatch = document.getElementById('passwordMatch');
+        const btnConfirmPassword = document.getElementById('btnConfirmPassword');
+        
+        // Variabel sementara untuk menyimpan password baru
+        let pendingNewPassword = null;
+
+        // Buka modal password baru
+        document.getElementById('btnChangePassword').addEventListener('click', () => {
+          passwordModal.classList.add('active');
+          newPasswordInput.value = '';
+          confirmPasswordInput.value = '';
+          passwordStrength.textContent = '';
+          passwordMatch.textContent = '';
+          pendingNewPassword = null;
+          newPasswordInput.focus();
+        });
+
+        // Toggle password visibility
+        window.togglePasswordVisibility = (inputId, btn) => {
+          const input = document.getElementById(inputId);
+          const icon = btn.querySelector('i');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+          } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+          }
+        };
+
+        // Close modal functions
+        window.closePasswordModal = () => {
+          passwordModal.classList.remove('active');
+        };
+
+        window.closeReauthModal = () => {
+          reauthModal.classList.remove('active');
+          pendingNewPassword = null;
+        };
+
+        // Check password strength real-time
+        newPasswordInput.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if (val.length === 0) {
+            passwordStrength.textContent = '';
+          } else if (val.length < 6) {
+            passwordStrength.textContent = '⚠️ Password terlalu pendek (minimal 6 karakter)';
+            passwordStrength.className = 'password-strength-weak';
+          } else if (val.length < 8) {
+            passwordStrength.textContent = '✓ Cukup kuat';
+            passwordStrength.className = 'password-strength-medium';
+          } else {
+            passwordStrength.textContent = '✓ Kuat';
+            passwordStrength.className = 'password-strength-strong';
+          }
+          checkPasswordMatch();
+        });
+
+        // Check password match real-time
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+          const pass1 = newPasswordInput.value;
+          const pass2 = confirmPasswordInput.value;
+          
+          if (pass2.length === 0) {
+            passwordMatch.textContent = '';
+            return;
+          }
+          
+          if (pass1 === pass2) {
+            passwordMatch.textContent = '✓ Password cocok';
+            passwordMatch.className = 'password-match-success';
+            btnConfirmPassword.disabled = false;
+          } else {
+            passwordMatch.textContent = '✗ Password tidak cocok';
+            passwordMatch.className = 'password-match-error';
+            btnConfirmPassword.disabled = true;
+          }
+        }
+
+        // Step 1: Submit password change (buka modal re-auth)
+        window.submitPasswordChange = () => {
+          const newPass = newPasswordInput.value;
+          const confirmPass = confirmPasswordInput.value;
+
+          if (newPass.length < 6) {
+            Utils.showToast('Password minimal 6 karakter', 'error');
+            newPasswordInput.focus();
+            return;
+          }
+
+          if (newPass !== confirmPass) {
+            Utils.showToast('Password tidak cocok', 'error');
+            confirmPasswordInput.focus();
+            return;
+          }
+
+          // Simpan password baru sementara
+          pendingNewPassword = newPass;
+          
+          // Tutup modal password, buka modal re-auth
+          closePasswordModal();
+          
+          // Buka modal minta password lama
+          document.getElementById('oldPasswordInput').value = '';
+          reauthModal.classList.add('active');
+          document.getElementById('oldPasswordInput').focus();
+        };
+
+        // Step 2: Submit re-authentication dan update password
+        window.submitReauth = async () => {
+          const oldPassword = document.getElementById('oldPasswordInput').value;
+          
+          if (!oldPassword) {
+            Utils.showToast('Password lama wajib diisi', 'error');
+            return;
+          }
+
+          Utils.showLoading();
+          
+          try {
+            const user = auth.currentUser;
+            if (!user || !user.email) {
+              Utils.showToast('Session tidak valid', 'error');
+              Utils.hideLoading();
+              return;
             }
-          });
+            
+            // Buat credential dengan email dan password lama
+            const credential = firebase.auth.EmailAuthProvider.credential(
+              user.email, 
+              oldPassword
+            );
+            
+            // Re-authenticate user
+            await user.reauthenticateWithCredential(credential);
+            
+            // Sekarang baru update password ke yang baru
+            await user.updatePassword(pendingNewPassword);
+            
+            closeReauthModal();
+            pendingNewPassword = null;
+            Utils.hideLoading();
+            Utils.showToast('Password berhasil diubah', 'success');
+          } catch (error) {
+            Utils.hideLoading();
+            console.error('Error reauth/password change:', error);
+            
+            if (error.code === 'auth/wrong-password') {
+              Utils.showToast('Password lama salah', 'error');
+              document.getElementById('oldPasswordInput').focus();
+            } else if (error.code === 'auth/too-many-requests') {
+              Utils.showToast('Terlalu banyak percobaan. Coba lagi nanti.', 'error');
+            } else if (error.code === 'auth/weak-password') {
+              Utils.showToast('Password baru terlalu lemah', 'error');
+            } else {
+              Utils.showToast('Gagal: ' + error.message, 'error');
+            }
+          }
+        };
+
+        // Close modal on overlay click
+        passwordModal.addEventListener('click', (e) => {
+          if (e.target === passwordModal) {
+            closePasswordModal();
+          }
+        });
+
+        reauthModal.addEventListener('click', (e) => {
+          if (e.target === reauthModal) {
+            closeReauthModal();
+          }
+        });
+
+        // Enter key handlers
+        confirmPasswordInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            submitPasswordChange();
+          }
+        });
+
+        document.getElementById('oldPasswordInput').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            submitReauth();
+          }
         });
 
         // Clear data
@@ -1050,5 +1304,78 @@ document.addEventListener('click', (e) => {
       }
     });
   </script>
+
+  <!-- Modal Ganti Password Baru -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-key"></i> Ganti Password</h3>
+        <button class="modal-close" onclick="closePasswordModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Password Baru</label>
+          <div style="position: relative;">
+            <input type="password" class="form-input" id="newPasswordInput" placeholder="Minimal 6 karakter" style="padding-right: 2.5rem;">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('newPasswordInput', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div id="passwordStrength" style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);"></div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Konfirmasi Password</label>
+          <div style="position: relative;">
+            <input type="password" class="form-input" id="confirmPasswordInput" placeholder="Ketik ulang password" style="padding-right: 2.5rem;">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirmPasswordInput', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div id="passwordMatch" style="margin-top: 0.5rem; font-size: 0.75rem;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closePasswordModal()">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmPassword" onclick="submitPasswordChange()">
+          <i class="fas fa-arrow-right"></i> Lanjutkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Re-Authentication (Password Lama) -->
+  <div class="modal-overlay" id="reauthModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-shield-alt"></i> Verifikasi Keamanan</h3>
+        <button class="modal-close" onclick="closeReauthModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+          Demi keamanan, masukkan password <strong>lama</strong> Anda untuk verifikasi:
+        </p>
+        <div class="form-group">
+          <label class="form-label">Password Lama</label>
+          <div style="position: relative;">
+            <input type="password" class="form-input" id="oldPasswordInput" placeholder="Masukkan password lama" style="padding-right: 2.5rem;">
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('oldPasswordInput', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeReauthModal()">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmReauth" onclick="submitReauth()">
+          <i class="fas fa-check"></i> Verifikasi & Ubah Password
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
