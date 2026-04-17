@@ -1187,7 +1187,16 @@
                 <i class="fas fa-chevron-down customer-toggle-icon"></i>
               </div>
               <div class="customer-body">
-                <div class="customer-list" id="customerListContainer">
+  <!-- Search Input -->
+  <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">
+    <div style="position: relative;">
+      <i class="fas fa-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem;"></i>
+      <input type="text" id="searchCustomer" placeholder="Cari nama atau no. HP..." 
+        style="width: 100%; padding: 0.5rem 0.75rem 0.5rem 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; background: var(--bg-primary);">
+    </div>
+  </div>
+  
+  <div class="customer-list" id="customerListContainer">
                   <!-- Customer items will be rendered here -->
                 </div>
                 <button class="btn-add-customer" id="btnAddCustomer">
@@ -1237,11 +1246,18 @@
           <!-- Right Column: List -->
           <div class="hutang-list-card">
             <div class="card-header">
-              <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <h3 class="card-title">
-                  <i class="fas fa-list"></i>
-                  Daftar Hutang/Piutang
-                </h3>
+  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1;">
+    <h3 class="card-title">
+      <i class="fas fa-list"></i>
+      Daftar Hutang/Piutang
+    </h3>
+    
+    <!-- Search Input untuk Hutang/Piutang -->
+    <div style="position: relative; flex: 1; min-width: 200px; max-width: 300px;">
+      <i class="fas fa-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem;"></i>
+      <input type="text" id="searchHutang" placeholder="Cari nama pelanggan..." 
+        style="width: 100%; padding: 0.5rem 0.75rem 0.5rem 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; background: var(--bg-primary);">
+    </div>
                 
                 <!-- Status Toggle -->
                 <div class="status-toggle-container">
@@ -1520,7 +1536,7 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-   <!-- Scripts -->
+     <!-- Scripts -->
   <script src="js/firebase-config.js?v=2"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
@@ -1570,31 +1586,104 @@
           once: async () => ({ val: () => ({}) }),
           set: async () => {},
           update: async () => {},
+          remove: async () => {},
           push: () => ({ key: 'mock_' + Date.now() })
         })
       };
     }
 
-    // LOCAL STORAGE FALLBACK for customers (fix permission issue)
+    // Debounce helper untuk search
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    // HYBRID STORAGE: Firebase (primary) + localStorage (cache)
     const CustomerStorage = {
-      getAll: () => {
-        try {
-          return JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-        } catch (e) { return {}; }
-      },
-      save: (id, data) => {
-        const all = CustomerStorage.getAll();
-        all[id] = { ...data, id, updatedAt: Date.now() };
-        localStorage.setItem('webpos_customers', JSON.stringify(all));
-        return all[id];
-      },
-      delete: (id) => {
-        const all = CustomerStorage.getAll();
-        delete all[id];
-        localStorage.setItem('webpos_customers', JSON.stringify(all));
-      }
-    };
+      _cache: {},
+      _loaded: false,
 
+      getAll: async () => {
+        try {
+          const snapshot = await database.ref('customers').once('value');
+          const data = snapshot.val() || {};
+          localStorage.setItem('webpos_customers', JSON.stringify(data));
+          CustomerStorage._cache = data;
+          CustomerStorage._loaded = true;
+          return data;
+        } catch (e) {
+          console.warn('Firebase error, fallback ke localStorage:', e);
+          try {
+            const local = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+            CustomerStorage._cache = local;
+            CustomerStorage._loaded = true;
+            return local;
+          } catch (e2) {
+            return {};
+          }
+        }
+      },
+
+      save: async (id, data) => {
+        const customerData = { 
+          ...data, 
+          id, 
+          updatedAt: Date.now(),
+          createdAt: data.createdAt || Date.now()
+        };
+        
+        try {
+          await database.ref('customers/' + id).set(customerData);
+          CustomerStorage._cache[id] = customerData;
+          localStorage.setItem('webpos_customers', JSON.stringify(CustomerStorage._cache));
+          return customerData;
+        } catch (e) {
+          console.error('Gagal simpan ke Firebase:', e);
+          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+          all[id] = customerData;
+          localStorage.setItem('webpos_customers', JSON.stringify(all));
+          CustomerStorage._cache = all;
+          throw e;
+        }
+      },
+
+      delete: async (id) => {
+        try {
+          await database.ref('customers/' + id).remove();
+          delete CustomerStorage._cache[id];
+          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+          delete all[id];
+          localStorage.setItem('webpos_customers', JSON.stringify(all));
+        } catch (e) {
+          console.error('Gagal hapus:', e);
+          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+          delete all[id];
+          localStorage.setItem('webpos_customers', JSON.stringify(all));
+          CustomerStorage._cache = all;
+          throw e;
+        }
+      },
+
+      search: (query) => {
+        if (!query || query.trim() === '') return Object.values(CustomerStorage._cache);
+        const searchLower = query.toLowerCase().trim();
+        return Object.values(CustomerStorage._cache).filter(customer => {
+          const nameMatch = (customer.name || '').toLowerCase().includes(searchLower);
+          const phoneMatch = (customer.phone || '').toLowerCase().includes(searchLower);
+          return nameMatch || phoneMatch;
+        });
+      },
+
+      get: (id) => CustomerStorage._cache[id] || null
+    };
+    
     document.addEventListener('DOMContentLoaded', () => {
       // Auth check
       const checkAuth = () => {
@@ -1632,11 +1721,11 @@
 
       function initHutang() {
         let currentFilter = 'all';
-        let currentStatus = 'active'; // 'active' or 'inactive'
+        let currentStatus = 'active';
         let currentPaymentId = null;
         let hutangData = {};
         let customerData = {};
-        let currentPaymentType = null; // 'hutang' or 'piutang'
+        let currentPaymentType = null;
 
         // Format currency inputs
         document.getElementById('hutangAmount').addEventListener('input', (e) => {
@@ -1649,6 +1738,27 @@
 
         // Load data
         loadAllData();
+
+        // Search customer real-time
+        const searchInput = document.getElementById('searchCustomer');
+        if (searchInput) {
+          searchInput.addEventListener('input', debounce((e) => {
+            renderCustomerList(e.target.value);
+          }, 300));
+          
+          // Expand saat focus
+          searchInput.addEventListener('focus', () => {
+            document.getElementById('customerSection').classList.add('expanded');
+          });
+        }
+
+        // Search hutang/piutang real-time
+const searchHutangInput = document.getElementById('searchHutang');
+if (searchHutangInput) {
+  searchHutangInput.addEventListener('input', debounce((e) => {
+    renderHutangList(e.target.value);
+  }, 300));
+}
 
         // Customer section toggle
         document.getElementById('customerHeader').addEventListener('click', () => {
@@ -1664,15 +1774,28 @@
         });
 
         // Filter tabs
-        document.querySelectorAll('.filter-tab').forEach(tab => {
-          tab.addEventListener('click', () => {
-            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentFilter = tab.dataset.filter;
-            renderHutangList();
-          });
-        });
+document.querySelectorAll('.filter-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentFilter = tab.dataset.filter;
+    // Reset search saat ganti filter
+    const searchInput = document.getElementById('searchHutang');
+    if (searchInput) searchInput.value = '';
+    renderHutangList();
+  });
+});
 
+// Status toggle
+document.getElementById('statusToggle').addEventListener('change', (e) => {
+  currentStatus = e.target.checked ? 'inactive' : 'active';
+  document.getElementById('labelAktif').classList.toggle('active', !e.target.checked);
+  document.getElementById('labelInactive').classList.toggle('active', e.target.checked);
+  // Reset search saat ganti status
+  const searchInput = document.getElementById('searchHutang');
+  if (searchInput) searchInput.value = '';
+  renderHutangList();
+});
         // Add buttons
         document.getElementById('btnAddHutang').addEventListener('click', () => {
           document.getElementById('modalTitle').textContent = 'Tambah Hutang/Piutang';
@@ -1683,13 +1806,12 @@
           document.getElementById('hutangModal').classList.add('active');
         });
 
-        // Hutang type change - update kas option visibility
+        // Hutang type change
         document.getElementById('hutangType').addEventListener('change', updateKasOptionHutang);
 
         function updateKasOptionHutang() {
           const type = document.getElementById('hutangType').value;
           const kasBox = document.getElementById('kasOptionBoxHutang');
-          const checkbox = document.getElementById('hutangAffectKas');
           const label = kasBox.querySelector('.checkbox-label');
           const sublabel = kasBox.querySelector('.checkbox-sublabel');
           
@@ -1739,41 +1861,38 @@
           }
         });
 
-        // Sidebar toggle - Desktop (collapse/expand)
-document.getElementById('menuToggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
+        // Sidebar toggle
+        document.getElementById('menuToggle').addEventListener('click', () => {
+          document.getElementById('sidebar').classList.toggle('collapsed');
+        });
 
-// Sidebar toggle - Mobile (burger menu) - VERSI BARU
-const mobileToggle = document.getElementById('mobileMenuToggle');
-const sidebar = document.getElementById('sidebar');
+        // Mobile sidebar
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
 
-if (mobileToggle) {
-  mobileToggle.removeAttribute('style');
-  mobileToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    sidebar.classList.toggle('mobile-open');
-  });
-}
+        if (mobileToggle) {
+          mobileToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('mobile-open');
+          });
+        }
 
-// Tutup sidebar saat klik link di mobile
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => {
-    if (window.innerWidth <= 1024) {
-      sidebar.classList.remove('mobile-open');
-    }
-  });
-});
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 1024) {
+              sidebar.classList.remove('mobile-open');
+            }
+          });
+        });
 
-// Tutup sidebar saat klik overlay (area gelap di luar sidebar)
-document.addEventListener('click', (e) => {
-  if (window.innerWidth <= 1024 && 
-      sidebar.classList.contains('mobile-open') &&
-      !sidebar.contains(e.target) && 
-      e.target !== mobileToggle) {
-    sidebar.classList.remove('mobile-open');
-  }
-});
+        document.addEventListener('click', (e) => {
+          if (window.innerWidth <= 1024 && 
+              sidebar.classList.contains('mobile-open') &&
+              !sidebar.contains(e.target) && 
+              e.target !== mobileToggle) {
+            sidebar.classList.remove('mobile-open');
+          }
+        });
 
         // Dropdown menus
         document.querySelectorAll('[data-dropdown]').forEach(dropdown => {
@@ -1826,15 +1945,14 @@ document.addEventListener('click', (e) => {
           Utils.showLoading();
           
           try {
-            // Load hutang data from Firebase
             const hutangSnapshot = await database.ref('debts').once('value');
             hutangData = hutangSnapshot.val() || {};
             
-            // Load customer data from LOCAL STORAGE (fix permission issue)
-            customerData = CustomerStorage.getAll();
+            customerData = await CustomerStorage.getAll();
             
             updateSummary();
             renderCustomerList();
+            updateCustomerSelect();
             renderHutangList();
           } catch (error) {
             console.error('Error loading data:', error);
@@ -1878,32 +1996,42 @@ document.addEventListener('click', (e) => {
           });
         }
 
-        function renderCustomerList() {
+        function renderCustomerList(searchQuery = '') {
           const container = document.getElementById('customerListContainer');
+          
+          const customers = searchQuery ? CustomerStorage.search(searchQuery) : Object.values(customerData);
+          
           document.getElementById('customerCount').textContent = Object.keys(customerData).length;
           
           let html = '';
           
-          if (Object.keys(customerData).length === 0) {
-            html = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">Belum ada pelanggan</div>';
+          if (customers.length === 0) {
+            if (searchQuery) {
+              html = `<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">
+                <i class="fas fa-search" style="display: block; margin-bottom: 0.5rem; font-size: 1.25rem;"></i>
+                Tidak ada hasil untuk "${searchQuery}"
+              </div>`;
+            } else {
+              html = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">Belum ada pelanggan</div>';
+            }
           } else {
-            Object.entries(customerData).forEach(([id, customer]) => {
+            customers.forEach(customer => {
               html += `
-                <div class="customer-item">
+                <div class="customer-item" style="animation: slideIn 0.3s ease;">
                   <div class="customer-info">
                     <div class="customer-avatar-small">
                       <i class="fas fa-user"></i>
                     </div>
                     <div>
-                      <div class="customer-name">${customer.name}</div>
-                      ${customer.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${customer.phone}</div>` : ''}
+                      <div class="customer-name">${highlightText(customer.name, searchQuery)}</div>
+                      ${customer.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${highlightText(customer.phone, searchQuery)}</div>` : ''}
                     </div>
                   </div>
                   <div class="customer-actions">
-                    <button class="btn-icon-xs btn-edit" onclick="window.editCustomer('${id}')" title="Edit">
+                    <button class="btn-icon-xs btn-edit" onclick="window.editCustomer('${customer.id}')" title="Edit">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon-xs btn-delete" onclick="window.deleteCustomer('${id}')" title="Hapus">
+                    <button class="btn-icon-xs btn-delete" onclick="window.deleteCustomer('${customer.id}')" title="Hapus">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -1915,78 +2043,107 @@ document.addEventListener('click', (e) => {
           container.innerHTML = html;
         }
 
-        function renderHutangList() {
-          const list = document.getElementById('hutangList');
-          let html = '';
-          
-          const items = Object.entries(hutangData)
-            .map(([id, data]) => ({ id, ...data }))
-            .filter(item => {
-              if (currentStatus === 'active') return item.status === 'active';
-              return item.status === 'paid' || item.status === 'inactive' || item.status === 'deleted';
-            })
-            .filter(item => currentFilter === 'all' || item.type === currentFilter)
-            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-          
-          if (items.length === 0) {
-            const message = currentStatus === 'active' ? 'Belum ada data hutang/piutang aktif' : 'Belum ada data yang lunas';
-            html = `
-              <div class="empty-state">
-                <i class="fas fa-${currentStatus === 'active' ? 'handshake' : 'check-circle'}"></i>
-                <p>${message}</p>
-              </div>
-            `;
-          } else {
-            items.forEach(item => {
-              const isHutang = item.type === 'hutang';
-              const dueDate = item.dueDate ? new Date(item.dueDate).toLocaleDateString('id-ID') : '-';
-              const remaining = item.remaining || item.amount || 0;
-              const isPaid = item.status === 'paid' || item.status === 'inactive';
-              
-              html += `
-                <div class="hutang-item">
-                  <div class="hutang-info">
-                    <div class="hutang-avatar">
-                      <i class="fas fa-user"></i>
-                    </div>
-                    <div class="hutang-details">
-                      <span class="hutang-name">${item.name}</span>
-                      <span class="hutang-meta">
-                        ${isHutang ? 'Hutang' : 'Piutang'} • Jatuh tempo: ${dueDate}
-                      </span>
-                      ${item.note ? `<span class="hutang-meta">${item.note}</span>` : ''}
-                      <span class="status-badge ${isPaid ? 'inactive' : 'active'}">
-                        ${isPaid ? 'Lunas' : 'Aktif'}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="hutang-amount-section">
-                    <span class="hutang-amount ${item.type} ${isPaid ? 'paid' : ''}">${Utils.formatRupiah(remaining)}</span>
-                    <div class="hutang-actions">
-                      ${!isPaid ? `
-                        <button class="btn-icon-sm btn-pay" onclick="window.openPayment('${item.id}')" title="Bayar">
-                          <i class="fas fa-money-bill-wave"></i>
-                        </button>
-                      ` : `
-                        <button class="btn-icon-sm btn-restore" onclick="window.restoreHutang('${item.id}')" title="Restore">
-                          <i class="fas fa-undo"></i>
-                        </button>
-                      `}
-                      <button class="btn-icon-sm btn-edit" onclick="window.editHutang('${item.id}')" title="Edit">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn-icon-sm btn-delete" onclick="window.deleteHutang('${item.id}')" title="Hapus">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              `;
-            });
-          }
-          
-          list.innerHTML = html;
+        // Helper untuk highlight text yang dicari
+        function highlightText(text, query) {
+          if (!query || !text) return text;
+          const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+          return text.replace(regex, '<mark style="background: var(--primary); color: white; padding: 0 2px; border-radius: 2px;">$1</mark>');
         }
+
+        function escapeRegex(string) {
+          return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function renderHutangList(searchQuery = '') {
+  const list = document.getElementById('hutangList');
+  let html = '';
+  
+  let items = Object.entries(hutangData)
+    .map(([id, data]) => ({ id, ...data }))
+    .filter(item => {
+      if (currentStatus === 'active') return item.status === 'active';
+      return item.status === 'paid' || item.status === 'inactive' || item.status === 'deleted';
+    })
+    .filter(item => currentFilter === 'all' || item.type === currentFilter);
+  
+  // Filter berdasarkan pencarian nama
+  if (searchQuery && searchQuery.trim() !== '') {
+    const searchLower = searchQuery.toLowerCase().trim();
+    items = items.filter(item => {
+      const nameMatch = (item.name || '').toLowerCase().includes(searchLower);
+      const noteMatch = (item.note || '').toLowerCase().includes(searchLower);
+      return nameMatch || noteMatch;
+    });
+  }
+  
+  // Sort berdasarkan createdAt
+  items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  
+  if (items.length === 0) {
+    const message = searchQuery 
+      ? `Tidak ada hasil untuk "${searchQuery}"`
+      : (currentStatus === 'active' ? 'Belum ada data hutang/piutang aktif' : 'Belum ada data yang lunas');
+    html = `
+      <div class="empty-state">
+        <i class="fas fa-${searchQuery ? 'search' : (currentStatus === 'active' ? 'handshake' : 'check-circle')}"></i>
+        <p>${message}</p>
+      </div>
+    `;
+  } else {
+    items.forEach(item => {
+      const isHutang = item.type === 'hutang';
+      const dueDate = item.dueDate ? new Date(item.dueDate).toLocaleDateString('id-ID') : '-';
+      const remaining = item.remaining || item.amount || 0;
+      const isPaid = item.status === 'paid' || item.status === 'inactive';
+      
+      // Highlight nama jika ada search query
+      const displayName = searchQuery ? highlightText(item.name, searchQuery) : item.name;
+      const displayNote = item.note ? (searchQuery ? highlightText(item.note, searchQuery) : item.note) : '';
+      
+      html += `
+        <div class="hutang-item">
+          <div class="hutang-info">
+            <div class="hutang-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="hutang-details">
+              <span class="hutang-name">${displayName}</span>
+              <span class="hutang-meta">
+                ${isHutang ? 'Hutang' : 'Piutang'} • Jatuh tempo: ${dueDate}
+              </span>
+              ${displayNote ? `<span class="hutang-meta">${displayNote}</span>` : ''}
+              <span class="status-badge ${isPaid ? 'inactive' : 'active'}">
+                ${isPaid ? 'Lunas' : 'Aktif'}
+              </span>
+            </div>
+          </div>
+          <div class="hutang-amount-section">
+            <span class="hutang-amount ${item.type} ${isPaid ? 'paid' : ''}">${Utils.formatRupiah(remaining)}</span>
+            <div class="hutang-actions">
+              ${!isPaid ? `
+                <button class="btn-icon-sm btn-pay" onclick="window.openPayment('${item.id}')" title="Bayar">
+                  <i class="fas fa-money-bill-wave"></i>
+                </button>
+              ` : `
+                <button class="btn-icon-sm btn-restore" onclick="window.restoreHutang('${item.id}')" title="Restore">
+                  <i class="fas fa-undo"></i>
+                </button>
+              `}
+              <button class="btn-icon-sm btn-edit" onclick="window.editHutang('${item.id}')" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon-sm btn-delete" onclick="window.deleteHutang('${item.id}')" title="Hapus">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  list.innerHTML = html;
+}
 
         async function saveHutang() {
           const id = document.getElementById('hutangId').value;
@@ -1996,7 +2153,6 @@ document.addEventListener('click', (e) => {
           const dueDate = document.getElementById('hutangDueDate').value;
           const note = document.getElementById('hutangNote').value;
           const affectKas = document.getElementById('hutangAffectKas').checked;
-          console.log('💾 Simpan hutang:', { type, name, amount, affectKas });
           
           if (!name || amount <= 0) {
             Utils.showToast('Nama dan jumlah harus diisi', 'error');
@@ -2027,9 +2183,7 @@ document.addEventListener('click', (e) => {
             
             await database.ref('debts/' + hutangId).set(hutangData);
             
-            // If affectKas is checked, record to kas
-            if (affectKas && !id) { // Only for new records
-              console.log('🔄 Mencatat ke kas...');
+            if (affectKas && !id) {
               await recordToKas(type === 'hutang' ? 'masuk' : 'keluar', amount, 
                 `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
             }
@@ -2055,27 +2209,28 @@ document.addEventListener('click', (e) => {
             return;
           }
           
+          Utils.showLoading();
+          
           try {
             const customerId = id || 'cust_' + Date.now();
             
-            // SAVE TO LOCAL STORAGE (fix Firebase permission issue)
-            CustomerStorage.save(customerId, {
+            await CustomerStorage.save(customerId, {
               name,
-              phone: phone || null,
-              createdAt: id ? (customerData[customerId]?.createdAt || Date.now()) : Date.now()
+              phone: phone || null
             });
             
             Utils.showToast('Pelanggan berhasil disimpan', 'success');
             closeCustomerModal();
             
-            // Reload customer data
-            customerData = CustomerStorage.getAll();
+            customerData = await CustomerStorage.getAll();
             renderCustomerList();
             updateCustomerSelect();
           } catch (error) {
             console.error('Error saving customer:', error);
-            Utils.showToast('Gagal menyimpan pelanggan: ' + error.message, 'error');
+            Utils.showToast('Gagal menyimpan: Cek koneksi internet', 'error');
           }
+          
+          Utils.hideLoading();
         }
 
         window.editCustomer = (id) => {
@@ -2089,17 +2244,23 @@ document.addEventListener('click', (e) => {
           document.getElementById('customerModal').classList.add('active');
         };
 
-        window.deleteCustomer = (id) => {
-          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', () => {
+        window.deleteCustomer = async (id) => {
+          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', async () => {
+            Utils.showLoading();
+            
             try {
-              CustomerStorage.delete(id);
+              await CustomerStorage.delete(id);
               Utils.showToast('Pelanggan berhasil dihapus', 'success');
-              customerData = CustomerStorage.getAll();
+              
+              customerData = await CustomerStorage.getAll();
               renderCustomerList();
               updateCustomerSelect();
             } catch (error) {
+              console.error('Error:', error);
               Utils.showToast('Gagal menghapus pelanggan', 'error');
             }
+            
+            Utils.hideLoading();
           });
         };
 
@@ -2115,20 +2276,17 @@ document.addEventListener('click', (e) => {
           document.getElementById('paymentAmount').value = '';
           document.getElementById('paymentNote').value = '';
           
-          // Update kas option based on type
           const kasBox = document.getElementById('kasOptionBox');
           const labelText = document.getElementById('kasLabelText');
           const subLabelText = document.getElementById('kasSubLabelText');
           const checkbox = document.getElementById('affectKas');
           
-          checkbox.checked = false; // Default tidak dicentang
+          checkbox.checked = false;
           
           if (item.type === 'hutang') {
-            // Bayar hutang = uang keluar dari kas (kita bayar utang)
             labelText.textContent = 'Catat ke Kas Keluar';
             subLabelText.textContent = 'Otomatis mencatat pengeluaran kas saat membayar hutang';
           } else {
-            // Bayar piutang = uang masuk ke kas (kita terima pembayaran)
             labelText.textContent = 'Catat ke Kas Masuk';
             subLabelText.textContent = 'Otomatis mencatat pemasukan kas saat menerima pembayaran piutang';
           }
@@ -2223,7 +2381,6 @@ document.addEventListener('click', (e) => {
             const isFullyPaid = newRemaining <= 0;
             const user = Auth.getCurrentUser();
             
-            // Update debt
             await database.ref('debts/' + currentPaymentId).update({
               remaining: newRemaining,
               status: isFullyPaid ? 'paid' : 'active',
@@ -2231,7 +2388,6 @@ document.addEventListener('click', (e) => {
               updatedAt: Date.now()
             });
             
-            // Add payment record
             await database.ref('debt_payments/' + currentPaymentId + '/' + Date.now()).set({
               amount: paymentAmount,
               note,
@@ -2241,13 +2397,10 @@ document.addEventListener('click', (e) => {
               timestamp: Date.now()
             });
             
-            // Record to kas if checked
             if (affectKas) {
               if (item.type === 'hutang') {
-                // Bayar hutang = kas keluar
                 await recordToKas('keluar', paymentAmount, `Pembayaran hutang - ${item.name}`, user);
               } else {
-                // Terima piutang = kas masuk
                 await recordToKas('masuk', paymentAmount, `Pembayaran piutang - ${item.name}`, user);
               }
             }
@@ -2263,43 +2416,35 @@ document.addEventListener('click', (e) => {
           Utils.hideLoading();
         }
 
-        // Helper function to record to kas - COMPATIBLE dengan page-kas-masuk.html & page-kas-keluar.html
-async function recordToKas(type, amount, description, user) {
-  console.log('📝 Mencatat ke kas:', { type, amount, description });
-  
-  try {
-    const kasId = 'kas_' + Date.now();
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Struktur data yang dibaca dashboard
-    const transactionData = {
-      type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
-      amount: parseInt(amount),
-      note: description,
-      date: today,
-      timestamp: Date.now(),
-      userId: user.uid,
-      userName: user.displayName || user.name || user.email || 'User',
-      status: 'completed'
-    };
+        async function recordToKas(type, amount, description, user) {
+          console.log('📝 Mencatat ke kas:', { type, amount, description });
+          
+          try {
+            const kasId = 'kas_' + Date.now();
+            const today = new Date().toISOString().split('T')[0];
+            
+            const transactionData = {
+              type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
+              amount: parseInt(amount),
+              note: description,
+              date: today,
+              timestamp: Date.now(),
+              userId: user.uid,
+              userName: user.displayName || user.name || user.email || 'User',
+              status: 'completed'
+            };
 
-    console.log('📤 Simpan ke transactions/' + today + '/' + kasId);
-    console.log('📦 Data:', transactionData);
-
-    // Simpan ke path yang dibaca dashboard
-    await database.ref('transactions/' + today + '/' + kasId).set(transactionData);
-    console.log('✅ Berhasil tersimpan di transactions!');
-    
-    return true;
-    
-  } catch (error) {
-    console.error('❌ Gagal:', error);
-    Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
-    throw error;
-  }
-}
+            await database.ref('transactions/' + today + '/' + kasId).set(transactionData);
+            console.log('✅ Berhasil tersimpan di transactions!');
+            
+            return true;
+          } catch (error) {
+            console.error('❌ Gagal:', error);
+            Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
+            throw error;
+          }
+        }
         
-        // Export Data
         function exportData() {
           const dataToExport = Object.values(hutangData).map(item => ({
             name: item.name,
@@ -2326,7 +2471,6 @@ async function recordToKas(type, amount, description, user) {
           Utils.showToast('Data berhasil diexport', 'success');
         }
 
-        // Import Data with Excel Support
         function importData() {
           const fileInput = document.getElementById('importFile');
           const overwrite = document.getElementById('importOverwrite').checked;
@@ -2346,14 +2490,12 @@ async function recordToKas(type, amount, description, user) {
               let importedData = [];
               
               if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
-                // Parse Excel using SheetJS
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 importedData = XLSX.utils.sheet_to_json(worksheet);
                 
-                // Normalize keys to lowercase
                 importedData = importedData.map(row => {
                   const normalized = {};
                   Object.keys(row).forEach(key => {
@@ -2362,7 +2504,6 @@ async function recordToKas(type, amount, description, user) {
                   return normalized;
                 });
               } else if (file.name.endsWith('.csv')) {
-                // Parse CSV
                 const text = e.target.result;
                 const lines = text.split('\n').filter(line => line.trim());
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -2376,7 +2517,6 @@ async function recordToKas(type, amount, description, user) {
                   importedData.push(obj);
                 }
               } else {
-                // Parse JSON
                 importedData = JSON.parse(e.target.result);
               }
               
@@ -2388,7 +2528,6 @@ async function recordToKas(type, amount, description, user) {
               let count = 0;
               
               for (const item of importedData) {
-                // Handle various field names
                 const name = item.name || item.nama || item.pelanggan || '';
                 const type = (item.type || item.tipe || 'hutang').toLowerCase();
                 const amount = parseInt(item.amount || item.jumlah || item.total || 0);
@@ -2414,7 +2553,7 @@ async function recordToKas(type, amount, description, user) {
                   createdAt: Date.now(),
                   updatedAt: Date.now(),
                   imported: true,
-                  affectKas: false // Default false for imported data
+                  affectKas: false
                 });
                 
                 count++;
