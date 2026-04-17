@@ -951,6 +951,90 @@
       background: rgba(99, 102, 241, 0.1);
       color: var(--primary);
     }
+
+    /* Detail Expandable Styles */
+.hutang-detail-row {
+  display: none;
+  background: var(--bg-secondary);
+  border-top: 1px dashed var(--border-color);
+}
+
+.hutang-detail-row.show {
+  display: table-row;
+}
+
+.hutang-detail-content {
+  padding: 1rem 1.5rem 1rem 4.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.expand-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.expand-btn.rotated {
+  transform: rotate(180deg);
+}
+
+/* Font Size Adjustments */
+.summary-amount {
+  font-size: 1.25rem !important; /* dari 1.5rem */
+  font-weight: 600; /* dari 700 */
+}
+
+.hutang-amount {
+  font-size: 0.95rem !important; /* dari 1.125rem */
+}
+
+.hutang-name {
+  font-size: 0.9rem; /* dari default */
+  font-weight: 600;
+}
+
+.card-title {
+  font-size: 1rem; /* dari 1.1rem */
+}
+
+.customer-title span {
+  font-size: 0.85rem;
+}
+
+.btn-add {
+  padding: 0.75rem; /* dari 1rem */
+  font-size: 0.8rem; /* dari 0.875rem */
+}
+    
   </style>
 </head>
 <body>
@@ -1187,16 +1271,7 @@
                 <i class="fas fa-chevron-down customer-toggle-icon"></i>
               </div>
               <div class="customer-body">
-  <!-- Search Input -->
-  <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color);">
-    <div style="position: relative;">
-      <i class="fas fa-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem;"></i>
-      <input type="text" id="searchCustomer" placeholder="Cari nama atau no. HP..." 
-        style="width: 100%; padding: 0.5rem 0.75rem 0.5rem 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; background: var(--bg-primary);">
-    </div>
-  </div>
-  
-  <div class="customer-list" id="customerListContainer">
+                <div class="customer-list" id="customerListContainer">
                   <!-- Customer items will be rendered here -->
                 </div>
                 <button class="btn-add-customer" id="btnAddCustomer">
@@ -1205,38 +1280,7 @@
                 </button>
               </div>
             </div>
-
-            <!-- Summary Cards -->
-            <div class="summary-card hutang">
-              <div class="summary-header">
-                <div class="summary-icon">
-                  <i class="fas fa-arrow-down"></i>
-                </div>
-                <span class="summary-title">Total Hutang Aktif</span>
-              </div>
-              <div class="summary-amount" id="totalHutang">Rp 0</div>
-            </div>
-
-            <div class="summary-card piutang">
-              <div class="summary-header">
-                <div class="summary-icon">
-                  <i class="fas fa-arrow-up"></i>
-                </div>
-                <span class="summary-title">Total Piutang Aktif</span>
-              </div>
-              <div class="summary-amount" id="totalPiutang">Rp 0</div>
-            </div>
-
-            <div class="summary-card" style="border-left: 4px solid var(--success);">
-              <div class="summary-header">
-                <div class="summary-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
-                  <i class="fas fa-check-circle"></i>
-                </div>
-                <span class="summary-title">Total Lunas</span>
-              </div>
-              <div class="summary-amount" id="totalLunas" style="color: var(--success);">Rp 0</div>
-            </div>
-
+            
             <button class="btn-add" id="btnAddHutang">
               <i class="fas fa-plus"></i>
               Tambah Hutang/Piutang
@@ -1245,19 +1289,39 @@
 
           <!-- Right Column: List -->
           <div class="hutang-list-card">
+
+             <!-- KOTAK TOTAL DIPINDAH KE SINI -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1.25rem; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+              <div class="summary-card piutang" style="margin: 0; border: none; background: var(--bg-card);">
+                <div class="summary-header">
+                  <div class="summary-icon"><i class="fas fa-arrow-up"></i></div>
+                  <span class="summary-title">Total Piutang Aktif</span>
+                </div>
+                <div class="summary-amount" id="totalPiutang">Rp 0</div>
+              </div>
+              <div class="summary-card hutang" style="margin: 0; border: none; background: var(--bg-card);">
+                <div class="summary-header">
+                  <div class="summary-icon"><i class="fas fa-arrow-down"></i></div>
+                  <span class="summary-title">Total Hutang Aktif</span>
+                </div>
+                <div class="summary-amount" id="totalHutang">Rp 0</div>
+              </div>
+            </div>
+
+            <!-- SEARCH BOX BARU -->
+            <div style="padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
+              <div class="search-input-wrapper" style="position: relative; max-width: 400px;">
+                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="text" class="form-input" id="searchHutangName" placeholder="Cari nama pelanggan..." style="padding-left: 2.5rem; background: var(--bg-card);">
+              </div>
+            </div>
+            
             <div class="card-header">
-  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; flex: 1;">
-    <h3 class="card-title">
-      <i class="fas fa-list"></i>
-      Daftar Hutang/Piutang
-    </h3>
-    
-    <!-- Search Input untuk Hutang/Piutang -->
-    <div style="position: relative; flex: 1; min-width: 200px; max-width: 300px;">
-      <i class="fas fa-search" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem;"></i>
-      <input type="text" id="searchHutang" placeholder="Cari nama pelanggan..." 
-        style="width: 100%; padding: 0.5rem 0.75rem 0.5rem 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem; background: var(--bg-primary);">
-    </div>
+              <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <h3 class="card-title">
+                  <i class="fas fa-list"></i>
+                  Daftar Hutang/Piutang
+                </h3>
                 
                 <!-- Status Toggle -->
                 <div class="status-toggle-container">
@@ -1343,18 +1407,38 @@
           <div class="form-group">
             <label class="form-label">Tipe</label>
             <select class="form-select" id="hutangType" required>
-              <option value="hutang">Hutang (Saya Berhutang)</option>
               <option value="piutang">Piutang (Orang Berhutang ke Saya)</option>
+              <option value="hutang">Hutang (Saya Berhutang)</option>
             </select>
           </div>
           
-          <div class="form-group">
-            <label class="form-label">Nama Pelanggan</label>
-            <select class="form-select" id="hutangCustomerSelect" style="margin-bottom: 0.5rem;">
-              <option value="">-- Pilih dari Daftar --</option>
-            </select>
-            <input type="text" class="form-input" id="hutangName" placeholder="Atau ketik nama baru" required>
-          </div>
+         <div class="form-group" style="position: relative;">
+  <label class="form-label">Nama Pelanggan</label>
+  <input type="text" class="form-input" id="hutangName" placeholder="Ketik nama pelanggan..." autocomplete="off" required>
+  
+  <!-- Autocomplete Dropdown -->
+  <div id="customerAutocomplete" style="
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    border-top: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+    box-shadow: var(--shadow-lg);
+  ">
+    <!-- Items will be injected here -->
+  </div>
+  
+  <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+    <i class="fas fa-info-circle"></i> Ketik minimal 2 huruf untuk mencari, atau nama baru otomatis tersimpan
+  </small>
+</div>
           
           <div class="form-group">
             <label class="form-label">Jumlah</label>
@@ -1416,7 +1500,22 @@
           <label class="form-label">Sisa Hutang/Piutang</label>
           <div class="form-input" id="remainingAmount" style="font-weight: 700; font-size: 1.25rem;">Rp 0</div>
         </div>
-        
+
+        <!-- Lunasi Sekaligus Option -->
+        <div class="form-group">
+          <label class="checkbox-group" style="cursor: pointer; margin: 0; padding: 0.75rem;">
+            <input type="checkbox" id="lunasSekaligus" style="width: 20px; height: 20px; accent-color: var(--success);">
+            <div style="margin-left: 0.5rem;">
+              <span class="checkbox-label" style="font-weight: 600; color: var(--success);">
+                <i class="fas fa-check-circle" style="margin-right: 0.25rem;"></i> Lunasi Sekaligus
+              </span>
+              <span class="checkbox-sublabel" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Centang untuk membayar lunas seluruh sisa hutang/piutang
+              </span>
+            </div>
+          </label>
+          </div>
+
         <div class="form-group">
           <label class="form-label">Jumlah Pembayaran</label>
           <div class="input-prefix">
@@ -1586,104 +1685,31 @@
           once: async () => ({ val: () => ({}) }),
           set: async () => {},
           update: async () => {},
-          remove: async () => {},
           push: () => ({ key: 'mock_' + Date.now() })
         })
       };
     }
 
-    // Debounce helper untuk search
-    function debounce(func, wait) {
-      let timeout;
-      return function executedFunction(...args) {
-        const later = () => {
-          clearTimeout(timeout);
-          func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-      };
-    }
-    
-    // HYBRID STORAGE: Firebase (primary) + localStorage (cache)
+    // LOCAL STORAGE FALLBACK for customers (fix permission issue)
     const CustomerStorage = {
-      _cache: {},
-      _loaded: false,
-
-      getAll: async () => {
+      getAll: () => {
         try {
-          const snapshot = await database.ref('customers').once('value');
-          const data = snapshot.val() || {};
-          localStorage.setItem('webpos_customers', JSON.stringify(data));
-          CustomerStorage._cache = data;
-          CustomerStorage._loaded = true;
-          return data;
-        } catch (e) {
-          console.warn('Firebase error, fallback ke localStorage:', e);
-          try {
-            const local = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-            CustomerStorage._cache = local;
-            CustomerStorage._loaded = true;
-            return local;
-          } catch (e2) {
-            return {};
-          }
-        }
+          return JSON.parse(localStorage.getItem('webpos_customers') || '{}');
+        } catch (e) { return {}; }
       },
-
-      save: async (id, data) => {
-        const customerData = { 
-          ...data, 
-          id, 
-          updatedAt: Date.now(),
-          createdAt: data.createdAt || Date.now()
-        };
-        
-        try {
-          await database.ref('customers/' + id).set(customerData);
-          CustomerStorage._cache[id] = customerData;
-          localStorage.setItem('webpos_customers', JSON.stringify(CustomerStorage._cache));
-          return customerData;
-        } catch (e) {
-          console.error('Gagal simpan ke Firebase:', e);
-          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-          all[id] = customerData;
-          localStorage.setItem('webpos_customers', JSON.stringify(all));
-          CustomerStorage._cache = all;
-          throw e;
-        }
+      save: (id, data) => {
+        const all = CustomerStorage.getAll();
+        all[id] = { ...data, id, updatedAt: Date.now() };
+        localStorage.setItem('webpos_customers', JSON.stringify(all));
+        return all[id];
       },
-
-      delete: async (id) => {
-        try {
-          await database.ref('customers/' + id).remove();
-          delete CustomerStorage._cache[id];
-          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-          delete all[id];
-          localStorage.setItem('webpos_customers', JSON.stringify(all));
-        } catch (e) {
-          console.error('Gagal hapus:', e);
-          const all = JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-          delete all[id];
-          localStorage.setItem('webpos_customers', JSON.stringify(all));
-          CustomerStorage._cache = all;
-          throw e;
-        }
-      },
-
-      search: (query) => {
-        if (!query || query.trim() === '') return Object.values(CustomerStorage._cache);
-        const searchLower = query.toLowerCase().trim();
-        return Object.values(CustomerStorage._cache).filter(customer => {
-          const nameMatch = (customer.name || '').toLowerCase().includes(searchLower);
-          const phoneMatch = (customer.phone || '').toLowerCase().includes(searchLower);
-          return nameMatch || phoneMatch;
-        });
-      },
-
-      get: (id) => CustomerStorage._cache[id] || null
+      delete: (id) => {
+        const all = CustomerStorage.getAll();
+        delete all[id];
+        localStorage.setItem('webpos_customers', JSON.stringify(all));
+      }
     };
-    
+
     document.addEventListener('DOMContentLoaded', () => {
       // Auth check
       const checkAuth = () => {
@@ -1716,16 +1742,17 @@
           initHutang();
         }
       };
-      
+
       checkAuth();
 
       function initHutang() {
         let currentFilter = 'all';
-        let currentStatus = 'active';
+        let currentStatus = 'active'; // 'active' or 'inactive'
+        let currentSearch = '';
         let currentPaymentId = null;
         let hutangData = {};
         let customerData = {};
-        let currentPaymentType = null;
+        let currentPaymentType = null; // 'hutang' or 'piutang'
 
         // Format currency inputs
         document.getElementById('hutangAmount').addEventListener('input', (e) => {
@@ -1739,26 +1766,55 @@
         // Load data
         loadAllData();
 
-        // Search customer real-time
-        const searchInput = document.getElementById('searchCustomer');
-        if (searchInput) {
-          searchInput.addEventListener('input', debounce((e) => {
-            renderCustomerList(e.target.value);
-          }, 300));
-          
-          // Expand saat focus
-          searchInput.addEventListener('focus', () => {
-            document.getElementById('customerSection').classList.add('expanded');
+        // Autocomplete Logic
+        const nameInput = document.getElementById('hutangName');
+        const autocompleteBox = document.getElementById('customerAutocomplete');
+
+        if (nameInput && autocompleteBox) {
+          nameInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            if (val.length < 2) {
+              autocompleteBox.style.display = 'none';
+              return;
+            }
+            
+            const matches = Object.values(customerData).filter(c => 
+              c.name.toLowerCase().includes(val)
+            );
+            
+            if (matches.length > 0) {
+              autocompleteBox.innerHTML = matches.map(c => `
+                <div class="autocomplete-item" style="
+                  padding: 0.75rem 1rem;
+                  cursor: pointer;
+                  border-bottom: 1px solid var(--border-color);
+                  transition: background 0.2s;
+                " onmouseover="this.style.background='var(--bg-secondary)'" 
+                onmouseout="this.style.background='var(--bg-card)'"
+                onclick="window.selectCustomer('${c.name.replace(/'/g, "\\'")}')">
+                  <div style="font-weight: 500;">${c.name}</div>
+                  ${c.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${c.phone}</div>` : ''}
+                </div>
+              `).join('');
+              autocompleteBox.style.display = 'block';
+            } else {
+              autocompleteBox.style.display = 'none';
+            }
+          });
+
+          // Hide autocomplete when click outside
+          document.addEventListener('click', (e) => {
+            if (!nameInput.contains(e.target) && !autocompleteBox.contains(e.target)) {
+              autocompleteBox.style.display = 'none';
+            }
           });
         }
 
-        // Search hutang/piutang real-time
-const searchHutangInput = document.getElementById('searchHutang');
-if (searchHutangInput) {
-  searchHutangInput.addEventListener('input', debounce((e) => {
-    renderHutangList(e.target.value);
-  }, 300));
-}
+        // Select customer function
+        window.selectCustomer = (name) => {
+          document.getElementById('hutangName').value = name;
+          document.getElementById('customerAutocomplete').style.display = 'none';
+        };
 
         // Customer section toggle
         document.getElementById('customerHeader').addEventListener('click', () => {
@@ -1774,44 +1830,37 @@ if (searchHutangInput) {
         });
 
         // Filter tabs
-document.querySelectorAll('.filter-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentFilter = tab.dataset.filter;
-    // Reset search saat ganti filter
-    const searchInput = document.getElementById('searchHutang');
-    if (searchInput) searchInput.value = '';
-    renderHutangList();
-  });
-});
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderHutangList();
+          });
+        });
 
-// Status toggle
-document.getElementById('statusToggle').addEventListener('change', (e) => {
-  currentStatus = e.target.checked ? 'inactive' : 'active';
-  document.getElementById('labelAktif').classList.toggle('active', !e.target.checked);
-  document.getElementById('labelInactive').classList.toggle('active', e.target.checked);
-  // Reset search saat ganti status
-  const searchInput = document.getElementById('searchHutang');
-  if (searchInput) searchInput.value = '';
-  renderHutangList();
-});
+        // Search nama listener - TAMBAHKAN INI
+        document.getElementById('searchHutangName').addEventListener('input', (e) => {
+          currentSearch = e.target.value.toLowerCase().trim();
+          renderHutangList();
+        });
+
         // Add buttons
         document.getElementById('btnAddHutang').addEventListener('click', () => {
           document.getElementById('modalTitle').textContent = 'Tambah Hutang/Piutang';
           document.getElementById('hutangForm').reset();
           document.getElementById('hutangId').value = '';
-          updateCustomerSelect();
           updateKasOptionHutang();
           document.getElementById('hutangModal').classList.add('active');
         });
 
-        // Hutang type change
+        // Hutang type change - update kas option visibility
         document.getElementById('hutangType').addEventListener('change', updateKasOptionHutang);
 
         function updateKasOptionHutang() {
           const type = document.getElementById('hutangType').value;
           const kasBox = document.getElementById('kasOptionBoxHutang');
+          const checkbox = document.getElementById('hutangAffectKas');
           const label = kasBox.querySelector('.checkbox-label');
           const sublabel = kasBox.querySelector('.checkbox-sublabel');
           
@@ -1854,29 +1903,24 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
         document.getElementById('btnExport').addEventListener('click', exportData);
         document.getElementById('btnConfirmImport').addEventListener('click', importData);
 
-        // Customer select change
-        document.getElementById('hutangCustomerSelect').addEventListener('change', (e) => {
-          if (e.target.value) {
-            document.getElementById('hutangName').value = e.target.value;
-          }
-        });
-
-        // Sidebar toggle
+        // Sidebar toggle - Desktop (collapse/expand)
         document.getElementById('menuToggle').addEventListener('click', () => {
           document.getElementById('sidebar').classList.toggle('collapsed');
         });
 
-        // Mobile sidebar
+        // Sidebar toggle - Mobile (burger menu)
         const mobileToggle = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');
 
         if (mobileToggle) {
+          mobileToggle.removeAttribute('style');
           mobileToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             sidebar.classList.toggle('mobile-open');
           });
         }
 
+        // Tutup sidebar saat klik link di mobile
         document.querySelectorAll('.nav-link').forEach(link => {
           link.addEventListener('click', () => {
             if (window.innerWidth <= 1024) {
@@ -1885,6 +1929,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           });
         });
 
+        // Tutup sidebar saat klik overlay (area gelap di luar sidebar)
         document.addEventListener('click', (e) => {
           if (window.innerWidth <= 1024 && 
               sidebar.classList.contains('mobile-open') &&
@@ -1930,6 +1975,19 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           document.getElementById('paymentModal').classList.remove('active');
           currentPaymentId = null;
           currentPaymentType = null;
+          // Reset lunasi sekaligus checkbox
+          const lunasCheckbox = document.getElementById('lunasSekaligus');
+          if (lunasCheckbox) {
+            lunasCheckbox.checked = false;
+            lunasCheckbox.removeEventListener('change', handleLunasToggle);
+          }
+          // Reset payment amount field
+          const paymentInput = document.getElementById('paymentAmount');
+          if (paymentInput) {
+            paymentInput.readOnly = false;
+            paymentInput.style.background = 'var(--bg-secondary)';
+            paymentInput.style.cursor = 'text';
+          }
         }
 
         function closeCustomerModal() {
@@ -1945,14 +2003,15 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           Utils.showLoading();
           
           try {
+            // Load hutang data from Firebase
             const hutangSnapshot = await database.ref('debts').once('value');
             hutangData = hutangSnapshot.val() || {};
             
-            customerData = await CustomerStorage.getAll();
+            // Load customer data from LOCAL STORAGE (fix permission issue)
+            customerData = CustomerStorage.getAll();
             
             updateSummary();
             renderCustomerList();
-            updateCustomerSelect();
             renderHutangList();
           } catch (error) {
             console.error('Error loading data:', error);
@@ -1962,10 +2021,18 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           Utils.hideLoading();
         }
 
+        window.toggleDetail = function(id) {
+          const detailRow = document.getElementById('detail-' + id);
+          const expandBtn = document.getElementById('expand-' + id);
+          if (detailRow) {
+            detailRow.classList.toggle('show');
+            if (expandBtn) expandBtn.classList.toggle('rotated');
+          }
+        };
+
         function updateSummary() {
           let totalHutang = 0;
           let totalPiutang = 0;
-          let totalLunas = 0;
           
           Object.values(hutangData).forEach(item => {
             if (item.status === 'active') {
@@ -1974,64 +2041,39 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               } else {
                 totalPiutang += item.remaining || item.amount || 0;
               }
-            } else if (item.status === 'paid' || item.status === 'inactive') {
-              totalLunas += item.amount || 0;
             }
           });
           
           document.getElementById('totalHutang').textContent = Utils.formatRupiah(totalHutang);
           document.getElementById('totalPiutang').textContent = Utils.formatRupiah(totalPiutang);
-          document.getElementById('totalLunas').textContent = Utils.formatRupiah(totalLunas);
         }
 
-        function updateCustomerSelect() {
-          const select = document.getElementById('hutangCustomerSelect');
-          select.innerHTML = '<option value="">-- Pilih dari Daftar --</option>';
-          
-          Object.entries(customerData).forEach(([id, customer]) => {
-            const option = document.createElement('option');
-            option.value = customer.name;
-            option.textContent = customer.name + (customer.phone ? ` (${customer.phone})` : '');
-            select.appendChild(option);
-          });
-        }
-
-        function renderCustomerList(searchQuery = '') {
+        function renderCustomerList() {
           const container = document.getElementById('customerListContainer');
-          
-          const customers = searchQuery ? CustomerStorage.search(searchQuery) : Object.values(customerData);
-          
           document.getElementById('customerCount').textContent = Object.keys(customerData).length;
           
           let html = '';
           
-          if (customers.length === 0) {
-            if (searchQuery) {
-              html = `<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">
-                <i class="fas fa-search" style="display: block; margin-bottom: 0.5rem; font-size: 1.25rem;"></i>
-                Tidak ada hasil untuk "${searchQuery}"
-              </div>`;
-            } else {
-              html = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">Belum ada pelanggan</div>';
-            }
+          if (Object.keys(customerData).length === 0) {
+            html = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.875rem;">Belum ada pelanggan</div>';
           } else {
-            customers.forEach(customer => {
+            Object.entries(customerData).forEach(([id, customer]) => {
               html += `
-                <div class="customer-item" style="animation: slideIn 0.3s ease;">
+                <div class="customer-item">
                   <div class="customer-info">
                     <div class="customer-avatar-small">
                       <i class="fas fa-user"></i>
                     </div>
                     <div>
-                      <div class="customer-name">${highlightText(customer.name, searchQuery)}</div>
-                      ${customer.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${highlightText(customer.phone, searchQuery)}</div>` : ''}
+                      <div class="customer-name">${customer.name}</div>
+                      ${customer.phone ? `<div style="font-size: 0.75rem; color: var(--text-muted);">${customer.phone}</div>` : ''}
                     </div>
                   </div>
                   <div class="customer-actions">
-                    <button class="btn-icon-xs btn-edit" onclick="window.editCustomer('${customer.id}')" title="Edit">
+                    <button class="btn-icon-xs btn-edit" onclick="window.editCustomer('${id}')" title="Edit">
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn-icon-xs btn-delete" onclick="window.deleteCustomer('${customer.id}')" title="Hapus">
+                    <button class="btn-icon-xs btn-delete" onclick="window.deleteCustomer('${id}')" title="Hapus">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -2043,108 +2085,166 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           container.innerHTML = html;
         }
 
-        // Helper untuk highlight text yang dicari
-        function highlightText(text, query) {
-          if (!query || !text) return text;
-          const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-          return text.replace(regex, '<mark style="background: var(--primary); color: white; padding: 0 2px; border-radius: 2px;">$1</mark>');
+                   function renderHutangList() {
+          const list = document.getElementById('hutangList');
+          let html = '';
+          
+          // Filter data
+          let filteredItems = Object.entries(hutangData)
+            .map(([id, data]) => ({ id, ...data }))
+            .filter(item => {
+              if (currentStatus === 'active') return item.status === 'active';
+              return item.status === 'paid' || item.status === 'inactive' || item.status === 'deleted';
+            })
+            .filter(item => currentFilter === 'all' || item.type === currentFilter);
+          
+          // Filter by search nama (jika ada)
+          if (currentSearch) {
+            filteredItems = filteredItems.filter(item => 
+              item.name.toLowerCase().includes(currentSearch)
+            );
+          }
+          
+          // GROUP BY NAMA
+          const groupedByName = {};
+          
+          filteredItems.forEach(item => {
+            const key = item.name.toLowerCase().trim();
+            if (!groupedByName[key]) {
+              groupedByName[key] = {
+                displayName: item.name,
+                items: [],
+                totalRemaining: 0,
+                hasActive: false,
+                type: item.type
+              };
+            }
+            groupedByName[key].items.push(item);
+            if (item.status === 'active') {
+              groupedByName[key].totalRemaining += (item.remaining || item.amount || 0);
+              groupedByName[key].hasActive = true;
+            }
+          });
+          
+          const groupedArray = Object.values(groupedByName).sort((a, b) => 
+            a.displayName.localeCompare(b.displayName)
+          );
+          
+          // Sort items per group by tanggal
+          groupedArray.forEach(group => {
+            group.items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          });
+          
+          if (groupedArray.length === 0) {
+            const message = currentSearch 
+              ? `Tidak ada hasil untuk "${currentSearch}"`
+              : (currentStatus === 'active' ? 'Belum ada data hutang/piutang aktif' : 'Belum ada data yang lunas');
+            html = `
+              <div class="empty-state">
+                <i class="fas fa-${currentSearch ? 'search' : (currentStatus === 'active' ? 'handshake' : 'check-circle')}"></i>
+                <p>${message}</p>
+              </div>
+            `;
+          } else {
+            groupedArray.forEach(group => {
+              const isPaid = !group.hasActive;
+              const groupId = 'group_' + group.displayName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+              const totalAmount = group.items.reduce((sum, item) => sum + (item.amount || 0), 0);
+              
+              html += `
+                <div class="hutang-item" onclick="window.toggleDetail('${groupId}')" style="cursor: pointer; border-left: 4px solid ${group.type === 'hutang' ? 'var(--danger)' : 'var(--warning)'};">
+                  <div class="hutang-info" style="flex: 1;">
+                    <div class="hutang-avatar" style="background: ${group.type === 'hutang' ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'};">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div class="hutang-details" style="flex: 1;">
+                      <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="hutang-name" style="font-size: 1rem; font-weight: 600;">${group.displayName}</span>
+                        <span style="background: var(--bg-secondary); color: var(--text-muted); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">
+                          ${group.items.length} transaksi
+                        </span>
+                        <button class="expand-btn" id="expand-${groupId}" onclick="event.stopPropagation(); window.toggleDetail('${groupId}')" style="margin-left: auto;">
+                          <i class="fas fa-chevron-down"></i>
+                        </button>
+                      </div>
+                      <div style="display: flex; gap: 1rem; margin-top: 0.25rem; font-size: 0.8rem; color: var(--text-muted);">
+                        <span>Total: ${Utils.formatRupiah(totalAmount)}</span>
+                        <span>•</span>
+                        <span>Sisa: <span style="color: ${group.type === 'hutang' ? 'var(--danger)' : 'var(--warning)'}; font-weight: 600;">${Utils.formatRupiah(group.totalRemaining)}</span></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="hutang-amount-section" onclick="event.stopPropagation();">
+                    <span class="hutang-amount ${group.type}" style="font-size: 1rem; ${isPaid ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
+                      ${Utils.formatRupiah(group.totalRemaining)}
+                    </span>
+                    <span class="status-badge ${isPaid ? 'inactive' : 'active'}" style="margin-top: 0.25rem;">
+                      ${isPaid ? 'Lunas' : 'Aktif'}
+                    </span>
+                  </div>
+                </div>
+                
+                <!-- DETAIL PER TANGGAL -->
+                <div class="hutang-detail-row" id="detail-${groupId}" style="background: var(--bg-secondary);">
+                  <div class="hutang-detail-content" style="padding: 1rem;">
+                    <div style="font-weight: 600; margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">
+                      Detail Transaksi
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                      ${group.items.map((item, idx) => {
+                        const createdDate = item.createdAt ? new Date(item.createdAt).toLocaleDateString('id-ID') : '-';
+                        const isItemPaid = item.status === 'paid' || item.status === 'inactive';
+                        const noteText = item.note || (item.type === 'hutang' ? 'Hutang' : 'Piutang');
+                        
+                        return `
+                          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-card); border-radius: 8px; border-left: 3px solid ${item.type === 'hutang' ? 'var(--danger)' : 'var(--warning)'};">
+                            <div style="flex: 1;">
+                              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <span style="font-weight: 500; color: var(--text-primary);">${idx + 1}. ${noteText}</span>
+                                <span class="status-badge ${isItemPaid ? 'inactive' : 'active'}" style="font-size: 0.65rem; padding: 2px 6px;">
+                                  ${isItemPaid ? 'Lunas' : 'Aktif'}
+                                </span>
+                              </div>
+                              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                <i class="far fa-calendar-alt"></i> ${createdDate}
+                                ${item.dueDate ? `• Jatuh tempo: ${new Date(item.dueDate).toLocaleDateString('id-ID')}` : ''}
+                              </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 1rem;">
+                              <div style="font-weight: 600; color: ${item.type === 'hutang' ? 'var(--danger)' : 'var(--warning)'}; font-size: 0.9rem;">
+                                ${Utils.formatRupiah(item.remaining || item.amount || 0)}
+                              </div>
+                            </div>
+                            <div style="display: flex; gap: 0.25rem; margin-left: 0.75rem;">
+                              ${!isItemPaid ? `
+                                <button class="btn-icon-sm btn-pay" onclick="window.openPayment('${item.id}')" title="Bayar" style="width: 28px; height: 28px;">
+                                  <i class="fas fa-money-bill-wave" style="font-size: 0.75rem;"></i>
+                                </button>
+                              ` : `
+                                <button class="btn-icon-sm btn-restore" onclick="window.restoreHutang('${item.id}')" title="Restore" style="width: 28px; height: 28px;">
+                                  <i class="fas fa-undo" style="font-size: 0.75rem;"></i>
+                                </button>
+                              `}
+                              <button class="btn-icon-sm btn-edit" onclick="window.editHutang('${item.id}')" title="Edit" style="width: 28px; height: 28px;">
+                                <i class="fas fa-edit" style="font-size: 0.75rem;"></i>
+                              </button>
+                              <button class="btn-icon-sm btn-delete" onclick="window.deleteHutang('${item.id}')" title="Hapus" style="width: 28px; height: 28px;">
+                                <i class="fas fa-trash" style="font-size: 0.75rem;"></i>
+                              </button>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+          
+          list.innerHTML = html;
         }
-
-        function escapeRegex(string) {
-          return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-
-        function renderHutangList(searchQuery = '') {
-  const list = document.getElementById('hutangList');
-  let html = '';
-  
-  let items = Object.entries(hutangData)
-    .map(([id, data]) => ({ id, ...data }))
-    .filter(item => {
-      if (currentStatus === 'active') return item.status === 'active';
-      return item.status === 'paid' || item.status === 'inactive' || item.status === 'deleted';
-    })
-    .filter(item => currentFilter === 'all' || item.type === currentFilter);
-  
-  // Filter berdasarkan pencarian nama
-  if (searchQuery && searchQuery.trim() !== '') {
-    const searchLower = searchQuery.toLowerCase().trim();
-    items = items.filter(item => {
-      const nameMatch = (item.name || '').toLowerCase().includes(searchLower);
-      const noteMatch = (item.note || '').toLowerCase().includes(searchLower);
-      return nameMatch || noteMatch;
-    });
-  }
-  
-  // Sort berdasarkan createdAt
-  items.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  
-  if (items.length === 0) {
-    const message = searchQuery 
-      ? `Tidak ada hasil untuk "${searchQuery}"`
-      : (currentStatus === 'active' ? 'Belum ada data hutang/piutang aktif' : 'Belum ada data yang lunas');
-    html = `
-      <div class="empty-state">
-        <i class="fas fa-${searchQuery ? 'search' : (currentStatus === 'active' ? 'handshake' : 'check-circle')}"></i>
-        <p>${message}</p>
-      </div>
-    `;
-  } else {
-    items.forEach(item => {
-      const isHutang = item.type === 'hutang';
-      const dueDate = item.dueDate ? new Date(item.dueDate).toLocaleDateString('id-ID') : '-';
-      const remaining = item.remaining || item.amount || 0;
-      const isPaid = item.status === 'paid' || item.status === 'inactive';
-      
-      // Highlight nama jika ada search query
-      const displayName = searchQuery ? highlightText(item.name, searchQuery) : item.name;
-      const displayNote = item.note ? (searchQuery ? highlightText(item.note, searchQuery) : item.note) : '';
-      
-      html += `
-        <div class="hutang-item">
-          <div class="hutang-info">
-            <div class="hutang-avatar">
-              <i class="fas fa-user"></i>
-            </div>
-            <div class="hutang-details">
-              <span class="hutang-name">${displayName}</span>
-              <span class="hutang-meta">
-                ${isHutang ? 'Hutang' : 'Piutang'} • Jatuh tempo: ${dueDate}
-              </span>
-              ${displayNote ? `<span class="hutang-meta">${displayNote}</span>` : ''}
-              <span class="status-badge ${isPaid ? 'inactive' : 'active'}">
-                ${isPaid ? 'Lunas' : 'Aktif'}
-              </span>
-            </div>
-          </div>
-          <div class="hutang-amount-section">
-            <span class="hutang-amount ${item.type} ${isPaid ? 'paid' : ''}">${Utils.formatRupiah(remaining)}</span>
-            <div class="hutang-actions">
-              ${!isPaid ? `
-                <button class="btn-icon-sm btn-pay" onclick="window.openPayment('${item.id}')" title="Bayar">
-                  <i class="fas fa-money-bill-wave"></i>
-                </button>
-              ` : `
-                <button class="btn-icon-sm btn-restore" onclick="window.restoreHutang('${item.id}')" title="Restore">
-                  <i class="fas fa-undo"></i>
-                </button>
-              `}
-              <button class="btn-icon-sm btn-edit" onclick="window.editHutang('${item.id}')" title="Edit">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="btn-icon-sm btn-delete" onclick="window.deleteHutang('${item.id}')" title="Hapus">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-  }
-  
-  list.innerHTML = html;
-}
-
+        
         async function saveHutang() {
           const id = document.getElementById('hutangId').value;
           const type = document.getElementById('hutangType').value;
@@ -2162,33 +2262,65 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           Utils.showLoading();
           
           try {
-            const hutangId = id || 'debt_' + Date.now();
             const user = Auth.getCurrentUser();
-            
-            const hutangData = {
-              id: hutangId,
-              type,
-              name,
-              amount,
-              remaining: amount,
-              dueDate: dueDate || null,
-              note,
-              status: 'active',
-              userId: user.uid,
-              userName: user.name || user.email,
-              createdAt: id ? (hutangData[hutangId]?.createdAt || Date.now()) : Date.now(),
-              updatedAt: Date.now(),
-              affectKas: affectKas
-            };
-            
-            await database.ref('debts/' + hutangId).set(hutangData);
-            
-            if (affectKas && !id) {
-              await recordToKas(type === 'hutang' ? 'masuk' : 'keluar', amount, 
-                `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
+            let hutangId = id;
+            let existingDebt = null;
+
+            // Kalau bukan edit mode, cari hutang aktif dengan nama yang sama
+            if (!id) {
+              existingDebt = Object.values(hutangData).find(
+                item => item.name.toLowerCase() === name.toLowerCase() && 
+                        item.type === type && 
+                        item.status === 'active'
+              );
+            }
+
+            if (existingDebt && !id) {
+              // UPDATE EXISTING: Tambahkan jumlah
+              const newAmount = existingDebt.amount + amount;
+              const newRemaining = (existingDebt.remaining || existingDebt.amount) + amount;
+              hutangId = existingDebt.id;
+              
+              await database.ref('debts/' + hutangId).update({
+  amount: newAmount,
+  remaining: newRemaining,
+  note: note || existingDebt.note || null,
+  updatedAt: Date.now()
+});
+              
+              Utils.showToast(`${type === 'hutang' ? 'Hutang' : 'Piutang'} ${name} ditambahkan (total: ${Utils.formatRupiah(newRemaining)})`, 'success');
+            } else {
+              // INSERT BARU
+              hutangId = id || 'debt_' + Date.now();
+              
+              const hutangPayload = {
+                id: hutangId,
+                type,
+                name,
+                amount,
+                remaining: amount,
+                dueDate: dueDate || null,
+                note,
+                status: 'active',
+                userId: user.uid,
+                userName: user.name || user.email,
+                createdAt: id ? (hutangData[hutangId]?.createdAt || Date.now()) : Date.now(),
+                updatedAt: Date.now(),
+                affectKas: affectKas
+              };
+              
+              await database.ref('debts/' + hutangId).set(hutangPayload);
+              
+              // If affectKas is checked, record to kas
+              if (affectKas && !id) {
+                console.log('🔄 Mencatat ke kas...');
+                await recordToKas(type === 'hutang' ? 'masuk' : 'keluar', amount, 
+                  `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
+              }
+              
+              Utils.showToast('Data berhasil disimpan', 'success');
             }
             
-            Utils.showToast('Data berhasil disimpan', 'success');
             closeModal();
             loadAllData();
           } catch (error) {
@@ -2198,7 +2330,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           
           Utils.hideLoading();
         }
-
+        
         async function saveCustomer() {
           const id = document.getElementById('customerId').value;
           const name = document.getElementById('customerNameInput').value.trim();
@@ -2209,28 +2341,26 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
             return;
           }
           
-          Utils.showLoading();
-          
           try {
             const customerId = id || 'cust_' + Date.now();
             
-            await CustomerStorage.save(customerId, {
+            // SAVE TO LOCAL STORAGE (fix Firebase permission issue)
+            CustomerStorage.save(customerId, {
               name,
-              phone: phone || null
+              phone: phone || null,
+              createdAt: id ? (customerData[customerId]?.createdAt || Date.now()) : Date.now()
             });
             
             Utils.showToast('Pelanggan berhasil disimpan', 'success');
             closeCustomerModal();
             
-            customerData = await CustomerStorage.getAll();
+            // Reload customer data
+            customerData = CustomerStorage.getAll();
             renderCustomerList();
-            updateCustomerSelect();
           } catch (error) {
             console.error('Error saving customer:', error);
-            Utils.showToast('Gagal menyimpan: Cek koneksi internet', 'error');
+            Utils.showToast('Gagal menyimpan pelanggan: ' + error.message, 'error');
           }
-          
-          Utils.hideLoading();
         }
 
         window.editCustomer = (id) => {
@@ -2244,25 +2374,39 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           document.getElementById('customerModal').classList.add('active');
         };
 
-        window.deleteCustomer = async (id) => {
-          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', async () => {
-            Utils.showLoading();
-            
+        window.deleteCustomer = (id) => {
+          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', () => {
             try {
-              await CustomerStorage.delete(id);
+              CustomerStorage.delete(id);
               Utils.showToast('Pelanggan berhasil dihapus', 'success');
-              
-              customerData = await CustomerStorage.getAll();
+              customerData = CustomerStorage.getAll();
               renderCustomerList();
-              updateCustomerSelect();
             } catch (error) {
-              console.error('Error:', error);
               Utils.showToast('Gagal menghapus pelanggan', 'error');
             }
-            
-            Utils.hideLoading();
           });
         };
+
+                // Handle Lunasi Sekaligus toggle
+        function handleLunasToggle(e) {
+          const paymentInput = document.getElementById('paymentAmount');
+          const remaining = parseInt(document.getElementById('paymentModal').dataset.remainingAmount) || 0;
+          
+          if (e.target.checked) {
+            // Isi otomatis dengan sisa hutang/piutang
+            paymentInput.value = Utils.formatNumberInput(remaining.toString());
+            paymentInput.readOnly = true;
+            paymentInput.style.background = 'var(--bg-secondary)';
+            paymentInput.style.cursor = 'not-allowed';
+          } else {
+            // Kosongkan field untuk input manual
+            paymentInput.value = '';
+            paymentInput.readOnly = false;
+            paymentInput.style.background = 'var(--bg-secondary)';
+            paymentInput.style.cursor = 'text';
+            paymentInput.focus();
+          }
+        }
 
         window.openPayment = (id) => {
           const item = hutangData[id];
@@ -2273,20 +2417,28 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           const remaining = item.remaining || item.amount || 0;
           
           document.getElementById('remainingAmount').textContent = Utils.formatRupiah(remaining);
+          document.getElementById('paymentModal').dataset.remainingAmount = remaining;
+           // Reset checkbox lunasi sekaligus
+          const lunasCheckbox = document.getElementById('lunasSekaligus');lunasCheckbox.checked = false;
+          lunasCheckbox.removeEventListener('change', handleLunasToggle);
+          lunasCheckbox.addEventListener('change', handleLunasToggle);
           document.getElementById('paymentAmount').value = '';
           document.getElementById('paymentNote').value = '';
           
+          // Update kas option based on type
           const kasBox = document.getElementById('kasOptionBox');
           const labelText = document.getElementById('kasLabelText');
           const subLabelText = document.getElementById('kasSubLabelText');
           const checkbox = document.getElementById('affectKas');
           
-          checkbox.checked = false;
+          checkbox.checked = false; // Default tidak dicentang
           
           if (item.type === 'hutang') {
+            // Bayar hutang = uang keluar dari kas (kita bayar utang)
             labelText.textContent = 'Catat ke Kas Keluar';
             subLabelText.textContent = 'Otomatis mencatat pengeluaran kas saat membayar hutang';
           } else {
+            // Bayar piutang = uang masuk ke kas (kita terima pembayaran)
             labelText.textContent = 'Catat ke Kas Masuk';
             subLabelText.textContent = 'Otomatis mencatat pemasukan kas saat menerima pembayaran piutang';
           }
@@ -2307,7 +2459,6 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           document.getElementById('hutangNote').value = item.note || '';
           document.getElementById('hutangAffectKas').checked = item.affectKas !== false;
           updateKasOptionHutang();
-          updateCustomerSelect();
           document.getElementById('hutangModal').classList.add('active');
         };
 
@@ -2355,24 +2506,32 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
         };
 
         async function processPayment() {
-          if (!currentPaymentId) return;
-          
-          const paymentAmount = parseInt(document.getElementById('paymentAmount').value.replace(/\./g, '')) || 0;
-          const note = document.getElementById('paymentNote').value;
-          const affectKas = document.getElementById('affectKas').checked;
-          
-          if (paymentAmount <= 0) {
-            Utils.showToast('Jumlah pembayaran harus lebih dari 0', 'error');
-            return;
-          }
-          
-          const item = hutangData[currentPaymentId];
-          const remaining = item.remaining || item.amount || 0;
-          
-          if (paymentAmount > remaining) {
-            Utils.showToast('Jumlah pembayaran melebihi sisa hutang/piutang', 'error');
-            return;
-          }
+  if (!currentPaymentId) return;
+  
+  // ✅ PINDAHKAN KE ATAS SINI
+  const item = hutangData[currentPaymentId];
+  const remaining = item.remaining || item.amount || 0;
+  
+  const paymentAmount = parseInt(document.getElementById('paymentAmount').value.replace(/\./g, '')) || 0;
+  const note = document.getElementById('paymentNote').value;
+  const affectKas = document.getElementById('affectKas').checked;
+  
+  if (paymentAmount <= 0) {
+    Utils.showToast('Jumlah pembayaran harus lebih dari 0', 'error');
+    return;
+  }
+
+  const lunasSekaligus = document.getElementById('lunasSekaligus').checked;
+  
+  // Optional: Hapus blok if ini kalau tidak perlu, atau biarkan saja
+  if (lunasSekaligus && paymentAmount !== remaining) {
+     console.log('Lunasi sekaligus dipilih, jumlah:', paymentAmount);
+  }
+  
+  if (paymentAmount > remaining) {
+    Utils.showToast('Jumlah pembayaran melebihi sisa hutang/piutang', 'error');
+    return;
+  }
           
           Utils.showLoading();
           
@@ -2381,6 +2540,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
             const isFullyPaid = newRemaining <= 0;
             const user = Auth.getCurrentUser();
             
+            // Update debt
             await database.ref('debts/' + currentPaymentId).update({
               remaining: newRemaining,
               status: isFullyPaid ? 'paid' : 'active',
@@ -2388,6 +2548,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               updatedAt: Date.now()
             });
             
+            // Add payment record
             await database.ref('debt_payments/' + currentPaymentId + '/' + Date.now()).set({
               amount: paymentAmount,
               note,
@@ -2397,10 +2558,13 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               timestamp: Date.now()
             });
             
+            // Record to kas if checked
             if (affectKas) {
               if (item.type === 'hutang') {
+                // Bayar hutang = kas keluar
                 await recordToKas('keluar', paymentAmount, `Pembayaran hutang - ${item.name}`, user);
               } else {
+                // Terima piutang = kas masuk
                 await recordToKas('masuk', paymentAmount, `Pembayaran piutang - ${item.name}`, user);
               }
             }
@@ -2423,6 +2587,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
             const kasId = 'kas_' + Date.now();
             const today = new Date().toISOString().split('T')[0];
             
+            // Struktur data yang dibaca dashboard
             const transactionData = {
               type: type === 'masuk' ? 'kas_masuk' : 'kas_keluar',
               amount: parseInt(amount),
@@ -2434,10 +2599,15 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               status: 'completed'
             };
 
+            console.log('📤 Simpan ke transactions/' + today + '/' + kasId);
+            console.log('📦 Data:', transactionData);
+
+            // Simpan ke path yang dibaca dashboard
             await database.ref('transactions/' + today + '/' + kasId).set(transactionData);
             console.log('✅ Berhasil tersimpan di transactions!');
             
             return true;
+            
           } catch (error) {
             console.error('❌ Gagal:', error);
             Utils.showToast('Gagal mencatat ke kas: ' + error.message, 'error');
@@ -2445,6 +2615,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           }
         }
         
+        // Export Data
         function exportData() {
           const dataToExport = Object.values(hutangData).map(item => ({
             name: item.name,
@@ -2471,6 +2642,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
           Utils.showToast('Data berhasil diexport', 'success');
         }
 
+        // Import Data with Excel Support
         function importData() {
           const fileInput = document.getElementById('importFile');
           const overwrite = document.getElementById('importOverwrite').checked;
@@ -2490,12 +2662,14 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               let importedData = [];
               
               if (file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
+                // Parse Excel using SheetJS
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 importedData = XLSX.utils.sheet_to_json(worksheet);
                 
+                // Normalize keys to lowercase
                 importedData = importedData.map(row => {
                   const normalized = {};
                   Object.keys(row).forEach(key => {
@@ -2504,6 +2678,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
                   return normalized;
                 });
               } else if (file.name.endsWith('.csv')) {
+                // Parse CSV
                 const text = e.target.result;
                 const lines = text.split('\n').filter(line => line.trim());
                 const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
@@ -2517,6 +2692,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
                   importedData.push(obj);
                 }
               } else {
+                // Parse JSON
                 importedData = JSON.parse(e.target.result);
               }
               
@@ -2528,6 +2704,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
               let count = 0;
               
               for (const item of importedData) {
+                // Handle various field names
                 const name = item.name || item.nama || item.pelanggan || '';
                 const type = (item.type || item.tipe || 'hutang').toLowerCase();
                 const amount = parseInt(item.amount || item.jumlah || item.total || 0);
@@ -2553,7 +2730,7 @@ document.getElementById('statusToggle').addEventListener('change', (e) => {
                   createdAt: Date.now(),
                   updatedAt: Date.now(),
                   imported: true,
-                  affectKas: false
+                  affectKas: false // Default false for imported data
                 });
                 
                 count++;
