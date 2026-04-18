@@ -812,6 +812,22 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script src="js/sidebar-filter.js"></script>
 
   <script>
+    // ===== GLOBAL FUNCTIONS =====
+function isFromDashboard() {
+  return localStorage.getItem('fromDashboard') === 'true';
+}
+
+function goBack() {
+  const dariDashboard = isFromDashboard();
+  localStorage.removeItem('fromDashboard');
+  
+  if (dariDashboard) {
+    window.location.replace('index.html');
+  } else {
+    window.location.href = 'page-kasir.html'; // fallback default
+  }
+}
+    
     document.addEventListener('DOMContentLoaded', () => {
   auth.onAuthStateChanged(async (user) => {  // ⭐ Tambah async
     if (!user && !Utils.getStorage('webpos_session')) {
@@ -873,7 +889,11 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       });
       
       Utils.hideLoading();
-      Utils.showToast('Modal berhasil disimpan!', 'success');
+      Utils.showToast('Modal harian berhasil disimpan', 'success');
+
+setTimeout(() => {
+  goBack();  // ✅ Otomatis ke dashboard jika dari dashboard
+}, 1000);
       
       // Reset form input amount (tapi biarkan tanggal)
       document.getElementById('modalAmount').value = '';
