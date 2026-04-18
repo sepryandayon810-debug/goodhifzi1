@@ -1693,23 +1693,45 @@
 
     // LOCAL STORAGE FALLBACK for customers (fix permission issue)
     const CustomerStorage = {
-      getAll: () => {
-        try {
-          return JSON.parse(localStorage.getItem('webpos_customers') || '{}');
-        } catch (e) { return {}; }
-      },
-      save: (id, data) => {
-        const all = CustomerStorage.getAll();
-        all[id] = { ...data, id, updatedAt: Date.now() };
-        localStorage.setItem('webpos_customers', JSON.stringify(all));
-        return all[id];
-      },
-      delete: (id) => {
-        const all = CustomerStorage.getAll();
-        delete all[id];
-        localStorage.setItem('webpos_customers', JSON.stringify(all));
-      }
+  getAll: async () => {
+    try {
+      // Ambil dari Firebase
+      const snapshot = await database.ref('customers').once('value');
+      const data = snapshot.val() || {};
+      // Filter hanya milik user ini (keamanan)
+      const user = Auth.getCurrentUser();
+      const filtered = {};
+      Object.entries(data).forEach(([id, customer]) => {
+        if (customer.userId === user.uid) {
+          filtered[id] = customer;
+        }
+      });
+      return filtered;
+    } catch (e) {
+      console.error('Error load customers:', e);
+      return {};
+    }
+  },
+  
+  save: async (id, data) => {
+    const user = Auth.getCurrentUser();
+    const customerData = {
+      ...data,
+      id,
+      userId: user.uid,
+      userName: user.name || user.email,
+      updatedAt: Date.now()
     };
+    
+    // Simpan ke Firebase
+    await database.ref('customers/' + id).set(customerData);
+    return customerData;
+  },
+  
+  delete: async (id) => {
+    await database.ref('customers/' + id).remove();
+  }
+};
 
     document.addEventListener('DOMContentLoaded', () => {
       // Auth check
@@ -2008,8 +2030,8 @@
             const hutangSnapshot = await database.ref('debts').once('value');
             hutangData = hutangSnapshot.val() || {};
             
-            // Load customer data from LOCAL STORAGE (fix permission issue)
-            customerData = CustomerStorage.getAll();
+            // Load customer data dari Firebase
+customerData = await CustomerStorage.getAll();
             
             updateSummary();
             renderCustomerList();
@@ -2346,18 +2368,18 @@
             const customerId = id || 'cust_' + Date.now();
             
             // SAVE TO LOCAL STORAGE (fix Firebase permission issue)
-            CustomerStorage.save(customerId, {
-              name,
-              phone: phone || null,
-              createdAt: id ? (customerData[customerId]?.createdAt || Date.now()) : Date.now()
-            });
+           await CustomerStorage.save(customerId, {
+  name,
+  phone: phone || null,
+  createdAt: id ? (customerData[customerId]?.createdAt || Date.now()) : Date.now()
+});
             
             Utils.showToast('Pelanggan berhasil disimpan', 'success');
             closeCustomerModal();
             
             // Reload customer data
-            customerData = CustomerStorage.getAll();
-            renderCustomerList();
+customerData = await CustomerStorage.getAll();
+renderCustomerList();
           } catch (error) {
             console.error('Error saving customer:', error);
             Utils.showToast('Gagal menyimpan pelanggan: ' + error.message, 'error');
@@ -2376,17 +2398,17 @@
         };
 
         window.deleteCustomer = (id) => {
-          Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', () => {
-            try {
-              CustomerStorage.delete(id);
-              Utils.showToast('Pelanggan berhasil dihapus', 'success');
-              customerData = CustomerStorage.getAll();
-              renderCustomerList();
-            } catch (error) {
-              Utils.showToast('Gagal menghapus pelanggan', 'error');
-            }
-          });
-        };
+  Utils.confirm('Apakah Anda yakin ingin menghapus pelanggan ini?', async () => {
+    try {
+      await CustomerStorage.delete(id);
+      Utils.showToast('Pelanggan berhasil dihapus', 'success');
+      customerData = await CustomerStorage.getAll();
+      renderCustomerList();
+    } catch (error) {
+      Utils.showToast('Gagal menghapus pelanggan', 'error');
+    }
+  });
+};
 
                 // Handle Lunasi Sekaligus toggle
         function handleLunasToggle(e) {
