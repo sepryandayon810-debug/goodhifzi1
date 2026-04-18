@@ -1791,6 +1791,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             if (!modalData || !modalData.amount) {
               Utils.hideLoading();
               Utils.showToast('Silakan set modal awal terlebih dahulu', 'warning');
+              localStorage.setItem('fromDashboard', 'true');
               window.location.href = 'page-modal-harian.html';
               return;
             }
