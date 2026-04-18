@@ -1008,20 +1008,38 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Wait for Firebase auth
-      auth.onAuthStateChanged((user) => {
-        if (!user && !Utils.getStorage('webpos_session')) {
-          window.location.href = 'login.html';
-          return;
-        }
-        
-        if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        initClosing();
-      });
-
+  // Wait for Firebase auth
+  auth.onAuthStateChanged((user) => {
+    if (!user && !Utils.getStorage('webpos_session')) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    if (user) {
+      // Load user data langsung ke sidebar
+      loadUserSidebar(user);
+    }
+    
+    initClosing(user); // Kirim user ke init
+  });
+  
+  // Fungsi untuk render sidebar user
+  function loadUserSidebar(user) {
+    if (!user) return;
+    
+    const userName = user.displayName || user.email || 'User';
+    const userRole = user.role || 'Kasir';
+    
+    document.getElementById('userName').textContent = userName;
+    document.getElementById('userRole').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
+    
+    const avatar = document.getElementById('userAvatar');
+    if (avatar && userName) {
+      const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      avatar.textContent = initials;
+    }
+  }
+      
       function initClosing() {
         // State
         let isShiftOpen = true;
@@ -1349,10 +1367,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               
               // Update shift to closed
               await database.ref('shifts/' + today + '/' + user.uid).update({
-                status: 'closed',
-                closedAt: firebase.database.ServerValue.TIMESTAMP,
-                closingData: closingData
-              });
+  status: 'closed',
+  closedAt: firebase.database.ServerValue.TIMESTAMP,
+  selisih: selisih,
+  closingStatus: selisih === 0 ? 'balance' : (selisih > 0 ? 'surplus' : 'minus'),
+  closingData: closingData
+});
               
               Utils.showToast('Closing berhasil disimpan. Shift ditutup.', 'success');
               
