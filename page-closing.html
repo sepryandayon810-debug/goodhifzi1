@@ -1009,36 +1009,50 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
   // Wait for Firebase auth
-  auth.onAuthStateChanged((user) => {
-    if (!user && !Utils.getStorage('webpos_session')) {
-      window.location.href = 'login.html';
-      return;
-    }
-    
-    if (user) {
-      // Load user data langsung ke sidebar
-      loadUserSidebar(user);
-    }
-    
-    initClosing(user); // Kirim user ke init
-  });
+  auth.onAuthStateChanged(async (user) => {  // <-- tambah async di sini
+  if (!user && !Utils.getStorage('webpos_session')) {
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  if (user) {
+    await loadUserSidebar(user);  // <-- tambah await di sini
+  }
+  
+  initClosing(user);
+});
   
   // Fungsi untuk render sidebar user
-  function loadUserSidebar(user) {
-    if (!user) return;
+  // Fungsi untuk render sidebar user - FETCH DARI DATABASE
+async function loadUserSidebar(user) {
+  if (!user) return;
+  
+  try {
+    // Ambil data lengkap dari database (sama seperti page-kas-shift.html)
+    const userSnap = await database.ref('users/' + user.uid).once('value');
+    const userData = userSnap.val() || {};
     
-    const userName = user.displayName || user.email || 'User';
-    const userRole = user.role || 'Kasir';
+    const displayName = userData.name || user.displayName || user.email || 'User';
+    const role = userData.role || 'kasir';
     
-    document.getElementById('userName').textContent = userName;
-    document.getElementById('userRole').textContent = userRole.charAt(0).toUpperCase() + userRole.slice(1);
+    document.getElementById('userName').textContent = displayName;
+    document.getElementById('userRole').textContent = role.charAt(0).toUpperCase() + role.slice(1);
     
+    // Update avatar dengan inisial nama
     const avatar = document.getElementById('userAvatar');
-    if (avatar && userName) {
-      const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    if (displayName && displayName !== 'User') {
+      const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
       avatar.textContent = initials;
+    } else {
+      avatar.innerHTML = '<i class="fas fa-user"></i>';
     }
+  } catch (e) {
+    console.error('Error load user:', e);
+    // Fallback ke data auth jika database error
+    document.getElementById('userName').textContent = user.displayName || user.email || 'User';
+    document.getElementById('userRole').textContent = 'Kasir';
   }
+}
       
       function initClosing() {
         // State
