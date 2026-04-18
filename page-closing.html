@@ -1380,11 +1380,14 @@ async function loadUserSidebar(user) {
               await database.ref('closing/' + today + '/' + user.uid).set(closingData);
               
               // Update shift to closed
-              await database.ref('shifts/' + today + '/' + user.uid).update({
+             await database.ref('shifts/' + today + '/' + user.uid).update({
   status: 'closed',
   closedAt: firebase.database.ServerValue.TIMESTAMP,
   selisih: selisih,
   closingStatus: selisih === 0 ? 'balance' : (selisih > 0 ? 'surplus' : 'minus'),
+  kasAkhir: fisikData.total,        // ⭐ TAMBAH INI
+  kasSistem: todayStats.uangGlobal, // ⭐ TAMBAH INI
+  userName: user.name || user.email, // ⭐ PASTIKAN INI JUGA ADA
   closingData: closingData
 });
               
