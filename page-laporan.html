@@ -1666,19 +1666,32 @@ if (transactions.length === 0) {
         }
 
         function calculateStats(transactions) {
-          let totalPenjualan = 0;
-          let totalLaba = 0;
-          let transaksiCount = 0;
-          
-          transactions.forEach(trans => {
-            if (trans.status !== 'cancelled') {
-              if (trans.type === 'penjualan') {
-                totalPenjualan += trans.total || 0;
-                totalLaba += trans.profit || 0;
-                transaksiCount++;
-              }
-            }
-          });
+  let totalPenjualan = 0;
+  let totalLaba = 0;
+  let transaksiCount = 0;
+
+  transactions.forEach(trans => {
+    if (trans.status !== 'cancelled' && trans.status !== 'voided') {
+      switch (trans.type) {
+        case 'penjualan':
+          totalPenjualan += trans.total || 0;
+          totalLaba += trans.profit || 0;
+          transaksiCount++;
+          break;
+
+        case 'topup':
+          totalLaba += trans.adminFee || 0;
+          transaksiCount++;
+          break;
+
+        case 'tarik':
+          totalLaba += trans.adminFee || 0;
+          transaksiCount++;
+          break;
+      }
+    }
+  });
+
           
           const rataRata = transaksiCount > 0 ? totalPenjualan / transaksiCount : 0;
           
