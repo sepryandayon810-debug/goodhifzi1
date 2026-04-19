@@ -2133,7 +2133,7 @@ function updateShiftUI() {
       updateShiftUI();
 
       
-            // Re-check shift status saat halaman kembali visible (hanya 1 kali di sini)
+                 // Re-check shift status saat halaman kembali visible
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
           console.log('Page visible, re-checking shift status...');
@@ -2144,10 +2144,10 @@ function updateShiftUI() {
             isShiftOpen = shift && shift.status === 'open';
             console.log('Shift status checked:', isShiftOpen, shift);
             updateShiftUI();
-         });
+          });
         }
       });
-    }  
+    }  // ← TUTUP initDashboard() - SATU INI SAJA
   </script>
 
   <!-- Modal Transfer Shift -->
