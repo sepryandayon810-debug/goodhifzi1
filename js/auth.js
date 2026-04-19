@@ -185,7 +185,7 @@ const Auth = {
     }
   },
 
-    // Register new user - FINAL CLEAN VERSION
+  // Register new user
   register: async (username, password, name, email, role = 'kasir', permissions = {}) => {
     try {
       Utils.showLoading('Mendaftarkan akun...');
@@ -225,111 +225,46 @@ const Auth = {
         }
       }
       
-      // Create Firebase Auth user
+      // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
-
-      console.log('✅ Auth user created:', uid);
-
-      // FIX: Tunggu propagasi auth ke Realtime Database (5 detik cukup)
-      console.log('⏳ Waiting 5s for auth propagation...');
-      await new Promise(resolve => setTimeout(resolve, 5000));
       
-      // Force refresh token untuk memastikan auth state valid
-      try {
-        await auth.currentUser.getIdToken(true);
-        console.log('✅ Token refreshed');
-      } catch (e) {
-        console.warn('Token refresh warning:', e);
-      }
-
       // Determine status based on role
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
-
-      // Write ke database dengan error handling
-      let writeSuccess = false;
-      let dbError = null;
       
-      try {
-        console.log('📝 Writing to database...');
-        await database.ref(`users/${uid}`).set({
-          uid: uid,
-          username: formattedUsername,
-          email: userEmail,
-          name: name || formattedUsername,
-          role: role,
-          permissions: permissions || {},
-          status: status,
-          createdAt: firebase.database.ServerValue.TIMESTAMP,
-          lastLogin: firebase.database.ServerValue.TIMESTAMP,
-          isOnline: true,
-          approvedBy: isOwner ? 'system' : null,
-          approvedAt: isOwner ? firebase.database.ServerValue.TIMESTAMP : null
-        });
-        writeSuccess = true;
-        console.log('✅ Database write success');
-      } catch (err) {
-        dbError = err;
-        console.error('❌ Database write failed:', err.message);
-        
-        // Cleanup: Delete auth user jika database gagal
-        try {
-          await auth.currentUser.delete();
-          console.log('🧹 Cleaned up auth user');
-        } catch (deleteErr) {
-          console.error('Failed to cleanup auth user:', deleteErr);
-        }
-        
-        // Fallback ke localStorage
-        const fallbackData = {
-          uid: uid,
-          username: formattedUsername,
-          email: userEmail,
-          name: name || formattedUsername,
-          role: role,
-          status: status,
-          createdAt: Date.now(),
-          isLocalOnly: true,
-          _error: err.message
-        };
-        
-        localStorage.setItem(`webpos_user_${uid}`, JSON.stringify(fallbackData));
-        localStorage.setItem('webpos_session', JSON.stringify({
-          user: fallbackData,
-          loginTime: Date.now(),
-          isOfflineMode: true
-        }));
-      }
+      // Create user data in database
+      await database.ref(`users/${uid}`).set({
+        uid,
+        username: formattedUsername,
+        email: userEmail,
+        name: name || formattedUsername,
+        role,
+        permissions: permissions || {},
+        status,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        lastLogin: firebase.database.ServerValue.TIMESTAMP,
+        isOnline: true,
+        approvedBy: isOwner ? 'system' : null,
+        approvedAt: isOwner ? firebase.database.ServerValue.TIMESTAMP : null
+      });
 
       Utils.hideLoading();
-
-      // Handle hasil
-      if (!writeSuccess) {
-        if (isOwner) {
-          Utils.showToast('Akun Owner dibuat (Mode Lokal)', 'warning');
-          return { success: true, uid: uid, offlineMode: true, error: dbError?.message };
-        } else {
-          await auth.signOut();
-          Utils.showToast('Registrasi tersimpan lokal, hubungi Owner', 'warning');
-          return { success: true, uid: uid, pendingApproval: true, offlineMode: true };
-        }
-      }
       
       if (status === 'pending') {
         await auth.signOut();
         Utils.showToast('Pendaftaran berhasil! Menunggu persetujuan owner.', 'success');
         return { 
           success: true, 
-          uid: uid, 
+          uid, 
           pendingApproval: true,
           message: 'Akun berhasil dibuat dan menunggu persetujuan owner'
         };
       }
       
       Utils.showToast('Akun berhasil dibuat!', 'success');
-      return { success: true, uid: uid };
+      return { success: true, uid };
     } catch (error) {
       Utils.hideLoading();
       console.error('Registration error:', error);
@@ -339,17 +274,19 @@ const Auth = {
         case 'auth/email-already-in-use':
           message = 'Email sudah terdaftar';
           break;
+        case 'auth/invalid-email':
+          message = 'Email tidak valid';
+          break;
         case 'auth/weak-password':
           message = 'Password terlalu lemah (min 6 karakter)';
           break;
-        default:
-          message = error.message || 'Pendaftaran gagal';
       }
       
       Utils.showToast(message, 'error');
       return { success: false, error: message };
     }
   },
+
   // Approve user (Owner/Admin only)
   approveUser: async (uid, approverUid) => {
     try {
