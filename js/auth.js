@@ -225,7 +225,7 @@ const Auth = {
         }
       }
       
-            // Create user with email
+      // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
       let result;
       try {
@@ -233,7 +233,7 @@ const Auth = {
       } catch (authError) {
         Utils.hideLoading();
         console.error('Auth creation failed:', authError);
-        throw authError; // Re-throw untuk ditangkap di catch bawah
+        throw authError;
       }
       
       const uid = result.user.uid;
