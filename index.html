@@ -1546,12 +1546,13 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         
         // Load user data if available
         if (user) {
-          Auth.loadUserData(user.uid);
-        }
-        
-        // Initialize dashboard
-        initDashboard();
-      });
+      Auth.loadUserData(user.uid).then(() => {
+          initDashboard(); // Panggil initDashboard di dalam sini
+        });
+      }
+    });
+  });
+});
 
       function initDashboard() {
       // State
@@ -1569,6 +1570,9 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         transaksiCount: 0
       };
 
+      let availableUsers = [];
+      let currentShiftData = null;
+
       // DOM Elements
       const sidebar = document.getElementById('sidebar');
       const menuToggle = document.getElementById('menuToggle');
@@ -1582,12 +1586,17 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 function setupUIBasedOnRole() {
   const user = Auth.getCurrentUser();
   const btnTransfer = document.getElementById('btnTransferShift');
+
+  console.log('setupUIBasedOnRole called:', user?.role, 'btnTransfer:', btnTransfer); //
   
   if (!user) return;
   
-  // Sembunyikan tombol transfer untuk kasir
+  // Sembunyikan tombol transfer untuk kasir, TAMPILKAN untuk owner/admin
   if (user.role === 'kasir' && btnTransfer) {
     btnTransfer.style.display = 'none';
+  } else if (btnTransfer) {
+    // PASTIKAN TOMBOL MUNCUL untuk owner/admin
+    btnTransfer.style.display = 'flex';
   }
   
   // Update label shift info berdasarkan role
@@ -1761,30 +1770,41 @@ function setupUIBasedOnRole() {
       }
 
       // Check shift status
-     function listenShiftStatus() {
-        const today = Utils.getTodayString();
-        const user = Auth.getCurrentUser();
+    function listenShiftStatus() {
+  const today = Utils.getTodayString();
+  const user = Auth.getCurrentUser();
+  
+  if (!user) {
+    console.error('No user for shift listener');
+    return;
+  }
 
-       console.log('Attaching shift listener for:', today, user.uid);
+  console.log('Attaching shift listener for:', today, user.uid, user.role);
+  
+  // ⭐ HAPUS LISTENER LAMA JIKA ADA (untuk mencegah duplicate saat reload)
+  database.ref('shifts/' + today + '/' + user.uid).off();
+  
+  database.ref('shifts/' + today + '/' + user.uid).on('value', (snapshot) => {
+    const shift = snapshot.val();
+    console.log('Shift data received:', shift);
+    isShiftOpen = shift && shift.status === 'open';
+    updateShiftUI(); // ⭐ UPDATE UI SETELAH DATA DITERIMA
+  }, (error) => {
+    console.error('Shift listener error:', error);
+  });
+}
         
-        database.ref('shifts/' + today + '/' + user.uid).on('value', (snapshot) => {
-          const shift = snapshot.val();
-          console.log('Shift data received:', shift);
-          isShiftOpen = shift && shift.status === 'open';
-          updateShiftUI(); // ⭐ PINDAHKAN KE SINI
-        }, (error) => {
-          console.error('Shift listener error:', error);
-        });
-      }
-        
-            // Update shift UI
+  
+// Update shift UI
 function updateShiftUI() {
   const shiftStatus = document.getElementById('shiftStatus');
   const shiftText = document.getElementById('shiftText');
   const shiftInfo = document.getElementById('shiftInfo');
   const shiftBtnText = document.getElementById('shiftBtnText');
   const btnIcon = btnToggleShift.querySelector('i');
-  const btnTransfer = document.getElementById('btnTransferShift'); // TAMBAHKAN INI
+  const btnTransfer = document.getElementById('btnTransferShift');
+  
+  console.log('Updating shift UI:', isShiftOpen, 'User:', Auth.getCurrentUser()?.role); // DEBUG
   
   if (isShiftOpen) {
     shiftStatus.classList.remove('closed');
@@ -1800,6 +1820,8 @@ function updateShiftUI() {
       btnTransfer.disabled = false;
       btnTransfer.style.opacity = '1';
       btnTransfer.style.cursor = 'pointer';
+      btnTransfer.style.display = 'flex'; // ⭐ PASTIKAN VISIBLE
+      console.log('Transfer button ENABLED for owner/admin'); // DEBUG
     }
   } else {
     shiftStatus.classList.remove('open');
@@ -1817,7 +1839,8 @@ function updateShiftUI() {
     }
   }
 }
-              // Toggle shift
+    
+    // Toggle shift
       async function toggleShift() {
         const today = Utils.getTodayString();
         const user = Auth.getCurrentUser();
@@ -2107,6 +2130,8 @@ function updateShiftUI() {
       setupUIBasedOnRole();
       loadDashboardData();
       listenShiftStatus();  // ✅ Hanya 1 kali di sini
+      updateShiftUI();
+
       
             // Re-check shift status saat halaman kembali visible (hanya 1 kali di sini)
       document.addEventListener('visibilitychange', () => {
@@ -2119,11 +2144,10 @@ function updateShiftUI() {
             isShiftOpen = shift && shift.status === 'open';
             console.log('Shift status checked:', isShiftOpen, shift);
             updateShiftUI();
-          });
+         });
         }
       });
     }  
-   });   
   </script>
 
   <!-- Modal Transfer Shift -->
