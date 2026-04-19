@@ -1029,6 +1029,13 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       text-align: center;
       font-family: monospace;
     }
+    .quick-action-btn:disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+      pointer-events: none;
+      filter: grayscale(0.5);
+    }
+    
   </style>
 </head>
 <body>
@@ -1441,6 +1448,11 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     <i class="fas fa-store-slash"></i>
     <span id="shiftBtnText">Tutup Shift</span>
   </button>
+
+<button class="quick-action-btn" id="btnTransferShift" disabled style="background: rgba(99, 102, 241, 0.1); border-color: var(--primary); color: var(--primary); opacity: 0.5;">
+  <i class="fas fa-exchange-alt"></i>
+  <span>Serahkan Shift</span>
+</button>
 </div>
               </div>
             </div>
@@ -1564,7 +1576,26 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       const btnTheme = document.getElementById('btnTheme');
       const btnLogout = document.getElementById('btnLogout');
       const btnToggleShift = document.getElementById('btnToggleShift');
+      const btnTransferShift = document.getElementById('btnTransferShift');
 
+      // Setup UI berdasarkan role
+function setupUIBasedOnRole() {
+  const user = Auth.getCurrentUser();
+  const btnTransfer = document.getElementById('btnTransferShift');
+  
+  if (!user) return;
+  
+  // Sembunyikan tombol transfer untuk kasir
+  if (user.role === 'kasir' && btnTransfer) {
+    btnTransfer.style.display = 'none';
+  }
+  
+  // Update label shift info berdasarkan role
+  if (user.role === 'kasir') {
+    document.getElementById('shiftInfo').textContent = 'Kasir Mode';
+  }
+}
+        
       // Load user data
       function loadUserData() {
         const user = Auth.getCurrentUser();
@@ -1747,30 +1778,45 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       }
         
             // Update shift UI
-      function updateShiftUI() {
-        const shiftStatus = document.getElementById('shiftStatus');
-        const shiftText = document.getElementById('shiftText');
-        const shiftInfo = document.getElementById('shiftInfo');
-        const shiftBtnText = document.getElementById('shiftBtnText');
-        const btnIcon = btnToggleShift.querySelector('i');
-        
-        if (isShiftOpen) {
-          shiftStatus.classList.remove('closed');
-          shiftStatus.classList.add('open');
-          shiftText.textContent = 'Buka';
-          shiftInfo.textContent = 'Shift Aktif';
-          shiftBtnText.textContent = 'Tutup Shift';
-          btnIcon.className = 'fas fa-store-slash';
-        } else {
-          shiftStatus.classList.remove('open');
-          shiftStatus.classList.add('closed');
-          shiftText.textContent = 'Tutup';
-          shiftInfo.textContent = '-';
-          shiftBtnText.textContent = 'Buka Shift';
-          btnIcon.className = 'fas fa-store';
-        }
-      }
-
+function updateShiftUI() {
+  const shiftStatus = document.getElementById('shiftStatus');
+  const shiftText = document.getElementById('shiftText');
+  const shiftInfo = document.getElementById('shiftInfo');
+  const shiftBtnText = document.getElementById('shiftBtnText');
+  const btnIcon = btnToggleShift.querySelector('i');
+  const btnTransfer = document.getElementById('btnTransferShift'); // TAMBAHKAN INI
+  
+  if (isShiftOpen) {
+    shiftStatus.classList.remove('closed');
+    shiftStatus.classList.add('open');
+    shiftText.textContent = 'Buka';
+    shiftInfo.textContent = 'Shift Aktif';
+    shiftBtnText.textContent = 'Tutup Shift';
+    btnIcon.className = 'fas fa-store-slash';
+    
+    // Enable tombol transfer jika owner/admin
+    const user = Auth.getCurrentUser();
+    if (btnTransfer && user && (user.role === 'owner' || user.role === 'admin')) {
+      btnTransfer.disabled = false;
+      btnTransfer.style.opacity = '1';
+      btnTransfer.style.cursor = 'pointer';
+    }
+  } else {
+    shiftStatus.classList.remove('open');
+    shiftStatus.classList.add('closed');
+    shiftText.textContent = 'Tutup';
+    shiftInfo.textContent = '-';
+    shiftBtnText.textContent = 'Buka Shift';
+    btnIcon.className = 'fas fa-store';
+    
+    // Disable tombol transfer
+    if (btnTransfer) {
+      btnTransfer.disabled = true;
+      btnTransfer.style.opacity = '0.5';
+      btnTransfer.style.cursor = 'not-allowed';
+    }
+  }
+}
               // Toggle shift
       async function toggleShift() {
         const today = Utils.getTodayString();
@@ -1865,8 +1911,200 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       });
       observer.observe(document.body, { childList: true, subtree: true });
 
+      // Event listener tombol transfer
+       btnTransferShift.addEventListener('click', async () => {
+        if (!isShiftOpen) {
+          Utils.showToast('Tidak ada shift aktif untuk ditransfer', 'warning');
+          return;
+        }
+        
+        // Cek apakah user adalah owner/admin
+        const user = Auth.getCurrentUser();
+        if (!user || (user.role !== 'owner' && user.role !== 'admin')) {
+          Utils.showToast('Hanya Owner atau Admin yang dapat transfer shift', 'error');
+          return;
+        }
+        
+        await loadAvailableUsers();
+        document.getElementById('transferModalAmount').textContent = Utils.formatRupiah(todayStats.modalAwal);
+        document.getElementById('modalTransfer').classList.add('active');
+      });
+      
+      // Close modal
+      window.closeTransferModal = function() {
+        document.getElementById('modalTransfer').classList.remove('active');
+        document.getElementById('transferTargetUser').value = '';
+      };
+      
+      // Load user yang bisa menerima
+      async function loadAvailableUsers() {
+        try {
+          const currentUser = Auth.getCurrentUser();
+          const today = Utils.getTodayString();
+          
+          // Get all users
+          const usersSnapshot = await database.ref('users').once('value');
+          const users = usersSnapshot.val() || {};
+          
+          // Check which users already have active shift
+          const shiftsSnapshot = await database.ref('shifts/' + today).once('value');
+          const shifts = shiftsSnapshot.val() || {};
+          
+          availableUsers = [];
+          const select = document.getElementById('transferTargetUser');
+          select.innerHTML = '<option value="">Pilih user...</option>';
+          
+          Object.entries(users).forEach(([uid, userData]) => {
+            // Skip current user
+            if (uid === currentUser.uid) return;
+            
+            // Only owner/admin
+            if (userData.role !== 'owner' && userData.role !== 'admin') return;
+            
+            // Skip if user already has open shift
+            if (shifts[uid] && shifts[uid].status === 'open') return;
+            
+            // Skip if user is pending/rejected
+            if (userData.status !== 'active') return;
+            
+            availableUsers.push({ uid, ...userData });
+            
+            const option = document.createElement('option');
+            option.value = uid;
+            option.textContent = `${userData.name || userData.username} (${userData.role})`;
+            select.appendChild(option);
+          });
+          
+          if (availableUsers.length === 0) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Tidak ada user tersedia';
+            select.appendChild(option);
+            document.getElementById('btnConfirmTransfer').disabled = true;
+          } else {
+            document.getElementById('btnConfirmTransfer').disabled = false;
+          }
+          
+        } catch (error) {
+          console.error('Error loading users:', error);
+          Utils.showToast('Gagal memuat data user', 'error');
+        }
+      }
+      
+      // Execute transfer
+      window.executeTransfer = async function() {
+        const targetUid = document.getElementById('transferTargetUser').value;
+        if (!targetUid) {
+          Utils.showToast('Pilih user penerima terlebih dahulu', 'warning');
+          return;
+        }
+        
+        const targetUser = availableUsers.find(u => u.uid === targetUid);
+        const currentUser = Auth.getCurrentUser();
+        const today = Utils.getTodayString();
+        
+        Utils.showLoading('Memproses transfer shift...');
+        
+        try {
+          // 1. Ambil data shift dan modal current user
+          const [shiftSnap, modalSnap] = await Promise.all([
+            database.ref(`shifts/${today}/${currentUser.uid}`).once('value'),
+            database.ref(`modal/${today}/${currentUser.uid}`).once('value')
+          ]);
+          
+          const shiftData = shiftSnap.val();
+          const modalData = modalSnap.val();
+          
+          if (!shiftData || shiftData.status !== 'open') {
+            Utils.hideLoading();
+            Utils.showToast('Shift tidak ditemukan atau sudah tertutup', 'error');
+            return;
+          }
+          
+          const timestamp = Date.now();
+          
+          // 2. Buat shift untuk target user dengan data yang sama
+          const targetShiftData = {
+            status: 'open',
+            openTime: timestamp,
+            openedAt: firebase.database.ServerValue.TIMESTAMP,
+            userId: targetUid,
+            userName: targetUser.name || targetUser.username,
+            modalAwal: shiftData.modalAwal,
+            transferredFrom: {
+              uid: currentUser.uid,
+              name: currentUser.name || currentUser.username,
+              transferredAt: timestamp,
+              originalOpenTime: shiftData.openTime
+            }
+          };
+          
+          // 3. Update modal target user (samakan dengan modal awal)
+          const targetModalData = {
+            amount: modalData?.amount || shiftData.modalAwal,
+            setAt: timestamp,
+            setBy: targetUid,
+            transferredFrom: currentUser.uid,
+            note: `Ditransfer dari ${currentUser.name || currentUser.username}`
+          };
+          
+          // 4. Tutup shift current user dengan status transferred
+          const closedShiftData = {
+            ...shiftData,
+            status: 'closed',
+            closedAt: timestamp,
+            closedReason: 'transferred',
+            transferredTo: {
+              uid: targetUid,
+              name: targetUser.name || targetUser.username,
+              transferredAt: timestamp
+            }
+          };
+          
+          // 5. Execute all writes
+          await Promise.all([
+            // Create shift for target
+            database.ref(`shifts/${today}/${targetUid}`).set(targetShiftData),
+            // Close current user shift
+            database.ref(`shifts/${today}/${currentUser.uid}`).set(closedShiftData),
+            // Set modal for target
+            database.ref(`modal/${today}/${targetUid}`).set(targetModalData),
+            // Log activity (optional)
+            database.ref(`activity_logs/${today}`).push({
+              type: 'shift_transferred',
+              fromUid: currentUser.uid,
+              fromName: currentUser.name || currentUser.username,
+              toUid: targetUid,
+              toName: targetUser.name || targetUser.username,
+              timestamp: timestamp,
+              modalAmount: shiftData.modalAwal
+            })
+          ]);
+          
+          Utils.hideLoading();
+          closeTransferModal();
+          Utils.showToast(`Shift berhasil ditransfer ke ${targetUser.name || targetUser.username}`, 'success');
+          
+          // Refresh UI
+          isShiftOpen = false;
+          updateShiftUI();
+          
+          // Redirect setelah 2 detik
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+          
+        } catch (error) {
+          Utils.hideLoading();
+          console.error('Transfer error:', error);
+          Utils.showToast('Gagal transfer shift: ' + error.message, 'error');
+        }
+      };
+        
+
             // Initialize
       loadUserData();
+      setupUIBasedOnRole();
       loadDashboardData();
       listenShiftStatus();  // ✅ Hanya 1 kali di sini
       
@@ -1887,5 +2125,55 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }  
    });   
   </script>
+
+  <!-- Modal Transfer Shift -->
+<div class="modal-overlay" id="modalTransfer">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">
+        <i class="fas fa-exchange-alt" style="color: var(--primary);"></i>
+        Serahkan Shift
+      </h3>
+      <button class="modal-close" onclick="closeTransferModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+        Transfer shift aktif beserta modal dan kas ke owner/admin lain.
+        <strong>Anda akan kehilangan akses ke shift ini.</strong>
+      </p>
+      
+      <div class="form-group">
+        <label class="form-label">Pilih Penerima</label>
+        <select class="form-select" id="transferTargetUser" required>
+          <option value="">Pilih user...</option>
+        </select>
+        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">
+          Hanya menampilkan user dengan role Owner atau Admin yang tidak sedang memiliki shift aktif
+        </small>
+      </div>
+      
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 0.75rem; padding: 1rem; margin-top: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--warning); margin-bottom: 0.5rem;">
+          <i class="fas fa-exclamation-triangle"></i>
+          <strong>Peringatan</strong>
+        </div>
+        <ul style="font-size: 0.75rem; color: var(--text-secondary); padding-left: 1.25rem; margin: 0;">
+          <li>Modal awal Rp <span id="transferModalAmount">0</span> akan dipindahkan</li>
+          <li>Semua transaksi hari ini tetap tersimpan</li>
+          <li>Shift Anda akan ditutup otomatis</li>
+        </ul>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTransferModal()">Batal</button>
+      <button class="btn btn-primary" id="btnConfirmTransfer" onclick="executeTransfer()">
+        <i class="fas fa-check"></i> Konfirmasi Transfer
+      </button>
+    </div>
+  </div>
+</div>
+  
 </body>
 </html>
