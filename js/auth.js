@@ -225,33 +225,49 @@ const Auth = {
         }
       }
       
-      // Create user with email
+            // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
-      const result = await auth.createUserWithEmailAndPassword(userEmail, password);
-      const uid = result.user.uid;
-
-     // ⬇️⬇️⬇️ TAMBAHKAN INI (Delay 5 detik)
-      console.log('Menunggu propagasi auth...');
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      await auth.currentUser.getIdToken(true);
-      console.log('Token refreshed, writing to DB...');
-      // ⬆️⬆️⬆️ SAMPAI SINI
+      let result;
+      try {
+        result = await auth.createUserWithEmailAndPassword(userEmail, password);
+      } catch (authError) {
+        Utils.hideLoading();
+        console.error('Auth creation failed:', authError);
+        throw authError; // Re-throw untuk ditangkap di catch bawah
+      }
       
-       // Determine status based on role
+      const uid = result.user.uid;
+      console.log('✅ Auth user created:', uid);
+
+      // FIX: Tunggu propagasi auth ke Realtime Database
+      console.log('⏳ Waiting 5 seconds for auth propagation...');
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      
+      // Force token refresh
+      try {
+        await auth.currentUser.getIdToken(true);
+        console.log('🔄 Token refreshed');
+      } catch (tokenErr) {
+        console.warn('Token refresh warning:', tokenErr);
+      }
+
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
-      
-      // ⬇️⬇️⬇️ GANTI TRY-CATCH INI
+
+      // Write to database dengan better error handling
       let writeSuccess = false;
+      let dbError = null;
+      
       try {
+        console.log('📝 Writing to database...');
         await database.ref(`users/${uid}`).set({
-          uid,
+          uid: uid,
           username: formattedUsername,
           email: userEmail,
           name: name || formattedUsername,
-          role,
+          role: role,
           permissions: permissions || {},
-          status,
+          status: status,
           createdAt: firebase.database.ServerValue.TIMESTAMP,
           lastLogin: firebase.database.ServerValue.TIMESTAMP,
           isOnline: true,
@@ -260,46 +276,65 @@ const Auth = {
         });
         writeSuccess = true;
         console.log('✅ Database write success');
-      } catch (dbError) {
-        console.error('❌ DB Write Error:', dbError.message);
-        // Fallback ke localStorage jika DB gagal
+      } catch (err) {
+        dbError = err;
+        console.error('❌ Database write failed:', err.message);
+        
+        // Cleanup: Delete auth user jika database gagal
+        console.log('🧹 Cleaning up auth user...');
+        try {
+          await auth.currentUser.delete();
+        } catch (deleteErr) {
+          console.error('Failed to delete auth user:', deleteErr);
+        }
+        
+        // Fallback ke localStorage untuk mode offline
         const fallbackData = {
-          uid, username: formattedUsername, email: userEmail,
-          name: name || formattedUsername, role, status,
-          createdAt: Date.now(), isLocalOnly: true
+          uid: uid,
+          username: formattedUsername,
+          email: userEmail,
+          name: name || formattedUsername,
+          role: role,
+          status: status,
+          createdAt: Date.now(),
+          isLocalOnly: true,
+          _originalError: err.message
         };
+        
         localStorage.setItem(`webpos_user_${uid}`, JSON.stringify(fallbackData));
         localStorage.setItem('webpos_session', JSON.stringify({
-          user: fallbackData, loginTime: Date.now(), isOfflineMode: true
+          user: fallbackData,
+          loginTime: Date.now(),
+          isOfflineMode: true
         }));
       }
-      // ⬆️⬆️⬆️ SAMPAI SINI
-            Utils.hideLoading();
 
-     if (!writeSuccess && !isOwner) {
-        await auth.signOut();
-        Utils.showToast('Akun tersimpan lokal (DB error), hubungi owner', 'warning');
-        return { success: true, uid, pendingApproval: true, offlineMode: true };
-      }
+      Utils.hideLoading();
 
-      if (!writeSuccess && isOwner) {
-        Utils.showToast('Akun Owner aktif (Mode Lokal)', 'warning');
-        return { success: true, uid, offlineMode: true };
+      if (!writeSuccess) {
+        if (isOwner) {
+          Utils.showToast('Akun Owner dibuat (Mode Lokal - Database error)', 'warning');
+          return { success: true, uid: uid, offlineMode: true, error: dbError?.message };
+        } else {
+          await auth.signOut();
+          Utils.showToast('Registrasi tersimpan lokal, hubungi Owner', 'warning');
+          return { success: true, uid: uid, pendingApproval: true, offlineMode: true };
+        }
       }
-      // ⬆️⬆️⬆️ SAMPAI SINI
+      
       if (status === 'pending') {
         await auth.signOut();
         Utils.showToast('Pendaftaran berhasil! Menunggu persetujuan owner.', 'success');
         return { 
           success: true, 
-          uid, 
+          uid: uid, 
           pendingApproval: true,
           message: 'Akun berhasil dibuat dan menunggu persetujuan owner'
         };
       }
       
       Utils.showToast('Akun berhasil dibuat!', 'success');
-      return { success: true, uid };
+      return { success: true, uid: uid };
     } catch (error) {
       Utils.hideLoading();
       console.error('Registration error:', error);
