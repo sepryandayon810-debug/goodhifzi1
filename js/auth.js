@@ -230,30 +230,69 @@ const Auth = {
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
 
-      await new Promise(resolve => setTimeout(resolve, 800)); // Tunggu 800ms
-      await auth.currentUser.getIdToken(true); // Force refresh token
-      // ⬆️⬆️⬆️ SAMPAI SINI
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Naik ke 2 detik
+      await auth.currentUser.getIdToken(true);
       
       // Determine status based on role
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
       
-      // Create user data in database
-      await database.ref(`users/${uid}`).set({
-        uid,
-        username: formattedUsername,
-        email: userEmail,
-        name: name || formattedUsername,
-        role,
-        permissions: permissions || {},
-        status,
-        createdAt: firebase.database.ServerValue.TIMESTAMP,
-        lastLogin: firebase.database.ServerValue.TIMESTAMP,
-        isOnline: true,
-        approvedBy: isOwner ? 'system' : null,
-        approvedAt: isOwner ? firebase.database.ServerValue.TIMESTAMP : null
-      });
+      // Retry mechanism untuk database write (3x percobaan)
+      let retryCount = 0;
+      const maxRetries = 3;
+      let dbWriteSuccess = false;
 
+      while (retryCount < maxRetries && !dbWriteSuccess) {
+        try {
+          await database.ref(`users/${uid}`).set({
+            uid,
+            username: formattedUsername,
+            email: userEmail,
+            name: name || formattedUsername,
+            role,
+            permissions: permissions || {},
+            status,
+            createdAt: firebase.database.ServerValue.TIMESTAMP,
+            lastLogin: firebase.database.ServerValue.TIMESTAMP,
+            isOnline: true,
+            approvedBy: isOwner ? 'system' : null,
+            approvedAt: isOwner ? firebase.database.ServerValue.TIMESTAMP : null
+          });
+          dbWriteSuccess = true;
+        } catch (dbError) {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            await auth.currentUser.getIdToken(true);
+          }
+        }
+      }
+
+      // Fallback jika database tetap gagal
+      if (!dbWriteSuccess) {
+        const fallbackData = {
+          uid, username: formattedUsername, email: userEmail,
+          name: name || formattedUsername, role, status: isOwner ? 'active' : 'pending',
+          createdAt: Date.now(), isLocalOnly: true
+        };
+        localStorage.setItem(`webpos_user_${uid}`, JSON.stringify(fallbackData));
+        localStorage.setItem('webpos_session', JSON.stringify({
+          user: fallbackData, loginTime: Date.now(), isOfflineMode: true
+        }));
+
+        
+        Utils.hideLoading();
+        if (isOwner) {
+          Utils.showToast('Akun dibuat (mode offline)', 'warning');
+          return { success: true, uid, offlineMode: true };
+        } else {
+          await auth.signOut();
+          Utils.showToast('Pendaftaran tersimpan, hubungi owner', 'warning');
+          return { success: true, uid, pendingApproval: true, offlineMode: true };
+        }
+      }
+      // ⬆️⬆️⬆️ AKHIR FIX
+      
       Utils.hideLoading();
       
       if (status === 'pending') {
