@@ -185,7 +185,7 @@ const Auth = {
     }
   },
 
-  // Register new user - DENGAN FIX PERMISSION DENIED
+    // Register new user - FINAL CLEAN VERSION
   register: async (username, password, name, email, role = 'kasir', permissions = {}) => {
     try {
       Utils.showLoading('Mendaftarkan akun...');
@@ -225,29 +225,30 @@ const Auth = {
         }
       }
       
-      // Create user with email
+      // Create Firebase Auth user
       const userEmail = email || `${formattedUsername}@webpos.local`;
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
 
-      // ⬇️⬇️⬇️ FIX: Tunggu propagasi auth ke Realtime Database
-      console.log('⏳ Menunggu propagasi auth...');
+      console.log('✅ Auth user created:', uid);
+
+      // FIX: Tunggu propagasi auth ke Realtime Database (5 detik cukup)
+      console.log('⏳ Waiting 5s for auth propagation...');
       await new Promise(resolve => setTimeout(resolve, 5000));
       
-      // Force refresh token
+      // Force refresh token untuk memastikan auth state valid
       try {
         await auth.currentUser.getIdToken(true);
-        console.log('🔄 Token refreshed');
+        console.log('✅ Token refreshed');
       } catch (e) {
         console.warn('Token refresh warning:', e);
       }
-      // ⬆️⬆️⬆️ END FIX
 
       // Determine status based on role
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
 
-      // ⬇️⬇️⬇️ FIX: Write ke database dengan error handling
+      // Write ke database dengan error handling
       let writeSuccess = false;
       let dbError = null;
       
@@ -274,11 +275,11 @@ const Auth = {
         console.error('❌ Database write failed:', err.message);
         
         // Cleanup: Delete auth user jika database gagal
-        console.log('🧹 Cleaning up auth user...');
         try {
           await auth.currentUser.delete();
+          console.log('🧹 Cleaned up auth user');
         } catch (deleteErr) {
-          console.error('Failed to delete auth user:', deleteErr);
+          console.error('Failed to cleanup auth user:', deleteErr);
         }
         
         // Fallback ke localStorage
@@ -291,7 +292,7 @@ const Auth = {
           status: status,
           createdAt: Date.now(),
           isLocalOnly: true,
-          _originalError: err.message
+          _error: err.message
         };
         
         localStorage.setItem(`webpos_user_${uid}`, JSON.stringify(fallbackData));
@@ -301,14 +302,13 @@ const Auth = {
           isOfflineMode: true
         }));
       }
-      // ⬆️⬆️⬆️ END FIX
 
       Utils.hideLoading();
 
-      // ⬇️⬇️⬇️ FIX: Handle hasil write
+      // Handle hasil
       if (!writeSuccess) {
         if (isOwner) {
-          Utils.showToast('Akun Owner dibuat (Mode Lokal - Database error)', 'warning');
+          Utils.showToast('Akun Owner dibuat (Mode Lokal)', 'warning');
           return { success: true, uid: uid, offlineMode: true, error: dbError?.message };
         } else {
           await auth.signOut();
@@ -316,7 +316,6 @@ const Auth = {
           return { success: true, uid: uid, pendingApproval: true, offlineMode: true };
         }
       }
-      // ⬆️⬆️⬆️ END FIX
       
       if (status === 'pending') {
         await auth.signOut();
@@ -340,19 +339,17 @@ const Auth = {
         case 'auth/email-already-in-use':
           message = 'Email sudah terdaftar';
           break;
-        case 'auth/invalid-email':
-          message = 'Email tidak valid';
-          break;
         case 'auth/weak-password':
           message = 'Password terlalu lemah (min 6 karakter)';
           break;
+        default:
+          message = error.message || 'Pendaftaran gagal';
       }
       
       Utils.showToast(message, 'error');
       return { success: false, error: message };
     }
   },
-
   // Approve user (Owner/Admin only)
   approveUser: async (uid, approverUid) => {
     try {
