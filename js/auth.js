@@ -185,7 +185,7 @@ const Auth = {
     }
   },
 
-  // Register new user
+  // Register new user - DENGAN FIX PERMISSION DENIED
   register: async (username, password, name, email, role = 'kasir', permissions = {}) => {
     try {
       Utils.showLoading('Mendaftarkan akun...');
@@ -227,34 +227,27 @@ const Auth = {
       
       // Create user with email
       const userEmail = email || `${formattedUsername}@webpos.local`;
-      let result;
-      try {
-        result = await auth.createUserWithEmailAndPassword(userEmail, password);
-      } catch (authError) {
-        Utils.hideLoading();
-        console.error('Auth creation failed:', authError);
-        throw authError;
-      }
-      
+      const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
-      console.log('✅ Auth user created:', uid);
 
-      // FIX: Tunggu propagasi auth ke Realtime Database
-      console.log('⏳ Waiting 5 seconds for auth propagation...');
+      // ⬇️⬇️⬇️ FIX: Tunggu propagasi auth ke Realtime Database
+      console.log('⏳ Menunggu propagasi auth...');
       await new Promise(resolve => setTimeout(resolve, 5000));
       
-      // Force token refresh
+      // Force refresh token
       try {
         await auth.currentUser.getIdToken(true);
         console.log('🔄 Token refreshed');
-      } catch (tokenErr) {
-        console.warn('Token refresh warning:', tokenErr);
+      } catch (e) {
+        console.warn('Token refresh warning:', e);
       }
+      // ⬆️⬆️⬆️ END FIX
 
+      // Determine status based on role
       const isOwner = role === 'owner';
       const status = isOwner ? 'active' : 'pending';
 
-      // Write to database dengan better error handling
+      // ⬇️⬇️⬇️ FIX: Write ke database dengan error handling
       let writeSuccess = false;
       let dbError = null;
       
@@ -288,7 +281,7 @@ const Auth = {
           console.error('Failed to delete auth user:', deleteErr);
         }
         
-        // Fallback ke localStorage untuk mode offline
+        // Fallback ke localStorage
         const fallbackData = {
           uid: uid,
           username: formattedUsername,
@@ -308,9 +301,11 @@ const Auth = {
           isOfflineMode: true
         }));
       }
+      // ⬆️⬆️⬆️ END FIX
 
       Utils.hideLoading();
 
+      // ⬇️⬇️⬇️ FIX: Handle hasil write
       if (!writeSuccess) {
         if (isOwner) {
           Utils.showToast('Akun Owner dibuat (Mode Lokal - Database error)', 'warning');
@@ -321,6 +316,7 @@ const Auth = {
           return { success: true, uid: uid, pendingApproval: true, offlineMode: true };
         }
       }
+      // ⬆️⬆️⬆️ END FIX
       
       if (status === 'pending') {
         await auth.signOut();
