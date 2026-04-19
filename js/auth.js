@@ -229,6 +229,10 @@ const Auth = {
       const userEmail = email || `${formattedUsername}@webpos.local`;
       const result = await auth.createUserWithEmailAndPassword(userEmail, password);
       const uid = result.user.uid;
+
+      await new Promise(resolve => setTimeout(resolve, 800)); // Tunggu 800ms
+      await auth.currentUser.getIdToken(true); // Force refresh token
+      // ⬆️⬆️⬆️ SAMPAI SINI
       
       // Determine status based on role
       const isOwner = role === 'owner';
