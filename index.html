@@ -1751,79 +1751,32 @@ function setupUIBasedOnRole() {
   document.getElementById('userRole').textContent = 
     user.role.charAt(0).toUpperCase() + user.role.slice(1);
   
-  const avatar = document.getElementById('userAvatar');
+    const avatar = document.getElementById('userAvatar');
   if (avatar && user.name) {
     const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     avatar.textContent = initials;
   }
   
-  // === PROFILE CARD (baru) ===
-  const nameEl = document.getElementById('profileNameLarge');
-  const emailEl = document.getElementById('profileEmailLarge');
-  const emailMeta = document.getElementById('profileEmailMeta');
-  const roleEl = document.getElementById('profileRoleLarge');
-  const avatarLarge = document.getElementById('profileAvatarLarge');
-  const loginTime = document.getElementById('profileLoginTime');
-  const uidMeta = document.getElementById('profileUidMeta');
-  
-  if (nameEl) {
+  // Stats grid - Nama (adaptive font)
+  const namaDisplay = document.getElementById('namaUserDisplay');
+  if (namaDisplay) {
     const displayName = user.name || user.email.split('@')[0];
-    nameEl.textContent = displayName;
+    namaDisplay.textContent = displayName;
     
-    // Adaptive font size berdasarkan panjang
-    nameEl.classList.remove('long-name', 'very-long-name');
-    if (displayName.length > 30) {
-      nameEl.classList.add('very-long-name');
-    } else if (displayName.length > 20) {
-      nameEl.classList.add('long-name');
-    }
-  }
-  
-  if (emailEl) emailEl.textContent = user.email;
-  if (emailMeta) emailMeta.textContent = user.email;
-  if (uidMeta) uidMeta.textContent = user.uid.substring(0, 16) + '...';
-  
-  if (roleEl) {
-    roleEl.innerHTML = `<i class="fas fa-shield-alt"></i> <span>${user.role}</span>`;
-  }
-  
-  if (avatarLarge && user.name) {
-    const initials = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    avatarLarge.textContent = initials;
-  }
-  
-  // Login time (dari session atau sekarang)
-  const sessionStart = Utils.getStorage('webpos_session_start');
-  if (loginTime) {
-    if (sessionStart) {
-      const date = new Date(parseInt(sessionStart));
-      loginTime.textContent = date.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) + ' WIB';
+    if (displayName.length > 25) {
+      namaDisplay.style.fontSize = '0.8rem';
+    } else if (displayName.length > 18) {
+      namaDisplay.style.fontSize = '0.95rem';
+    } else if (displayName.length > 12) {
+      namaDisplay.style.fontSize = '1.05rem';
     } else {
-      // Simpan sekarang kalau belum ada
-      Utils.setStorage('webpos_session_start', Date.now().toString());
-      loginTime.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) + ' WIB';
+      namaDisplay.style.fontSize = '1.15rem';
     }
   }
-    // Update nama di stats grid (adaptive font)
-const namaDisplay = document.getElementById('namaUserDisplay');
-if (namaDisplay) {
-  const displayName = user.name || user.email.split('@')[0];
-  namaDisplay.textContent = displayName;
-  
-  // Adaptive font size
-  if (displayName.length > 25) {
-    namaDisplay.style.fontSize = '0.8rem';
-  } else if (displayName.length > 18) {
-    namaDisplay.style.fontSize = '0.95rem';
-  } else if (displayName.length > 12) {
-    namaDisplay.style.fontSize = '1.05rem';
-  } else {
-    namaDisplay.style.fontSize = '1.15rem';
-  }
 }
-}
-
-        
+       
+      // Load dashboard data
+       
       // Load dashboard data
       async function loadDashboardData() {
         Utils.showLoading();
