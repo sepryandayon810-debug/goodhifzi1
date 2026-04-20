@@ -292,6 +292,19 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       background: var(--bg-secondary);
     }
 
+    /* Dark mode fix */
+[data-theme="dark"] .numpad-btn {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+[data-theme="dark"] .numpad-btn:hover {
+  background: var(--border-color);
+}
+[data-theme="dark"] .numpad-btn.action {
+  color: white;
+}
+
     .numpad-btn.action {
       background: var(--danger);
       color: white;
@@ -563,19 +576,23 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </div>
 
               <div class="numpad">
-                <button class="numpad-btn" data-num="1">1</button>
-                <button class="numpad-btn" data-num="2">2</button>
-                <button class="numpad-btn" data-num="3">3</button>
-                <button class="numpad-btn" data-num="4">4</button>
-                <button class="numpad-btn" data-num="5">5</button>
-                <button class="numpad-btn" data-num="6">6</button>
-                <button class="numpad-btn" data-num="7">7</button>
-                <button class="numpad-btn" data-num="8">8</button>
-                <button class="numpad-btn" data-num="9">9</button>
-                <button class="numpad-btn action" data-action="clear">C</button>
-                <button class="numpad-btn" data-num="0">0</button>
-                <button class="numpad-btn action" data-action="backspace"><i class="fas fa-backspace"></i></button>
-              </div>
+  <button class="numpad-btn" data-num="1">1</button>
+  <button class="numpad-btn" data-num="2">2</button>
+  <button class="numpad-btn" data-num="3">3</button>
+  <button class="numpad-btn" data-num="4">4</button>
+  <button class="numpad-btn" data-num="5">5</button>
+  <button class="numpad-btn" data-num="6">6</button>
+  <button class="numpad-btn" data-num="7">7</button>
+  <button class="numpad-btn" data-num="8">8</button>
+  <button class="numpad-btn" data-num="9">9</button>
+  <button class="numpad-btn" data-num="00">00</button>
+  <button class="numpad-btn" data-num="0">0</button>
+  <button class="numpad-btn" data-num="000">000</button>
+  <button class="numpad-btn action" data-action="clear">C</button>
+  <button class="numpad-btn action" data-action="backspace" style="grid-column: span 2;">
+    <i class="fas fa-backspace"></i>
+  </button>
+</div>
 
               <div class="form-group">
                 <label class="form-label">Keterangan <span style="color: var(--text-muted); font-size: 0.75rem;">(Opsional)</span></label>
@@ -760,7 +777,13 @@ document.addEventListener('click', (e) => {
           const action = btn.dataset.action;
           
           if (num !== undefined) {
-            amount = amount * 10 + parseInt(num);
+  if (num === '00') {
+    amount = amount * 100;
+  } else if (num === '000') {
+    amount = amount * 1000;
+  } else {
+    amount = amount * 10 + parseInt(num);
+  }
           } else if (action === 'clear') {
             amount = 0;
           } else if (action === 'backspace') {
