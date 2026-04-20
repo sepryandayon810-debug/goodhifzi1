@@ -476,20 +476,26 @@ body{background:var(--bg-primary);color:var(--text-primary);line-height:1.6;min-
   });
 });
 
-      // Numpad
+            // Numpad
       document.querySelectorAll('.numpad-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const num = btn.dataset.num;
           const action = btn.dataset.action;
+          
           if (num !== undefined) {
-  if (num === '00') {
-    amount = amount * 100;
-  } else if (num === '000') {
-    amount = amount * 1000;
-  } else {
-    amount = amount * 10 + parseInt(num);
-          else if (action === 'clear') amount = 0;
-          else if (action === 'backspace') amount = Math.floor(amount / 10);
+            if (num === '00') {
+              amount = amount * 100;
+            } else if (num === '000') {
+              amount = amount * 1000;
+            } else {
+              amount = amount * 10 + parseInt(num);
+            }
+          } else if (action === 'clear') {
+            amount = 0;
+          } else if (action === 'backspace') {
+            amount = Math.floor(amount / 10);
+          }
+          
           updateDisplay();
         });
       });
