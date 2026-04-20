@@ -1618,7 +1618,6 @@ function setupUIBasedOnRole() {
             avatar.textContent = initials;
           }
         }
-      }
 
         // Update nama di stats grid (adaptive font)
 const namaDisplay = document.getElementById('namaUserDisplay');
@@ -1637,7 +1636,9 @@ if (namaDisplay) {
     namaDisplay.style.fontSize = '1.15rem';
   }
 }
-      
+}
+
+              
       // Toggle sidebar
       menuToggle.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
