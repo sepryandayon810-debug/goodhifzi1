@@ -1418,14 +1418,14 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           </div>
           
           <div class="stat-card">
-            <div class="stat-icon orange">
-              <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-label">Shift</div>
-              <div class="stat-value" id="shiftInfo">-</div>
-            </div>
-          </div>
+  <div class="stat-icon orange">
+    <i class="fas fa-user"></i>
+  </div>
+  <div class="stat-content" style="min-width:0;">
+    <div class="stat-label">Nama</div>
+    <div class="stat-value" id="namaUserDisplay" style="font-size:1.15rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">-</div>
+  </div>
+</div>
           
           <div class="stat-card">
             <div class="stat-icon pink">
@@ -1804,7 +1804,26 @@ function setupUIBasedOnRole() {
       loginTime.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) + ' WIB';
     }
   }
+    // Update nama di stats grid (adaptive font)
+const namaDisplay = document.getElementById('namaUserDisplay');
+if (namaDisplay) {
+  const displayName = user.name || user.email.split('@')[0];
+  namaDisplay.textContent = displayName;
+  
+  // Adaptive font size
+  if (displayName.length > 25) {
+    namaDisplay.style.fontSize = '0.8rem';
+  } else if (displayName.length > 18) {
+    namaDisplay.style.fontSize = '0.95rem';
+  } else if (displayName.length > 12) {
+    namaDisplay.style.fontSize = '1.05rem';
+  } else {
+    namaDisplay.style.fontSize = '1.15rem';
+  }
 }
+}
+
+        
       // Load dashboard data
       async function loadDashboardData() {
         Utils.showLoading();
