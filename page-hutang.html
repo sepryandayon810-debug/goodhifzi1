@@ -2290,7 +2290,32 @@ filteredItems.forEach(item => {
       affectKas: affectKas
     };
     
-    await database.ref('debts/' + hutangId).set(hutangPayload);
+        await database.ref('debts/' + hutangId).set(hutangPayload);
+    
+    // ⭐ Otomatis catat penjualan saat piutang baru (supaya kas sistem tidak negatif)
+    if (!id && type === 'piutang') {
+      const today = Utils.getTodayString ? Utils.getTodayString() : new Date().toISOString().split('T')[0];
+      const transId = 'hutang_' + Date.now();
+      await database.ref('transactions/' + today + '/' + transId).set({
+        type: 'penjualan',
+        paymentMethod: 'hutang',
+        source: 'hutang_page',
+        total: amount,
+        paymentAmount: 0,
+        remainingPiutang: amount,
+        profit: 0,
+        description: `Piutang - ${name}`,
+        customerName: name,
+        timestamp: Date.now(),
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        userId: user.uid,
+        userName: user.name || user.email,
+        status: 'completed',
+        debtId: hutangId
+      });
+    }
+    
+    Utils.showToast('Data berhasil disimpan', 'success');
     
     Utils.showToast('Data berhasil disimpan', 'success');
     closeModal();
