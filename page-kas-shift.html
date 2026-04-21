@@ -354,7 +354,7 @@
             <div class="status-text closed" id="shiftStatusText">TUTUP</div>
             <div class="status-time" id="shiftStatusTime">-</div>
             <button class="btn-shift open" id="btnToggleShift"><i class="fas fa-store"></i><span>Buka Shift</span></button>
-            <div class="summary-grid">
+                        <div class="summary-grid" style="grid-template-columns: repeat(3, 1fr);">
               <div class="summary-item">
                 <div class="summary-label">Modal</div>
                 <div class="summary-value" id="summaryModal">Rp 0</div>
@@ -364,12 +364,20 @@
                 <div class="summary-value positive" id="summaryPenjualan">Rp 0</div>
               </div>
               <div class="summary-item">
+                <div class="summary-label">Piutang</div>
+                <div class="summary-value negative" id="summaryPiutang">Rp 0</div>
+              </div>
+              <div class="summary-item">
                 <div class="summary-label">Kas Masuk</div>
                 <div class="summary-value positive" id="summaryKasMasuk">Rp 0</div>
               </div>
               <div class="summary-item">
                 <div class="summary-label">Kas Keluar</div>
                 <div class="summary-value negative" id="summaryKasKeluar">Rp 0</div>
+              </div>
+              <div class="summary-item">
+                <div class="summary-label">Kas Sistem</div>
+                <div class="summary-value" id="summaryKasSistem" style="color: var(--primary);">Rp 0</div>
               </div>
             </div>
           </div>
@@ -631,7 +639,7 @@
         const catatan = document.getElementById('catatanInput').value;
         const transSnapshot = await database.ref('transactions/' + today).once('value');
         const transactions = transSnapshot.val() || {};
-        let penjualan = 0, kasMasuk = 0, kasKeluar = 0, topup = 0, tarik = 0, topupAdminFee = 0;
+        let penjualan = 0, kasMasuk = 0, kasKeluar = 0, topup = 0, tarik = 0, topupAdminFee = 0, tarikAdminFee = 0;  // ← ⭐ TAMBAH
         Object.values(transactions).forEach(trans => {
           if (trans.status !== 'cancelled') {
             switch(trans.type) {
@@ -639,20 +647,51 @@
               case 'kas_masuk': kasMasuk += trans.amount || 0; break;
               case 'kas_keluar': kasKeluar += trans.amount || 0; break;
               case 'topup': topup += trans.amount || 0; topupAdminFee += trans.adminFee || 0; break;
-              case 'tarik': tarik += trans.amount || 0; break;
+              case 'tarik': tarik += trans.amount || 0; tarikAdminFee += trans.adminFee || 0; break;
             }
           }
         });
-        const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
+                const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
         const modalData = modalSnapshot.val();
-        const kasSistem = (modalData ? modalData.amount : 0) + kasMasuk - kasKeluar + penjualan + topup + topupAdminFee - tarik;
+
+        // Load piutang HARI INI dari debts/
+        let totalPiutang = 0;
+        try {
+          const todayStart = new Date(today + 'T00:00:00').getTime();
+          const todayEnd = todayStart + 86400000;
+          const debtsSnapshot = await database.ref('debts').once('value');
+          const debtsData = debtsSnapshot.val() || {};
+          Object.values(debtsData).forEach(d => {
+            if (d.status === 'active' && d.type === 'piutang') {
+              const createdAt = d.createdAt || 0;
+              if (createdAt >= todayStart && createdAt < todayEnd) {
+                totalPiutang += d.remaining || 0;
+              }
+            }
+          });
+        } catch (e) {
+          console.error('Error loading debts:', e);
+        }
+
+                const kasSistem = (modalData ? modalData.amount : 0) + 
+                          kasMasuk - 
+                          kasKeluar + 
+                          penjualan - 
+                          totalPiutang + 
+                          topup + 
+                          topupAdminFee - 
+                          tarik +
+                          tarikAdminFee;
         const selisih = kasAkhir - kasSistem;
         let statusSelisih = 'pas';
         if (selisih > 0) statusSelisih = 'lebih';
         if (selisih < 0) statusSelisih = 'kurang';
-        await database.ref('shifts/' + today + '/' + user.uid).update({
+                await database.ref('shifts/' + today + '/' + user.uid).update({
           status: 'closed', closeTime: Date.now(), kasAkhir, kasSistem, selisih, statusSelisih,
-          penjualan, kasMasuk, kasKeluar, topup, tarik, topupAdminFee, catatan
+          penjualan, kasMasuk, kasKeluar, topup, tarik, topupAdminFee, 
+          tarikAdminFee,
+          piutang: totalPiutang,
+          catatan
         });
         document.getElementById('closeShiftModal').classList.remove('active');
         document.getElementById('kasAkhirInput').value = '';
@@ -675,20 +714,49 @@
         const modalData = modalSnapshot.val();
         const transSnapshot = await database.ref('transactions/' + today).once('value');
         const transactions = transSnapshot.val() || {};
-        let penjualan = 0, kasMasuk = 0, kasKeluar = 0;
+        let penjualan = 0, kasMasuk = 0, kasKeluar = 0, topup = 0, tarik = 0, topupAdminFee = 0, tarikAdminFee = 0;
         Object.values(transactions).forEach(trans => {
           if (trans.status !== 'cancelled') {
             switch(trans.type) {
               case 'penjualan': penjualan += trans.total || 0; break;
               case 'kas_masuk': kasMasuk += trans.amount || 0; break;
               case 'kas_keluar': kasKeluar += trans.amount || 0; break;
+              case 'topup': topup += trans.amount || 0; topupAdminFee += trans.adminFee || 0; break;
+              case 'tarik': tarik += trans.amount || 0; tarikAdminFee += trans.adminFee || 0; break;
             }
           }
         });
+
+                // Load piutang hari ini
+        let totalPiutang = 0;
+        try {
+          const todayStart = new Date(today + 'T00:00:00').getTime();
+          const todayEnd = todayStart + 86400000;
+          const debtsSnapshot = await database.ref('debts').once('value');
+          const debtsData = debtsSnapshot.val() || {};
+          Object.values(debtsData).forEach(d => {
+            if (d.status === 'active' && d.type === 'piutang') {
+              const createdAt = d.createdAt || 0;
+              if (createdAt >= todayStart && createdAt < todayEnd) {
+                totalPiutang += d.remaining || 0;
+              }
+            }
+          });
+        } catch (e) {
+          console.error('Error loading debts:', e);
+        }
+
+        const kasSistemSummary = (modalData ? modalData.amount : 0) + 
+                                 kasMasuk - kasKeluar + 
+                                 penjualan - totalPiutang + 
+                                 topup + topupAdminFee - 
+                                 tarik + tarikAdminFee;
         document.getElementById('summaryModal').textContent = Utils.formatRupiah(modalData ? modalData.amount : 0);
         document.getElementById('summaryPenjualan').textContent = Utils.formatRupiah(penjualan);
+        document.getElementById('summaryPiutang').textContent = '-' + Utils.formatRupiah(totalPiutang);
         document.getElementById('summaryKasMasuk').textContent = Utils.formatRupiah(kasMasuk);
         document.getElementById('summaryKasKeluar').textContent = Utils.formatRupiah(kasKeluar);
+        document.getElementById('summaryKasSistem').textContent = Utils.formatRupiah(kasSistemSummary);
       } catch (error) {
         console.error('Error loading today summary:', error);
       }
