@@ -2471,6 +2471,14 @@ document.querySelectorAll('.sort-btn').forEach(btn => {
   });
 });
 
+    // ===== UPDATE PAYMENT DISPLAY =====
+function updatePaymentDisplay() {
+  const total = calculateTotal();
+  document.getElementById('paymentInput').textContent = formatRupiah(paymentAmount);
+  const change = paymentAmount - total;
+  document.getElementById('paymentChange').textContent = formatRupiah(change > 0 ? change : 0);
+}
+
         function updatePiutangDisplay() {
       const total = calculateTotal();
       const paid = parseInt(document.getElementById('piutangPayment').value.replace(/\D/g, '')) || 0;
