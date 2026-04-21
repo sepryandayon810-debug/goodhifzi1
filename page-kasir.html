@@ -1489,11 +1489,11 @@ html, body {
   </div>
   <div style="display:flex;gap:0.5rem;align-items:center;">
     <div class="sort-toggle">
-      <button class="sort-btn active" data-sort="default" title="Default">
+      <button class="sort-btn" data-sort="default" title="Default">
         <i class="fas fa-sort"></i>
         <span class="d-md-inline">Default</span>
       </button>
-      <button class="sort-btn" data-sort="az" title="A - Z">
+      <button class="sort-btn active" data-sort="az" title="A - Z">
         <i class="fas fa-sort-alpha-down"></i>
         <span class="d-md-inline">A-Z</span>
       </button>
@@ -1502,11 +1502,11 @@ html, body {
         <span class="d-md-inline">Z-A</span>
       </button>
     </div>
-    <div class="view-toggle">
-      <button class="view-btn active" data-view="grid" title="Grid View">
+     <div class="view-toggle">
+      <button class="view-btn" data-view="grid" title="Grid View">
         <i class="fas fa-th-large"></i>
       </button>
-      <button class="view-btn" data-view="list" title="List View">
+      <button class="view-btn active" data-view="list" title="List View">
         <i class="fas fa-list"></i>
       </button>
     </div>
@@ -1974,8 +1974,8 @@ document.addEventListener('click', (e) => {
     let cart = [];
     let discount = 0;
     let currentCategory = 'all';
-    let currentSort = 'default'; // 'default', 'az', 'za'
-    let currentView = 'grid'
+    let currentSort = 'az'; // 'default', 'az', 'za'
+    let currentView = 'list'
     let paymentAmount = 0;
     let paymentMethod = 'cash';
     let customers = {};
