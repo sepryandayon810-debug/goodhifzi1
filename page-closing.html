@@ -899,6 +899,15 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
                   </div>
                   <div class="system-data-value positive" id="sistemPenjualan">+ Rp 0</div>
                 </div>
+
+                                <!-- ⭐ TAMBAH: Piutang Customer -->
+                <div class="system-data-item">
+                  <div class="system-data-label">
+                    <i class="fas fa-hand-holding-usd" style="color: var(--warning);"></i>
+                    <span>Piutang Customer</span>
+                  </div>
+                  <div class="system-data-value negative" id="sistemPiutang">- Rp 0</div>
+                </div>
                 
                 <div class="system-data-item">
                   <div class="system-data-label">
@@ -926,7 +935,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
               </div>
               
               <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(99, 102, 241, 0.05); border-radius: 0.5rem; font-size: 0.75rem; color: var(--text-muted); text-align: center; font-family: monospace;">
-                Modal + Masuk - Keluar + Jual + Topup - Tarik
+                Modal + Masuk - Keluar + Jual - Piutang + Topup - Tarik
               </div>
             </div>
           </div>
@@ -1064,6 +1073,9 @@ async function loadUserSidebar(user) {
           tarik: 0,
           kasMasuk: 0,
           kasKeluar: 0,
+          piutang: 0,
+          topupAdminFee: 0,
+          tarikAdminFee: 0,   // ← ⭐ TAMBAH
           laba: 0,
           uangGlobal: 0
         };
@@ -1079,9 +1091,6 @@ async function loadUserSidebar(user) {
           { value: 2000, label: '2.000', type: 'kertas' },
           { value: 1000, label: '1.000', type: 'kertas' },
           { value: 500, label: '500', type: 'logam' },
-          { value: 200, label: '200', type: 'logam' },
-          { value: 100, label: '100', type: 'logam' },
-          { value: 50, label: '50', type: 'logam' }
         ];
 
         // DOM Elements
@@ -1267,9 +1276,11 @@ async function loadUserSidebar(user) {
                     break;
                   case 'topup':
                     todayStats.topup += trans.amount || 0;
+                    todayStats.topupAdminFee += trans.adminFee || 0;  // ← ⭐ TAMBAH
                     break;
                   case 'tarik':
                     todayStats.tarik += trans.amount || 0;
+                    todayStats.tarikAdminFee += trans.adminFee || 0;  // ← ⭐ TAMBAH
                     break;
                   case 'kas_masuk':
                     todayStats.kasMasuk += trans.amount || 0;
@@ -1280,25 +1291,54 @@ async function loadUserSidebar(user) {
                 }
               }
             });
+
             
             // Load modal
             const modalSnapshot = await database.ref('modal/' + today + '/' + user.uid).once('value');
             const modalData = modalSnapshot.val();
             todayStats.modalAwal = modalData ? modalData.amount : 0;
+
+                        // ⭐ Load piutang HARI INI dari debts/
+            let totalPiutang = 0;
+            try {
+              const todayStart = new Date(today + 'T00:00:00').getTime();
+              const todayEnd = todayStart + 86400000;
+              
+              const debtsSnapshot = await database.ref('debts').once('value');
+              const debtsData = debtsSnapshot.val() || {};
+              
+              Object.values(debtsData).forEach(d => {
+                if (d.status === 'active' && d.type === 'piutang') {
+                  const createdAt = d.createdAt || 0;
+                  if (createdAt >= todayStart && createdAt < todayEnd) {
+                    totalPiutang += d.remaining || 0;
+                  }
+                }
+              });
+            } catch (e) {
+              console.error('Error loading debts:', e);
+            }
+            todayStats.piutang = totalPiutang;
+            
+            // Calculate Uang Global
             
             // Calculate Uang Global
             todayStats.uangGlobal = todayStats.modalAwal + 
                                     todayStats.kasMasuk - 
                                     todayStats.kasKeluar + 
-                                    todayStats.penjualan + 
-                                    todayStats.topup - 
+                                    todayStats.penjualan - 
+                                    todayStats.piutang +        // ← ⭐ DIKURANG
+                                    todayStats.topup +
+                                    todayStats.topupAdminFee -  // ← ⭐ TAMBAH
                                     todayStats.tarik;
+                                    todayStats.tarikAdminFee;
             
             // Update UI
             document.getElementById('sistemModal').textContent = Utils.formatRupiah(todayStats.modalAwal);
             document.getElementById('sistemMasuk').textContent = '+ ' + Utils.formatRupiah(todayStats.kasMasuk);
             document.getElementById('sistemKeluar').textContent = '- ' + Utils.formatRupiah(todayStats.kasKeluar);
             document.getElementById('sistemPenjualan').textContent = '+ ' + Utils.formatRupiah(todayStats.penjualan);
+            document.getElementById('sistemPiutang').textContent = '- ' + Utils.formatRupiah(todayStats.piutang); 
             document.getElementById('sistemTopup').textContent = '+ ' + Utils.formatRupiah(todayStats.topup);
             document.getElementById('sistemTarik').textContent = '- ' + Utils.formatRupiah(todayStats.tarik);
             document.getElementById('sistemGlobal').textContent = Utils.formatRupiah(todayStats.uangGlobal);
@@ -1367,8 +1407,11 @@ async function loadUserSidebar(user) {
                   kasMasuk: todayStats.kasMasuk,
                   kasKeluar: todayStats.kasKeluar,
                   penjualan: todayStats.penjualan,
+                  piutang: todayStats.piutang,        // ← ⭐ TAMBAH
                   topup: todayStats.topup,
+                  topupAdminFee: todayStats.topupAdminFee,  // ← ⭐ TAMBAH
                   tarik: todayStats.tarik,
+                  tarikAdminFee: todayStats.tarikAdminFee,
                   uangGlobal: todayStats.uangGlobal
                 },
                 selisih: selisih,
