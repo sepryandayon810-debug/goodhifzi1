@@ -1713,22 +1713,27 @@ if (namaDisplay) {
           Object.values(transactions).forEach(trans => {
   if (trans.status !== 'cancelled' && trans.status !== 'voided') {
     switch (trans.type) {
-      case 'penjualan':
+            case 'penjualan':
         todayStats.penjualan += trans.total || 0;
         todayStats.laba += trans.profit || 0;
-        todayStats.transaksiCount++;
+        // ⭐ Hanya count kalau BUKAN dari menu Hutang
+        if (trans.source !== 'hutang_page') {
+          todayStats.transaksiCount++;
+        }
         break;
         
-      case 'topup':
+            case 'topup':
         todayStats.topup += trans.amount || 0;
+        todayStats.topupAdminFee += trans.adminFee || 0;  // ← ⭐ TAMBAH
         todayStats.laba += trans.adminFee || 0;
-        todayStats.transaksiCount++; // ✅ Transaksi bisnis dihitung
+        todayStats.transaksiCount++;
         break;
         
       case 'tarik':
         todayStats.tarik += trans.amount || 0;
+        todayStats.tarikAdminFee += trans.adminFee || 0;  // ← ⭐ TAMBAH
         todayStats.laba += trans.adminFee || 0;
-        todayStats.transaksiCount++; // ✅ Transaksi bisnis dihitung
+        todayStats.transaksiCount++;
         break;
         
       case 'kas_masuk':
@@ -1789,6 +1794,7 @@ if (namaDisplay) {
                             todayStats.topup +
                             todayStats.topupAdminFee -
                             todayStats.tarik;
+                            todayStats.tarikAdminFee;
 
           // Update UI - Header Stats
           document.getElementById('kasDitangan').textContent = Utils.formatRupiah(uangGlobal);
