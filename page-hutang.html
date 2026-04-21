@@ -2292,12 +2292,6 @@ filteredItems.forEach(item => {
     
     await database.ref('debts/' + hutangId).set(hutangPayload);
     
-    if (affectKas && !id) {
-      console.log('🔄 Mencatat ke kas...');
-      await recordToKas(type === 'hutang' ? 'masuk' : 'keluar', amount, 
-        `${type === 'hutang' ? 'Hutang' : 'Piutang'} baru - ${name}`, user);
-    }
-    
     Utils.showToast('Data berhasil disimpan', 'success');
     closeModal();
     loadAllData();
