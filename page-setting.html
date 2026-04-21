@@ -918,7 +918,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
         const themes = Utils.Theme.getThemes();
         const currentTheme = Utils.Theme.getColor();
         
-        const allThemes = [
+                const allThemes = [
   {id:'indigo',name:'Indigo',class:'theme-indigo'},
   {id:'blue',name:'Blue',class:'theme-blue'},
   {id:'green',name:'Green',class:'theme-green'},
@@ -931,7 +931,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   {id:'sunset',name:'Sunset',class:'theme-sunset'},
   {id:'midnight',name:'Midnight',class:'theme-midnight'}
 ];
-const currentTheme = Utils.Theme.getColor();
 themeGrid.innerHTML = allThemes.map(theme => `
   <div class="theme-option ${theme.id === currentTheme ? 'active' : ''}" data-theme="${theme.id}">
     <div class="theme-color ${theme.class}"></div>
