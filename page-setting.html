@@ -918,7 +918,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 
         // Generate theme grid
         const themeGrid = document.getElementById('themeGrid');
-        const themes = Utils.Theme.getThemes();
         const currentTheme = Utils.Theme.getColor();
         
                 const allThemes = [
@@ -934,6 +933,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   {id:'sunset',name:'Sunset',class:'theme-sunset'},
   {id:'midnight',name:'Midnight',class:'theme-midnight'}
 ];
+
+  console.log('Theme grid found:', themeGrid);
+        console.log('Current theme:', currentTheme);
+        console.log('Total themes:', allThemes.length);
+        console.log('Theme IDs:', allThemes.map(t => t.id));
+        
 themeGrid.innerHTML = allThemes.map(theme => `
   <div class="theme-option ${theme.id === currentTheme ? 'active' : ''}" data-theme="${theme.id}">
     <div class="theme-color ${theme.class}"></div>
