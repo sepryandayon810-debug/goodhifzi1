@@ -938,6 +938,7 @@
     let scannedData = null;
     let receiptHeader = {};
     let currentUser = null;
+    const isMedianApp = typeof window.median !== 'undefined';
 
     // ==========================================
     // INITIALIZATION
@@ -1802,12 +1803,26 @@
       const admin = parseInt(document.getElementById('manualAdmin')?.value) || 0;
       const total = nominal + admin;
 
-      if (nominal <= 0) {
+            if (nominal <= 0) {
         showToast('Nominal harus diisi!', 'warning');
         return;
       }
 
+      // ⭐ MEDIAN APP: buka struk HTML di browser eksternal untuk Print/Save PDF
+      if (isMedianApp) {
+        const dataUrl = bukaStrukExternal();
+        if (!dataUrl) return;
+        if (window.median && window.median.window) {
+          window.median.window.open(dataUrl, 'external');
+        } else {
+          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
+        }
+        showToast('Buka di Chrome untuk Print / Save PDF', 'success');
+        return;
+      }
+
       let content = '';
+      
       const trxId = currentReceiptType.substring(0,2).toUpperCase() + '-' + Date.now().toString().slice(-6);
 
       if (currentReceiptType === 'transfer') {
@@ -1902,36 +1917,56 @@ ${note}
       showToast('Struk berhasil dibuat! Pilih "Save as PDF" atau "Share"', 'success');
     }
 
-    async function shareAsPDF() {
-      if (!navigator.share) {
-        showToast('Fitur share tidak tersedia di browser ini. Gunakan tombol Print.', 'warning');
+        function shareAsPDF() {
+      // ⭐ MEDIAN APP: buka struk di Chrome → user pilih Print → Save as PDF
+      if (isMedianApp) {
+        const dataUrl = bukaStrukExternal();
+        if (!dataUrl) return;
+        if (window.median && window.median.window) {
+          window.median.window.open(dataUrl, 'external');
+        } else {
+          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
+        }
+        showToast('Buka di Chrome → Print → Save as PDF', 'success');
         return;
       }
 
+      // ⭐ BROWSER BIASA
+      if (!navigator.share) {
+        showToast('Fitur share tidak tersedia. Gunakan Print.', 'warning');
+        return;
+      }
       try {
         const content = generateReceiptText();
         const blob = new Blob([content], { type: 'text/plain' });
         const file = new File([blob], `bukti-transfer-${Date.now()}.txt`, { type: 'text/plain' });
-        
-        await navigator.share({
-          title: 'Bukti Transfer',
-          text: content.substring(0, 100) + '...',
-          files: [file]
-        });
-        
+        navigator.share({ title: 'Bukti Transfer', text: content.substring(0, 100) + '...', files: [file] });
         showToast('Berhasil membuka share dialog', 'success');
       } catch (err) {
-        console.error('Share error:', err);
         showToast('Gagal share, coba gunakan Print', 'error');
       }
     }
 
-    function shareAsImage() {
-      showToast('Fitur share gambar membutuhkan library html2canvas. Untuk sekarang gunakan Print.', 'info');
+        function shareAsImage() {
+      // ⭐ MEDIAN APP: buka struk di Chrome external, user bisa screenshot dari sana
+      if (isMedianApp) {
+        const dataUrl = bukaStrukExternal();
+        if (!dataUrl) return;
+        if (window.median && window.median.window) {
+          window.median.window.open(dataUrl, 'external');
+        } else {
+          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
+        }
+        showToast('Buka di Chrome → screenshot untuk share', 'success');
+        return;
+      }
+
+      // ⭐ BROWSER BIASA
+      showToast('Fitur share gambar membutuhkan html2canvas. Gunakan Print.', 'info');
       printReceipt();
     }
 
-    function shareToWhatsApp() {
+        function shareToWhatsApp() {
       const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
       const date = document.getElementById('manualDate')?.value || '';
       const type = currentReceiptType === 'transfer' ? 'Transfer' : currentReceiptType === 'tarik_tunai' ? 'Tarik Tunai' : 'Top Up';
@@ -1942,9 +1977,23 @@ ${note}
       text += `_Dibuat via WebPOS_`;
       
       const encoded = encodeURIComponent(text);
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
-    }
+      const waUrl = `https://wa.me/?text=${encoded}`;
 
+      // ⭐ MEDIAN APP: pakai external mode supaya WhatsApp app terbuka
+      if (isMedianApp) {
+        if (window.median && window.median.window) {
+          window.median.window.open(waUrl, 'external');
+        } else {
+          window.location.href = 'median://window/open?url=' + encodeURIComponent(waUrl) + '&mode=external';
+        }
+        showToast('Membuka WhatsApp...', 'success');
+        return;
+      }
+
+      // ⭐ BROWSER BIASA
+      window.open(waUrl, '_blank');
+    }
+    
     function generateReceiptText() {
       const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
       const address = document.getElementById('receiptAddress')?.value || '';
@@ -2130,6 +2179,122 @@ ${note}
       });
     }
 
+        // ==========================================
+    // HELPER: Buka Struk di Browser Eksternal (untuk Median APK)
+    // ==========================================
+    function bukaStrukExternal() {
+      const storeName = document.getElementById('receiptStoreName')?.value || 'NAMA TOKO';
+      const address = document.getElementById('receiptAddress')?.value || '';
+      const phone = document.getElementById('receiptPhone')?.value || '';
+      const note = document.getElementById('receiptNote')?.value || 'Terima kasih';
+      const date = document.getElementById('manualDate')?.value || '';
+      const time = document.getElementById('manualTime')?.value || '';
+      const nominal = parseInt(document.getElementById('manualNominal')?.value) || 0;
+      const admin = parseInt(document.getElementById('manualAdmin')?.value) || 0;
+      const total = nominal + admin;
+      const trxId = currentReceiptType.substring(0,2).toUpperCase() + '-' + Date.now().toString().slice(-6);
+
+      if (nominal <= 0) {
+        showToast('Nominal harus diisi!', 'warning');
+        return null;
+      }
+
+      let bodyContent = '';
+      if (currentReceiptType === 'transfer') {
+        const sender = document.getElementById('manualSender')?.value || '-';
+        const senderAcc = document.getElementById('manualSenderAccount')?.value || '-';
+        const senderBank = document.getElementById('manualBankFrom')?.value || '';
+        const receiver = document.getElementById('manualReceiver')?.value || '-';
+        const receiverAcc = document.getElementById('manualReceiverAccount')?.value || '-';
+        const receiverBank = document.getElementById('manualBankTo')?.value || '';
+        bodyContent = `
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">PENGIRIM:</div>
+            <div>${sender}</div>
+            <div style="font-family:monospace; font-size:0.85rem;">${senderAcc} ${senderBank}</div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">PENERIMA:</div>
+            <div>${receiver}</div>
+            <div style="font-family:monospace; font-size:0.85rem;">${receiverAcc} ${receiverBank}</div>
+          </div>`;
+      } else if (currentReceiptType === 'tarik_tunai') {
+        const customer = document.getElementById('manualCustomer')?.value || '-';
+        const bank = document.getElementById('manualBank')?.value || '';
+        const account = document.getElementById('manualAccount')?.value || '-';
+        bodyContent = `
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">CUSTOMER:</div>
+            <div>${customer}</div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">BANK:</div>
+            <div>${bank}</div>
+            <div style="font-family:monospace; font-size:0.85rem;">${account}</div>
+          </div>`;
+      } else {
+        const type = document.getElementById('manualTopUpType')?.value || '';
+        const target = document.getElementById('manualTarget')?.value || '-';
+        const customer = document.getElementById('manualCustomer')?.value || '-';
+        bodyContent = `
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">JENIS:</div>
+            <div>${type}</div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">NO TUJUAN:</div>
+            <div style="font-family:monospace;">${target}</div>
+          </div>
+          <div style="margin-bottom:1rem;">
+            <div style="font-weight:bold;">CUSTOMER:</div>
+            <div>${customer}</div>
+          </div>`;
+      }
+
+      const html = `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Struk ${currentReceiptType}</title>
+<style>
+  body { font-family: 'Courier New', monospace; padding: 20px; font-size: 14px; line-height: 1.6; background: #fff; color: #000; max-width: 400px; margin: 0 auto; }
+  .center { text-align: center; }
+  .line { border-top: 1px dashed #333; margin: 10px 0; }
+  .total { font-size: 1.15rem; font-weight: bold; }
+  .btn-print { display: block; width: 100%; padding: 12px; margin-top: 20px; background: #333; color: #fff; text-align: center; border-radius: 8px; text-decoration: none; font-family: sans-serif; font-size: 0.9rem; }
+  @media print { .btn-print { display: none; } body { padding: 0; } }
+</style>
+</head>
+<body>
+  <div class="center">
+    <h3 style="margin-bottom:4px;">${storeName.toUpperCase()}</h3>
+    <div style="font-size:0.85rem; color:#555;">${address}</div>
+    ${phone ? `<div style="font-size:0.85rem; color:#555;">HP: ${phone}</div>` : ''}
+  </div>
+  <div class="line"></div>
+  <div class="center" style="font-weight:bold; margin-bottom:8px;">
+    ${currentReceiptType === 'transfer' ? 'BUKTI TRANSFER' : currentReceiptType === 'tarik_tunai' ? 'BUKTI TARIK TUNAI' : 'BUKTI TOP UP'}
+  </div>
+  <div style="font-size:0.85rem; margin-bottom:4px;">No: ${trxId}</div>
+  <div style="font-size:0.85rem; margin-bottom:8px;">Tgl: ${date} ${time}</div>
+  <div class="line"></div>
+  ${bodyContent}
+  <div class="line"></div>
+  <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Nominal</span><span>Rp ${formatNumber(nominal)}</span></div>
+  <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Admin</span><span>Rp ${formatNumber(admin)}</span></div>
+  <div class="line"></div>
+  <div class="total" style="display:flex; justify-content:space-between;"><span>TOTAL</span><span>Rp ${formatNumber(total)}</span></div>
+  <div class="line"></div>
+  <div class="center" style="font-size:0.85rem;">${note}</div>
+  <div class="center" style="margin-top:16px; font-size:0.75rem; color:#888;">_Dibuat via WebPOS_</div>
+  <a href="javascript:window.print()" class="btn-print">🖨️ Print / Save PDF</a>
+</body>
+</html>`;
+
+      return 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+    }
+    
     // ==========================================
     // UTILITIES
     // ==========================================
