@@ -14,7 +14,32 @@
 /* WebPOS Modern CSS - Simplified */
 
 /* Theme Colors */
-:root{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6}
+:root{
+  --primary:#6366f1;
+  --primary-dark:#4f46e5;
+  --secondary:#ec4899;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --info:#3b82f6;
+  
+  /* Extended variables */
+  --success-dark:#059669;
+  --danger-dark:#b91c1c;
+  --info-dark:#2563eb;
+  --bg-hover:rgba(99,102,241,0.05);
+  --radius-full:9999px;
+  --radius-2xl:1rem;
+  --space-md:1rem;
+  --space-lg:1.25rem;
+  --space-xl:1.5rem;
+  --transition-fast:0.15s;
+  --transition-base:0.25s;
+  --shadow-xl:0 20px 25px rgba(0,0,0,0.15);
+  --primary-rgb:99,102,241;
+}
+
+[data-theme-color="indigo"]{--primary:#6366f1;--primary-dark:#4f46e5;--secondary:#ec4899}
 [data-theme-color="blue"]{--primary:#3b82f6;--primary-dark:#2563eb;--secondary:#06b6d4}
 [data-theme-color="green"]{--primary:#10b981;--primary-dark:#059669;--secondary:#84cc16}
 [data-theme-color="orange"]{--primary:#f97316;--primary-dark:#ea580c;--secondary:#f59e0b}
@@ -240,42 +265,117 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
 .mb-2{margin-bottom:1rem!important}
 .w-full{width:100%!important}
 
+/* ===== MODAL & PERMISSION FIX ===== */
+.modal-content {
+  max-width: 600px !important;
+  border-radius: 1.25rem !important;
+}
+
+.modal-body {
+  padding: 1.5rem !important;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-input, .form-select {
+  padding: 0.875rem 1rem !important;
+  border-radius: 0.75rem !important;
+  font-size: 0.95rem !important;
+}
+
+/* Permission Section */
+.permission-section {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.permission-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.permission-section-header i {
+  font-size: 0.875rem;
+  color: var(--primary);
+}
+
 .permission-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
+  padding: 0.75rem;
 }
 
 .permission-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg-card);
+  border-radius: 0.625rem;
+  border: 1.5px solid transparent;
   transition: all 0.15s;
+  cursor: pointer;
 }
 
 .permission-item:hover {
   border-color: var(--primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: rgba(99, 102, 241, 0.04);
 }
 
-.permission-item input {
-  width: 18px;
-  height: 18px;
+.permission-item input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
   accent-color: var(--primary);
   cursor: pointer;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 .permission-item label {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   flex: 1;
+  margin: 0;
+}
+
+.permission-item label i {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  width: 18px;
+  text-align: center;
+}
+
+/* Responsive: 1 column di mobile */
+@media (max-width: 480px) {
+  .permission-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal-content {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
 }
 
   </style>
@@ -298,6 +398,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
   
   
   <style>
+    
     .pengguna-header {
       display: flex;
       justify-content: space-between;
@@ -379,19 +480,6 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       border-radius: var(--radius-xl);
       border: 1px solid var(--border-color);
       overflow: hidden;
-    }
-
-    .card-header {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .card-title {
-      font-size: 1.125rem;
-      font-weight: 700;
     }
 
     .pengguna-list {
@@ -566,160 +654,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     .btn-delete:hover {
       background: var(--danger-dark);
     }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem 1.5rem;
-      color: var(--text-muted);
-    }
-
-    .empty-state i {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all var(--transition-base);
-      padding: var(--space-md);
-    }
-
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      border-radius: var(--radius-2xl);
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: var(--shadow-xl);
-      transform: scale(0.9) translateY(20px);
-      transition: all var(--transition-base);
-    }
-
-    .modal-overlay.active .modal-content {
-      transform: scale(1) translateY(0);
-    }
-
-    .modal-header {
-      padding: var(--space-lg) var(--space-xl);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .modal-close {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: var(--radius-lg);
-      background: var(--bg-secondary);
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .modal-close:hover {
-      background: var(--danger);
-      color: white;
-    }
-
-    .modal-body {
-      padding: var(--space-xl);
-    }
-
-    .modal-footer {
-      padding: var(--space-lg) var(--space-xl);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      gap: var(--space-md);
-      justify-content: flex-end;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-input,
-    .form-select {
-      width: 100%;
-      padding: 0.875rem 1rem;
-      border: 1.5px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      font-size: 1rem;
-    }
-
-    .form-input:focus,
-    .form-select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.1);
-    }
-
-    .permission-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-    }
-
-    .permission-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      background: var(--bg-secondary);
-      border-radius: var(--radius-md);
-    }
-
-    .permission-item input {
-      width: 18px;
-      height: 18px;
-      accent-color: var(--primary);
-    }
-
-    .permission-item label {
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      cursor: pointer;
-    }
+ 
   </style>
 </head>
 <body>
@@ -1056,102 +991,105 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             <label class="form-label">Password <small>(Kosongkan jika tidak diubah)</small></label>
             <input type="password" class="form-input" id="penggunaPassword" placeholder="Minimal 6 karakter">
           </div>
-          
-          <div class="form-group">
-  <label class="form-label">Izin Akses Menu</label>
-  
-    <!-- Utama -->
-  <div style="margin-bottom: 1rem;">
-    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; padding-left: 0.5rem;">
-      Utama
-    </div>
-    <div class="permission-grid">
-      <div class="permission-item">
-        <input type="checkbox" id="permDashboard" data-perm="dashboard">
-        <label for="permDashboard"><i class="fas fa-home" style="margin-right: 4px;"></i> Dashboard</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permKasir" data-perm="kasir">
-        <label for="permKasir"><i class="fas fa-cash-register" style="margin-right: 4px;"></i> Kasir</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permProduk" data-perm="produk">
-        <label for="permProduk"><i class="fas fa-box" style="margin-right: 4px;"></i> Produk</label>
-      </div>
-    </div>
-  </div>
+                    <div class="form-group">
+            <label class="form-label">Izin Akses Menu</label>
+            
+            <!-- Utama -->
+            <div class="permission-section">
+              <div class="permission-section-header">
+                <i class="fas fa-star"></i> Utama
+              </div>
+              <div class="permission-grid">
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permDashboard" data-perm="dashboard">
+                  <label for="permDashboard"><i class="fas fa-home"></i> Dashboard</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permKasir" data-perm="kasir">
+                  <label for="permKasir"><i class="fas fa-cash-register"></i> Kasir</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permProduk" data-perm="produk">
+                  <label for="permProduk"><i class="fas fa-box"></i> Produk</label>
+                </div>
+              </div>
+            </div>
 
-  <!-- Transaksi -->
-  <div style="margin-bottom: 1rem;">
-    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; padding-left: 0.5rem;">
-      Transaksi & Keuangan
-    </div>
-    <div class="permission-grid">
-      <div class="permission-item">
-        <input type="checkbox" id="permRiwayat" data-perm="riwayat">
-        <label for="permRiwayat"><i class="fas fa-history" style="margin-right: 4px;"></i> Riwayat</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permKas" data-perm="kas">
-        <label for="permKas"><i class="fas fa-wallet" style="margin-right: 4px;"></i> Kas Mgmt</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permHutang" data-perm="hutang">
-        <label for="permHutang"><i class="fas fa-hand-holding-usd" style="margin-right: 4px;"></i> Hutang</label>
-      </div>
-    </div>
-  </div>
+            <!-- Transaksi -->
+            <div class="permission-section">
+              <div class="permission-section-header">
+                <i class="fas fa-exchange-alt"></i> Transaksi & Keuangan
+              </div>
+              <div class="permission-grid">
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permRiwayat" data-perm="riwayat">
+                  <label for="permRiwayat"><i class="fas fa-history"></i> Riwayat</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permKas" data-perm="kas">
+                  <label for="permKas"><i class="fas fa-wallet"></i> Kas Mgmt</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permHutang" data-perm="hutang">
+                  <label for="permHutang"><i class="fas fa-hand-holding-usd"></i> Hutang</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permPembelian" data-perm="pembelian">
+                  <label for="permPembelian"><i class="fas fa-shopping-cart"></i> Pembelian</label>
+                </div>
+              </div>
+            </div>
 
-  <!-- Laporan -->
-  <div style="margin-bottom: 1rem;">
-    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; padding-left: 0.5rem;">
-      Laporan & Integrasi
-    </div>
-    <div class="permission-grid">
-      <div class="permission-item">
-        <input type="checkbox" id="permLaporan" data-perm="laporan">
-        <label for="permLaporan"><i class="fas fa-chart-bar" style="margin-right: 4px;"></i> Laporan</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permTelegram" data-perm="telegram">
-        <label for="permTelegram"><i class="fab fa-telegram" style="margin-right: 4px;"></i> Telegram</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permPelanggan" data-perm="pelanggan">
-        <label for="permPelanggan"><i class="fas fa-users" style="margin-right: 4px;"></i> Pelanggan</label>
-      </div>
-    </div>
-  </div>
+            <!-- Laporan -->
+            <div class="permission-section">
+              <div class="permission-section-header">
+                <i class="fas fa-chart-pie"></i> Laporan & Integrasi
+              </div>
+              <div class="permission-grid">
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permLaporan" data-perm="laporan">
+                  <label for="permLaporan"><i class="fas fa-chart-bar"></i> Laporan</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permTelegram" data-perm="telegram">
+                  <label for="permTelegram"><i class="fab fa-telegram"></i> Telegram</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permPelanggan" data-perm="pelanggan">
+                  <label for="permPelanggan"><i class="fas fa-users"></i> Pelanggan</label>
+                </div>
+              </div>
+            </div>
 
-  <!-- Sistem -->
-  <div style="margin-bottom: 1rem;">
-    <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.5rem; padding-left: 0.5rem;">
-      Sistem (Khusus Admin/Owner)
-    </div>
-    <div class="permission-grid">
-      <div class="permission-item">
-        <input type="checkbox" id="permPengguna" data-perm="pengguna">
-        <label for="permPengguna"><i class="fas fa-user-cog" style="margin-right: 4px;"></i> Pengguna</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permPengaturan" data-perm="pengaturan">
-        <label for="permPengaturan"><i class="fas fa-cog" style="margin-right: 4px;"></i> Pengaturan</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permBackup" data-perm="backup">
-        <label for="permBackup"><i class="fas fa-cloud-upload-alt" style="margin-right: 4px;"></i> Backup</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permPrinter" data-perm="printer">
-        <label for="permPrinter"><i class="fas fa-print" style="margin-right: 4px;"></i> Printer</label>
-      </div>
-      <div class="permission-item">
-        <input type="checkbox" id="permReset" data-perm="reset">
-        <label for="permReset"><i class="fas fa-trash-alt" style="margin-right: 4px;"></i> Reset Data</label>
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Sistem -->
+            <div class="permission-section">
+              <div class="permission-section-header">
+                <i class="fas fa-shield-alt"></i> Sistem (Admin/Owner)
+              </div>
+              <div class="permission-grid">
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permPengguna" data-perm="pengguna">
+                  <label for="permPengguna"><i class="fas fa-user-cog"></i> Pengguna</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permPengaturan" data-perm="pengaturan">
+                  <label for="permPengaturan"><i class="fas fa-cog"></i> Pengaturan</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permBackup" data-perm="backup">
+                  <label for="permBackup"><i class="fas fa-cloud-upload-alt"></i> Backup</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permPrinter" data-perm="printer">
+                  <label for="permPrinter"><i class="fas fa-print"></i> Printer</label>
+                </div>
+                <div class="permission-item" onclick="togglePerm(this, event)">
+                  <input type="checkbox" id="permReset" data-perm="reset">
+                  <label for="permReset"><i class="fas fa-trash-alt"></i> Reset Data</label>
+                </div>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -1185,10 +1123,10 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
     }
     
     if (user) {
-      Auth.loadUserData(user.uid).then(() => {
+            Auth.loadUserData(user.uid).then(() => {
         const currentUser = Auth.getCurrentUser();
         
-        // ⭐ INI YANG DITAMBAHKAN: Update sidebar user profile
+        // Update sidebar user profile
         if (currentUser) {
           document.getElementById('userName').textContent = currentUser.name || user.email || 'User';
           document.getElementById('userRole').textContent = currentUser.role || 'Kasir';
@@ -1196,7 +1134,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
           document.getElementById('userAvatar').textContent = initial;
         }
         
-        // Check permission
+        // Check permission for THIS page (pengguna)
         if (currentUser && currentUser.role !== 'owner' && currentUser.role !== 'admin') {
           Utils.showToast('Anda tidak memiliki izin mengakses halaman ini', 'error');
           window.location.href = 'index.html';
@@ -1207,6 +1145,69 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       });
     }
   });
+
+      // ⭐ APPLY PERMISSIONS TO SIDEBAR
+        function applySidebarPermissions() {
+          const currentUser = Auth.getCurrentUser();
+          if (!currentUser) return;
+          
+          // Owner & Admin selalu lihat semua
+          if (currentUser.role === 'owner' || currentUser.role === 'admin') return;
+          
+          const perms = currentUser.permissions || {};
+          
+          // Mapping data-menu ke permission key
+          const menuPermMap = {
+            'dashboard': 'dashboard',
+            'kasir': 'kasir',
+            'produk': 'produk',
+            'riwayat': 'riwayat',
+            'kas': 'kas',
+            'hutang': 'hutang',
+            'pembelian': 'pembelian',
+            'laporan': 'laporan',
+            'laporan-stok': 'laporan',
+            'laporan-terlaris': 'laporan',
+            'telegram': 'telegram',
+            'pelanggan': 'pelanggan',
+            'pengguna': 'pengguna',
+            'setting': 'pengaturan',
+            'backup': 'backup',
+            'log-aktivitas': 'pengaturan',
+            'printer': 'printer',
+            'reset': 'reset'
+          };
+          
+          // Sembunyikan menu yang tidak punya izin
+          document.querySelectorAll('.nav-link[data-menu]').forEach(link => {
+            const menuKey = link.dataset.menu;
+            const permKey = menuPermMap[menuKey];
+            if (permKey && !perms[permKey]) {
+              const navItem = link.closest('.nav-item');
+              if (navItem) navItem.style.display = 'none';
+            }
+          });
+          
+          // Sembunyikan section title kalau semua menu di sectionnya hidden
+          document.querySelectorAll('.nav-section').forEach(section => {
+            const visibleItems = section.querySelectorAll('.nav-item:not([style*="display: none"])');
+            if (visibleItems.length === 0) {
+              section.style.display = 'none';
+            }
+          });
+          
+          // Update mobile nav juga
+          document.querySelectorAll('.mobile-nav-item').forEach(item => {
+            const href = item.getAttribute('href');
+            if (!href) return;
+            const page = href.replace('page-', '').replace('.html', '');
+            const permKey = menuPermMap[page] || menuPermMap[page.replace('-stok','').replace('-terlaris','')];
+            if (permKey && !perms[permKey]) {
+              item.style.display = 'none';
+            }
+          });
+        }
+
       function initPengguna() {
         let penggunaData = {};
         let currentFilter = 'all';
@@ -1303,7 +1304,9 @@ document.addEventListener('click', (e) => {
         function closeModal() {
           document.getElementById('penggunaModal').classList.remove('active');
         }
+         applySidebarPermissions();
 
+                
         async function loadPenggunaData() {
           Utils.showLoading();
           
@@ -1423,8 +1426,17 @@ document.addEventListener('click', (e) => {
         }
 
         // Mapping semua 14 permission keys
+// Toggle checkbox saat klik div permission-item
+window.togglePerm = function(el, ev) {
+  const cb = el.querySelector('input[type="checkbox"]');
+  const e = ev || window.event;
+  if (cb && e && e.target !== cb && e.target.tagName !== 'INPUT') {
+    cb.checked = !cb.checked;
+  }
+};
+// Mapping semua 15 permission keys (tambah pembelian)
 const ALL_PERMISSIONS = [
-  'dashboard', 'kasir', 'produk', 'riwayat', 'kas', 'hutang',
+  'dashboard', 'kasir', 'produk', 'riwayat', 'kas', 'hutang', 'pembelian',
   'laporan', 'telegram', 'pelanggan',
   'pengguna', 'pengaturan', 'backup', 'printer', 'reset'
 ];
@@ -1464,7 +1476,7 @@ async function savePengguna() {
       
       await database.ref(`users/${id}`).update(updates);
       Utils.showToast('Pengguna berhasil diperbarui', 'success');
-    } else {
+     } else {
       // Create new user dengan permissions
       const password = document.getElementById('penggunaPassword').value || 'password123';
       const result = await Auth.register(username, password, name, email, role, permissions);
@@ -1489,12 +1501,14 @@ window.editPengguna = (id) => {
   const p = penggunaData[id];
   if (!p) return;
   
+  const role = p.role || 'kasir'; // ⭐ FIX: definisikan role dari data user
+  
   document.getElementById('modalTitle').textContent = 'Edit Pengguna';
   document.getElementById('penggunaId').value = id;
   document.getElementById('penggunaUsername').value = p.username || '';
   document.getElementById('penggunaName').value = p.name || '';
   document.getElementById('penggunaEmail').value = p.email || '';
-  document.getElementById('penggunaRole').value = p.role || 'kasir';
+  document.getElementById('penggunaRole').value = role;
   document.getElementById('penggunaPassword').value = '';
   
   // Reset semua checkbox
@@ -1510,9 +1524,16 @@ window.editPengguna = (id) => {
       if (cb) cb.checked = val === true;
     });
   } else {
-    // Default untuk user lama: kasir & produk true
-    document.querySelector('input[data-perm="kasir"]').checked = true;
-    document.querySelector('input[data-perm="produk"]').checked = true;
+    // Default permission sesuai role
+    if (role === 'kasir') {
+      document.querySelector('input[data-perm="dashboard"]').checked = true;
+      document.querySelector('input[data-perm="kasir"]').checked = true;
+      document.querySelector('input[data-perm="produk"]').checked = true;
+      document.querySelector('input[data-perm="riwayat"]').checked = true;
+    } else if (role === 'admin') {
+      // Admin: cek semua
+      document.querySelectorAll('input[data-perm]').forEach(cb => cb.checked = true);
+    }
   }
   
   document.getElementById('penggunaModal').classList.add('active');
