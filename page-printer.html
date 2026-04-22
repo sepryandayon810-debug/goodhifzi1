@@ -938,7 +938,57 @@
     let scannedData = null;
     let receiptHeader = {};
     let currentUser = null;
-    const isMedianApp = typeof window.median !== 'undefined';
+        let isMedianApp = false;
+
+    // ⭐ DETEKSI APK/WEBVIEW (multi-cara)
+        // ⭐ DETEKSI APK/WEBVIEW (multi-cara)
+    function detectAppEnvironment() {
+      const ua = navigator.userAgent.toLowerCase();
+      // Cek Median/GoNative bridge
+      if (window.median || window.gonative) return true;
+      // Cek Android WebView (ada Android + WebView indicators)
+      if (ua.includes('android')) {
+        // WebView biasanya tidak punya 'version/' seperti Chrome browser
+        if (!ua.includes('version/')) return true;
+        // Atau kalau adawv indicator
+        if (ua.includes('wv')) return true;
+      }
+      // Cek standalone mode (PWA/APK)
+      if (window.matchMedia('(display-mode: standalone)').matches) return true;
+      if (navigator.standalone === true) return true;
+      // Cek Median.co specific UA
+      if (ua.includes('median') || ua.includes('gonative')) return true;
+      return false;
+    }
+
+    isMedianApp = detectAppEnvironment();
+
+    // Callback resmi Median.co (kalau inject belakangan)
+    window.median_library_ready = function() {
+      isMedianApp = true;
+      console.log('Median bridge ready');
+    };
+
+    // Re-check setelah 2 detik
+    setTimeout(() => {
+      if (!isMedianApp) isMedianApp = detectAppEnvironment();
+    }, 2000);
+    
+        // ⭐ HELPER: Buka URL di browser eksternal / app native
+    function openExternal(url) {
+      // Coba gonative dulu (GoNative lama)
+      if (window.gonative && window.gonative.window && window.gonative.window.open) {
+        window.gonative.window.open(url, 'external');
+        return;
+      }
+      // Coba median (Median.co baru)
+      if (window.median && window.median.window && window.median.window.open) {
+        window.median.window.open(url, 'external');
+        return;
+      }
+      // Fallback: Median Protocol (tidak butuh library inject)
+      window.location.href = 'median://window/open?url=' + encodeURIComponent(url) + '&mode=external';
+    }
 
     // ==========================================
     // INITIALIZATION
@@ -1809,14 +1859,11 @@
       }
 
       // ⭐ MEDIAN APP: buka struk HTML di browser eksternal untuk Print/Save PDF
+           
       if (isMedianApp) {
         const dataUrl = bukaStrukExternal();
         if (!dataUrl) return;
-        if (window.median && window.median.window) {
-          window.median.window.open(dataUrl, 'external');
-        } else {
-          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
-        }
+        openExternal(dataUrl);
         showToast('Buka di Chrome untuk Print / Save PDF', 'success');
         return;
       }
@@ -1919,14 +1966,10 @@ ${note}
 
         function shareAsPDF() {
       // ⭐ MEDIAN APP: buka struk di Chrome → user pilih Print → Save as PDF
-      if (isMedianApp) {
+            if (isMedianApp) {
         const dataUrl = bukaStrukExternal();
         if (!dataUrl) return;
-        if (window.median && window.median.window) {
-          window.median.window.open(dataUrl, 'external');
-        } else {
-          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
-        }
+        openExternal(dataUrl);
         showToast('Buka di Chrome → Print → Save as PDF', 'success');
         return;
       }
@@ -1949,14 +1992,10 @@ ${note}
 
         function shareAsImage() {
       // ⭐ MEDIAN APP: buka struk di Chrome external, user bisa screenshot dari sana
-      if (isMedianApp) {
+            if (isMedianApp) {
         const dataUrl = bukaStrukExternal();
         if (!dataUrl) return;
-        if (window.median && window.median.window) {
-          window.median.window.open(dataUrl, 'external');
-        } else {
-          window.location.href = 'median://window/open?url=' + encodeURIComponent(dataUrl) + '&mode=external';
-        }
+        openExternal(dataUrl);
         showToast('Buka di Chrome → screenshot untuk share', 'success');
         return;
       }
@@ -1981,14 +2020,11 @@ ${note}
 
       // ⭐ MEDIAN APP: pakai external mode supaya WhatsApp app terbuka
       if (isMedianApp) {
-        if (window.median && window.median.window) {
-          window.median.window.open(waUrl, 'external');
-        } else {
-          window.location.href = 'median://window/open?url=' + encodeURIComponent(waUrl) + '&mode=external';
-        }
+        openExternal(waUrl);
         showToast('Membuka WhatsApp...', 'success');
         return;
       }
+
 
       // ⭐ BROWSER BIASA
       window.open(waUrl, '_blank');
@@ -2258,12 +2294,41 @@ ${note}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Struk ${currentReceiptType}</title>
 <style>
-  body { font-family: 'Courier New', monospace; padding: 20px; font-size: 14px; line-height: 1.6; background: #fff; color: #000; max-width: 400px; margin: 0 auto; }
+  * { box-sizing: border-box; }
+  body { 
+    font-family: 'Courier New', monospace; 
+    padding: 12px; 
+    font-size: 13px; 
+    line-height: 1.5; 
+    background: #fff; 
+    color: #000; 
+    width: 100%; 
+    max-width: 100%; 
+    margin: 0; 
+  }
   .center { text-align: center; }
-  .line { border-top: 1px dashed #333; margin: 10px 0; }
-  .total { font-size: 1.15rem; font-weight: bold; }
-  .btn-print { display: block; width: 100%; padding: 12px; margin-top: 20px; background: #333; color: #fff; text-align: center; border-radius: 8px; text-decoration: none; font-family: sans-serif; font-size: 0.9rem; }
-  @media print { .btn-print { display: none; } body { padding: 0; } }
+  .line { border-top: 1px dashed #333; margin: 8px 0; }
+  .total { font-size: 1.1rem; font-weight: bold; }
+  .btn-print { 
+    display: block; 
+    width: 100%; 
+    padding: 14px; 
+    margin-top: 20px; 
+    background: #2563eb; 
+    color: #fff; 
+    text-align: center; 
+    border-radius: 8px; 
+    text-decoration: none; 
+    font-family: sans-serif; 
+    font-size: 1rem; 
+    font-weight: 600;
+    border: none;
+  }
+  @media print { 
+    @page { margin: 0; size: 80mm auto; }
+    .btn-print { display: none !important; } 
+    body { padding: 4px; width: 80mm; max-width: 80mm; margin: 0; } 
+  }
 </style>
 </head>
 <body>
