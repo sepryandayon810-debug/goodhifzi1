@@ -7,7 +7,7 @@ const Utils = {
   // Theme Management
   Theme: {
     // Available themes
-    colors: ['indigo', 'blue', 'green', 'orange', 'purple', 'red', 'pink', 'teal'],
+      colors: ['indigo', 'blue', 'green', 'orange', 'purple', 'red', 'pink', 'teal', 'ocean', 'sunset', 'midnight'],
     
     // Initialize theme from localStorage
     init: () => {
@@ -84,7 +84,7 @@ const Utils = {
     },
     
     // Get all available themes with labels
-    getThemes: () => [
+        getThemes: () => [
       { id: 'indigo', name: 'Indigo', class: 'theme-indigo' },
       { id: 'blue', name: 'Biru', class: 'theme-blue' },
       { id: 'green', name: 'Hijau', class: 'theme-green' },
@@ -92,7 +92,10 @@ const Utils = {
       { id: 'purple', name: 'Ungu', class: 'theme-purple' },
       { id: 'red', name: 'Merah', class: 'theme-red' },
       { id: 'pink', name: 'Pink', class: 'theme-pink' },
-      { id: 'teal', name: 'Teal', class: 'theme-teal' }
+      { id: 'teal', name: 'Teal', class: 'theme-teal' },
+      { id: 'ocean', name: 'Ocean', class: 'theme-ocean' },
+      { id: 'sunset', name: 'Sunset', class: 'theme-sunset' },
+      { id: 'midnight', name: 'Midnight', class: 'theme-midnight' }
     ]
   },
 
