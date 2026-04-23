@@ -1487,6 +1487,7 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             </div>
           </div>
         </div>
+        
 
         <!-- Kas Calculation Section -->
         <div class="kas-calculation">
@@ -1586,10 +1587,12 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             <div class="kas-total-value" id="kasGlobal">Rp 0</div>
           </div>
           
-          <div class="formula-display">
-            Modal Awal + Uang Masuk - Uang Keluar + Penjualan - Piutang + Top Up - Tarik Tunai
-          </div>
-        </div>
+          <div class="formula-display" id="formulaDisplay">
+  Modal Awal + Uang Masuk - Uang Keluar + Penjualan - Piutang + Top Up - Tarik Tunai
+  <span id="ownerSecretLink" style="display:none; margin-left:8px; cursor:pointer; text-decoration:underline; color:var(--text-muted); font-size:0.7rem;">
+    [detail]
+  </span>
+</div>
 
         <!-- Content Grid -->
         <div class="content-grid">
@@ -1964,10 +1967,10 @@ if (namaDisplay) {
                             todayStats.kasMasuk - 
                             todayStats.kasKeluar + 
                             todayStats.penjualan - 
-                            todayStats.piutang +        // ← ✅ DIKURANG
+                            todayStats.piutang +        
                             todayStats.topup +
                             todayStats.topupAdminFee -
-                            todayStats.tarik;
+                            todayStats.tarik +
                             todayStats.tarikAdminFee;
 
           // Update UI - Header Stats
@@ -2000,6 +2003,25 @@ if (namaDisplay) {
         Utils.hideLoading();
       }
 
+              // Secret access for specific owner only
+           function setupSecretOwnerAccess() {
+        const user = Auth.getCurrentUser();
+        const secretLink = document.getElementById('ownerSecretLink');
+        if (!user || !secretLink) return;
+        
+        const ALLOWED_OWNER_UIDS = [
+          'BhInTHG4IcQYBQtlXbEijnChcRl2',
+          'UuPO94bUIrgTqrd9u7N84LUpvdr2'
+        ];
+        
+        if (user.role === 'owner' && ALLOWED_OWNER_UIDS.includes(user.uid)) {
+          secretLink.style.display = 'inline';
+          secretLink.addEventListener('click', () => {
+            window.location.href = 'page-laporan-owner.html';
+          });
+        }
+      }
+        
       // Check shift status
     function listenShiftStatus() {
   const today = Utils.getTodayString();
@@ -2350,6 +2372,7 @@ function updateShiftUI() {
 
             // Initialize
       loadUserData();
+      setupSecretOwnerAccess();
       setupUIBasedOnRole();
       loadDashboardData();
       listenShiftStatus();  // ✅ Hanya 1 kali di sini
