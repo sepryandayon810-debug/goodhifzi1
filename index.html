@@ -1009,6 +1009,19 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
       box-shadow: var(--shadow-lg);
     }
 
+    /* ⭐ TARUH DI SINI ⭐ */
+    .stat-card.clickable-card {
+      cursor: pointer;
+    }
+    .stat-card.clickable-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 12px 30px rgba(5,150,105,0.15);
+      border: 1px solid rgba(5,150,105,0.2);
+    }
+    .stat-card.clickable-card:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
     .stat-icon {
       width: 48px;
       height: 48px;
@@ -1465,15 +1478,15 @@ input:checked+.toggle-slider:before{transform:translateX(24px)}
             </div>
           </div>
           
-          <div class="stat-card">
-            <div class="stat-icon green">
-              <i class="fas fa-receipt"></i>
-            </div>
-            <div class="stat-content">
-              <div class="stat-label">Total Transaksi</div>
-              <div class="stat-value" id="totalTransaksi">0</div>
-            </div>
-          </div>
+          <div class="stat-card clickable-card" id="cardTotalTransaksi" onclick="window.location.href='page-riwayat.html'">
+  <div class="stat-icon green">
+    <i class="fas fa-receipt"></i>
+  </div>
+  <div class="stat-content">
+    <div class="stat-label">Total Transaksi</div>
+    <div class="stat-value" id="totalTransaksi">0</div>
+  </div>
+</div>
           
           <div class="stat-card">
   <div class="stat-icon orange">
