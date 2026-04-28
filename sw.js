@@ -46,7 +46,7 @@ const PRECACHE_URLS = [
   './page-laporan.html',
   './page-laporan-stok.html',
   './page-laporan-terlaris.html',
-  './page-laporan-owner.html',  // ⭐ MENU TERSEMBUNYI - OWNER KEUANGAN
+  './page-laporan-owner.html',
   './page-log-aktivitas.html',
 
   // ═══════════════════════════════════════════
@@ -107,10 +107,10 @@ const PRECACHE_URLS = [
   './js/modules/kas-manager.js',
 
   // ═══════════════════════════════════════════
-  // ICONS PWA (aktifkan kalau sudah ada)
+  // ICONS PWA
   // ═══════════════════════════════════════════
-  // './icon-192.png',
-  // './icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // ============================================
@@ -266,8 +266,6 @@ self.addEventListener('sync', event => {
 
 async function syncTransaksiPending() {
   console.log('[SW] Syncing pending transactions...');
-  // Handler transaksi pending dari IndexedDB/localStorage
-  // akan diproses oleh utils.js saat online kembali
 }
 
 // ============================================
