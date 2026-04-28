@@ -1952,17 +1952,46 @@ ${note}
 ================================`;
       }
 
-      const w = window.open('', '_blank');
-      w.document.write(`<html><head><title>Struk ${currentReceiptType}</title><style>body{font-family: 'Courier New', monospace; padding: 20px; white-space: pre-wrap; font-size: 12px; line-height: 1.4;}</style></head><body>${content}</body></html>`);
-      w.document.close();
+            // ⭐ PRINT VIA IFRAME - tidak buka Chrome/tab baru
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;';
+      document.body.appendChild(iframe);
+      
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Struk ${currentReceiptType}</title>
+  <style>
+    body { 
+      font-family: 'Courier New', monospace; 
+      padding: 20px; 
+      white-space: pre-wrap; 
+      font-size: 12px; 
+      line-height: 1.4; 
+    }
+    @media print {
+      @page { margin: 0; size: 80mm auto; }
+      body { padding: 4px; width: 80mm; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>${content}</body>
+</html>`);
+      doc.close();
       
       setTimeout(() => {
-        w.print();
-        w.close();
-      }, 250);
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        // Hapus iframe setelah 5 detik
+        setTimeout(() => {
+          if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+        }, 5000);
+      }, 300);
       
-      showToast('Struk berhasil dibuat! Pilih "Save as PDF" atau "Share"', 'success');
-    }
+      showToast('Struk berhasil dibuat! Pilih printer atau Save as PDF', 'success');
 
         function shareAsPDF() {
       // ⭐ MEDIAN APP: buka struk di Chrome → user pilih Print → Save as PDF
