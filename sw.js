@@ -1,109 +1,167 @@
-const CACHE_NAME = 'webpos-v2';
-const STATIC_CACHE = 'webpos-static-v2';
-const IMAGE_CACHE = 'webpos-images-v2';
+const CACHE_NAME = 'webpos-v5';
+const STATIC_CACHE = 'webpos-static-v5';
+const IMAGE_CACHE = 'webpos-images-v5';
 
-// 🔴 DAFTAR SEMUA PAGE & FILE PENTING WEBPOS
+// ============================================
+// DAFTAR FILE LENGKAP SESUAI STRUKTUR REPO
+// ============================================
 const PRECACHE_URLS = [
-  // HTML Pages - Utama
+  // ═══════════════════════════════════════════
+  // HTML PAGES - ROOT
+  // ═══════════════════════════════════════════
   './',
   './index.html',
+
+  // Auth
+  './login.html',
+  './register.html',
+
+  // ═══════════════════════════════════════════
+  // UTAMA
+  // ═══════════════════════════════════════════
   './page-kasir.html',
   './page-produk.html',
   './page-pembelian.html',
+
+  // ═══════════════════════════════════════════
+  // TRANSAKSI
+  // ═══════════════════════════════════════════
   './page-riwayat.html',
   './page-hutang.html',
-  './page-laporan.html',
-  './page-telegram.html',
-  './page-pelanggan.html',
-  './page-user.html',
-  './page-setting.html',
-  './page-printer.html',
-  './page-reset.html',
-  './page-backup.html',
-  './page-login.html',
-  './page-register.html',
-  
-  // Kas Management Pages
+
+  // Kas Management + Submenu
   './page-kas.html',
   './page-kas-masuk.html',
   './page-kas-keluar.html',
-  './page-top-up.html',
-  './page-tarik-tunai.html',
+  './page-kas-shift.html',
+  './page-kas-topup.html',
+  './page-kas-tarik.html',
   './page-modal.html',
-  
-  // CSS & Assets
-  './css/style.css',
-  './css/darkmode.css',
-  './css/mint-theme.css',
+  './page-modal-harian.html',
+  './page-closing.html',
+
+  // ═══════════════════════════════════════════
+  // LAPORAN
+  // ═══════════════════════════════════════════
+  './page-laporan.html',
+  './page-laporan-stok.html',
+  './page-laporan-terlaris.html',
+  './page-laporan-owner.html',  // ⭐ MENU TERSEMBUNYI - OWNER KEUANGAN
+  './page-log-aktivitas.html',
+
+  // ═══════════════════════════════════════════
+  // INTEGRASI
+  // ═══════════════════════════════════════════
+  './page-saldo-telegram.html',
+  './page-data-pelanggan.html',
+
+  // ═══════════════════════════════════════════
+  // SISTEM
+  // ═══════════════════════════════════════════
+  './page-pengguna.html',
+  './page-setting.html',
+  './page-printer.html',
+  './page-backup.html',
+  './page-reset.html',
+
+  // ═══════════════════════════════════════════
+  // MANIFEST & CONFIG
+  // ═══════════════════════════════════════════
   './manifest.json',
-  
-  // JS Core (Wajib Ada)
+
+  // ═══════════════════════════════════════════
+  // JS CORE - ROOT FOLDER js/
+  // ═══════════════════════════════════════════
   './js/firebase-config.js',
   './js/utils.js',
   './js/auth.js',
-  './js/session-manager.js',
-  
-  // JS Kasir Module
-  './js/kasir-main.js',
-  './js/keranjang.js',
-  './js/produk-grid.js',
-  './js/produk-list.js',
-  './js/pencarian-produk.js',
-  './js/transaksi-manual.js',
-  './js/edit-harga.js',
-  './js/uang-pas.js',
-  
-  // JS Kas Management
-  './js/topup.js',
-  './js/tarik-tunai.js',
-  
-  // JS Lainnya
-  './js/laporan.js',
-  './js/riwayat.js',
-  './js/hutang.js',
-  './js/backup.js',
-  './js/setting.js',
-  './js/printer.js',
-  
-  // Icons (buat PWA icon)
-  './icon-192.png',
-  './icon-512.png'
+  './js/nav-config.js',
+  './js/sidebar-filter.js',
+
+  // ═══════════════════════════════════════════
+  // JS MODULES - FOLDER js/modules/
+  // ═══════════════════════════════════════════
+  './js/modules/kasir-main.js',
+  './js/modules/kasir-cart.js',
+  './js/modules/kasir-categories.js',
+  './js/modules/kasir-keyboard.js',
+  './js/modules/kasir-numpad.js',
+  './js/modules/kasir-payment.js',
+  './js/modules/kasir-products.js',
+  './js/modules/kasir-quick-actions.js',
+  './js/modules/kasir-summary.js',
+  './js/modules/kasir-ui.js',
+
+  './js/modules/kategori-manager.js',
+  './js/modules/laporan-generator.js',
+  './js/modules/pelanggan-manager.js',
+  './js/modules/pengguna-manager.js',
+  './js/modules/printer-manager.js',
+  './js/modules/produk-import.js',
+  './js/modules/reset-manager.js',
+  './js/modules/riwayat-manager.js',
+  './js/modules/settings-manager.js',
+  './js/modules/telegram-integration.js',
+  './js/modules/backup-manager.js',
+  './js/modules/hutang-manager.js',
+  './js/modules/kas-manager.js',
+
+  // ═══════════════════════════════════════════
+  // ICONS PWA (aktifkan kalau sudah ada)
+  // ═══════════════════════════════════════════
+  // './icon-192.png',
+  // './icon-512.png'
 ];
 
 // ============================================
-// INSTALL - Cache semua file penting saat pertama install
+// INSTALL - Cache per file, skip kalau 404
 // ============================================
 self.addEventListener('install', event => {
-  console.log('[SW] Install WebPOS...');
-  
+  console.log('[SW] Install WebPOS v5...');
+
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => {
-        console.log('[SW] Caching static assets...');
-        return cache.addAll(PRECACHE_URLS);
+        console.log('[SW] Caching static assets one by one...');
+        return Promise.all(
+          PRECACHE_URLS.map(url => {
+            return fetch(url, { cache: 'no-cache' })
+              .then(response => {
+                if (response.ok) {
+                  return cache.put(url, response);
+                }
+                console.warn('[SW] SKIP (not found):', url);
+                return Promise.resolve();
+              })
+              .catch(err => {
+                console.warn('[SW] SKIP (error):', url, err.message);
+                return Promise.resolve();
+              });
+          })
+        );
       })
       .then(() => {
-        console.log('[SW] Skip waiting...');
+        console.log('[SW] Pre-cache complete!');
         return self.skipWaiting();
       })
       .catch(err => {
-        console.error('[SW] Pre-cache failed:', err);
+        console.error('[SW] Install error:', err);
       })
   );
 });
 
 // ============================================
-// ACTIVATE - Hapus cache lama saat update
+// ACTIVATE - Hapus cache lama
 // ============================================
 self.addEventListener('activate', event => {
-  console.log('[SW] Activate WebPOS...');
-  
+  console.log('[SW] Activate WebPOS v5...');
+
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
           if (![STATIC_CACHE, IMAGE_CACHE].includes(cache)) {
-            console.log('[SW] Deleting old cache:', cache);
+            console.log('[SW] Delete old cache:', cache);
             return caches.delete(cache);
           }
         })
@@ -118,9 +176,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // 🔴 JANGAN CACHE: Firebase API, Google Sheets, Telegram API, n8n webhook
-  // (Supaya data selalu real-time)
+
+  // 🔴 JANGAN CACHE: Firebase, Google API, Telegram, n8n
   if (
     url.hostname.includes('firebaseio.com') ||
     url.hostname.includes('googleapis.com') ||
@@ -131,11 +188,10 @@ self.addEventListener('fetch', event => {
     url.pathname.includes('firestore') ||
     url.pathname.includes('auth')
   ) {
-    return; // Biarkan lewat network biasa, tidak di-cache
+    return;
   }
-  
+
   // 🟢 HTML Pages: Stale-While-Revalidate
-  // (Tampilkan cache dulu supaya cepat, tapi update di belakang)
   if (request.mode === 'navigate' || request.destination === 'document') {
     event.respondWith(
       caches.match(request).then(cached => {
@@ -143,21 +199,19 @@ self.addEventListener('fetch', event => {
           .then(networkResponse => {
             if (networkResponse && networkResponse.ok) {
               const clone = networkResponse.clone();
-              caches.open(STATIC_CACHE).then(cache => {
-                cache.put(request, clone);
-              });
+              caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
             }
             return networkResponse;
           })
-          .catch(() => cached); // Kalau offline, pakai cache
-        
+          .catch(() => cached);
+
         return cached || fetchPromise;
       })
     );
     return;
   }
-  
-  // 🟡 JS & CSS: Cache First (karena jarang berubah)
+
+  // 🟡 JS & CSS: Cache First
   if (
     request.destination === 'script' || 
     request.destination === 'style' ||
@@ -167,7 +221,6 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
-        
         return fetch(request).then(response => {
           if (!response || response.status !== 200) return response;
           const clone = response.clone();
@@ -178,13 +231,12 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
-  // 🔵 Images: Cache terpisah, limit size
+
+  // 🔵 Images: Cache terpisah
   if (request.destination === 'image') {
     event.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
-        
         return fetch(request).then(response => {
           if (!response || response.status !== 200) return response;
           const clone = response.clone();
@@ -195,7 +247,7 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  
+
   // 🟣 Default: Network first, fallback cache
   event.respondWith(
     fetch(request).catch(() => caches.match(request))
@@ -203,7 +255,7 @@ self.addEventListener('fetch', event => {
 });
 
 // ============================================
-// BACKGROUND SYNC - Untuk transaksi offline
+// BACKGROUND SYNC - Transaksi offline
 // ============================================
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-transaksi') {
@@ -213,18 +265,22 @@ self.addEventListener('sync', event => {
 });
 
 async function syncTransaksiPending() {
-  // Baca transaksi pending dari IndexedDB / localStorage
-  // (Ini butuh handler di utils.js kamu untuk queue transaksi)
   console.log('[SW] Syncing pending transactions...');
-  // Kirim ke Firebase / Sheets saat online lagi
+  // Handler transaksi pending dari IndexedDB/localStorage
+  // akan diproses oleh utils.js saat online kembali
 }
 
 // ============================================
-// PUSH NOTIFICATION - Untuk notifikasi stok menipis
+// PUSH NOTIFICATION - Stok menipis & alert
 // ============================================
 self.addEventListener('push', event => {
-  const data = event.data.json();
-  
+  let data = {};
+  try {
+    data = event.data.json();
+  } catch(e) {
+    data = { title: 'WebPOS Alert', body: 'Ada notifikasi baru' };
+  }
+
   const options = {
     body: data.body || 'Stok produk hampir habis!',
     icon: './icon-192.png',
@@ -232,29 +288,19 @@ self.addEventListener('push', event => {
     tag: data.tag || 'stok-alert',
     requireInteraction: true,
     actions: [
-      {
-        action: 'buka',
-        title: 'Buka WebPOS'
-      },
-      {
-        action: 'tutup',
-        title: 'Tutup'
-      }
+      { action: 'buka', title: 'Buka WebPOS' },
+      { action: 'tutup', title: 'Tutup' }
     ]
   };
-  
+
   event.waitUntil(
     self.registration.showNotification(data.title || 'WebPOS Alert', options)
   );
 });
 
-// Klik notifikasi
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  
   if (event.action === 'buka' || !event.action) {
-    event.waitUntil(
-      clients.openWindow('./page-produk.html')
-    );
+    event.waitUntil(clients.openWindow('./index.html'));
   }
 });
